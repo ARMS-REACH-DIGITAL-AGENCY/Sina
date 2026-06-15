@@ -16,10 +16,11 @@ export default function ArtistSection() {
                   <div className="a-orb" style={{ background: '#1ABC9C', top: '50%', right: '10%' }} />
                   <div className="a-orb" style={{ background: '#7D3C98', bottom: '15%', left: '30%' }} />
                 </div>
-                <div className="artist__portrait-label">
-                  <span>Thomasina</span>
-                  <span className="artist__portrait-sub">Place photo here</span>
-                </div>
+                <img 
+                  src="/images/thomasina.jpg" 
+                  alt="Thomasina Schnepf — Artist" 
+                  style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                />
               </div>
             </div>
             <div className="artist__quote-card">
