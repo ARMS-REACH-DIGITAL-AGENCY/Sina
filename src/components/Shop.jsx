@@ -70,10 +70,10 @@ export default function Shop() {
 
         <div className="shop__footer">
           <p className="body-sm">
-            All 345+ pieces available by inquiry. Custom commissions welcome.
+            350 children, each waiting for a home.
           </p>
           <a href="#contact" className="btn-ghost">
-            Commission a Custom Piece
+            Commission a New Life
             <svg width="12" height="12" viewBox="0 0 14 14" fill="none">
               <path d="M1 7h12M7 1l6 6-6 6" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
             </svg>
