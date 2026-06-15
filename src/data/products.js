@@ -60,7 +60,7 @@ export const products = [
     badge: 'Pair',
     colors: ['#1E8449', '#CA6F1E', '#FDFEFE'],
     description: `Vera arrived on a Tuesday when the afternoon light was gold and Thomasina could see every edge of the glass glowing. These earrings — forest green with flecks of amber and white — move like leaves in wind. Light enough to forget you're wearing them. Striking enough that no one else will.`,
-    details: 'Fused glass drop earrings. Pair them with anything. They'll still be the most interesting thing in the room.',
+    details: `Fused glass drop earrings. Pair them with anything. They'll still be the most interesting thing in the room.`,
     image: null,
   },
   {
