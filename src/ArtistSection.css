@@ -1,0 +1,169 @@
+.artist {
+  background: var(--smoke);
+  border-top: 1px solid var(--ash);
+  border-bottom: 1px solid var(--ash);
+}
+
+.artist__inner {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 80px;
+  align-items: start;
+}
+
+/* ---- Visual / Left ---- */
+.artist__visual {
+  position: relative;
+}
+
+.artist__portrait-frame {
+  aspect-ratio: 3 / 4;
+  border: 1px solid var(--ash);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  position: relative;
+  margin-bottom: 24px;
+}
+
+.artist__portrait-placeholder {
+  position: absolute;
+  inset: 0;
+  background: #0a0a0a;
+  display: flex;
+  align-items: flex-end;
+  justify-content: flex-start;
+  padding: 24px;
+  overflow: hidden;
+}
+
+.artist__portrait-orbs {
+  position: absolute;
+  inset: 0;
+}
+
+.a-orb {
+  position: absolute;
+  width: 200px;
+  height: 200px;
+  border-radius: 50%;
+  filter: blur(60px);
+  opacity: 0.25;
+}
+
+.artist__portrait-label {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.artist__portrait-label span:first-child {
+  font-family: var(--font-display);
+  font-size: 1.4rem;
+  font-style: italic;
+  color: var(--bone);
+}
+
+.artist__portrait-sub {
+  font-size: 0.65rem !important;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--mist) !important;
+  font-family: var(--font-body);
+  font-style: normal !important;
+}
+
+.artist__quote-card {
+  border: 1px solid var(--ash);
+  border-left: 3px solid var(--gold);
+  padding: 24px 28px;
+  border-radius: var(--radius-sm);
+  background: rgba(201, 169, 110, 0.04);
+}
+
+.artist__quote-card blockquote {
+  font-family: var(--font-display);
+  font-size: 1.05rem;
+  font-style: italic;
+  font-weight: 300;
+  color: var(--bone);
+  line-height: 1.7;
+  margin-bottom: 12px;
+}
+
+.artist__quote-card cite {
+  font-size: 0.7rem;
+  font-weight: 500;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--gold);
+  font-style: normal;
+}
+
+/* ---- Copy / Right ---- */
+.artist__copy .eyebrow {
+  margin-bottom: 16px;
+}
+
+.artist__name {
+  font-family: var(--font-display);
+  margin-bottom: 0;
+}
+
+.artist__name + .divider-gold {
+  margin: 28px 0;
+}
+
+.artist__lead {
+  color: var(--fog);
+  margin-bottom: 28px;
+}
+
+.artist__body {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  margin-bottom: 36px;
+}
+
+.artist__body p {
+  color: var(--fog);
+  font-size: 0.95rem;
+  line-height: 1.8;
+}
+
+/* ---- Markers ---- */
+.artist__markers {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.artist__marker {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  font-size: 0.85rem;
+  color: var(--mist);
+}
+
+.artist__marker-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--gold);
+  flex-shrink: 0;
+}
+
+/* ---- Responsive ---- */
+@media (max-width: 900px) {
+  .artist__inner {
+    grid-template-columns: 1fr;
+    gap: 48px;
+  }
+
+  .artist__portrait-frame {
+    aspect-ratio: 16 / 9;
+  }
+}

@@ -1,0 +1,215 @@
+.card {
+  background: var(--smoke);
+  border: 1px solid var(--ash);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  transition: border-color var(--transition), transform var(--transition);
+  display: flex;
+  flex-direction: column;
+}
+
+.card--hovered {
+  border-color: var(--gold);
+  transform: translateY(-4px);
+}
+
+/* ---- Image area ---- */
+.card__image {
+  position: relative;
+  aspect-ratio: 4 / 3;
+  overflow: hidden;
+  background: #111;
+}
+
+.card__image-placeholder {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #0a0a0a;
+}
+
+/* The glass field — three colored orbs that represent each piece */
+.card__glass-field {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+.card__glass-orb {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(50px);
+  opacity: 0.5;
+  animation: orb-breathe calc(6s + var(--orb-index) * 2s) ease-in-out infinite alternate;
+}
+
+.card__glass-orb:nth-child(1) {
+  width: 60%;
+  height: 60%;
+  top: 10%;
+  left: 10%;
+}
+.card__glass-orb:nth-child(2) {
+  width: 50%;
+  height: 50%;
+  top: 30%;
+  right: 5%;
+}
+.card__glass-orb:nth-child(3) {
+  width: 40%;
+  height: 40%;
+  bottom: 5%;
+  left: 25%;
+}
+
+@keyframes orb-breathe {
+  from { opacity: 0.3; transform: scale(0.95); }
+  to   { opacity: 0.65; transform: scale(1.05); }
+}
+
+.card__glass-shimmer {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    135deg,
+    transparent 30%,
+    rgba(255,255,255,0.04) 50%,
+    transparent 70%
+  );
+  animation: shimmer 4s ease-in-out infinite;
+}
+
+@keyframes shimmer {
+  0%   { transform: translateX(-100%) rotate(15deg); }
+  100% { transform: translateX(200%) rotate(15deg); }
+}
+
+.card__badge {
+  position: absolute;
+  top: 16px;
+  left: 16px;
+  background: rgba(13, 13, 13, 0.85);
+  border: 1px solid var(--gold);
+  color: var(--gold);
+  font-size: 0.6rem;
+  font-weight: 500;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  padding: 5px 12px;
+  border-radius: 2px;
+  backdrop-filter: blur(6px);
+}
+
+.card__overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(13, 13, 13, 0.8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: opacity var(--transition);
+  backdrop-filter: blur(4px);
+}
+
+.card--hovered .card__overlay {
+  opacity: 1;
+}
+
+.card__overlay-btn {
+  background: var(--gold);
+  color: var(--ink);
+  font-size: 0.7rem;
+  font-weight: 500;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  padding: 12px 24px;
+  border-radius: var(--radius-sm);
+  transition: background var(--transition);
+  cursor: pointer;
+}
+
+.card__overlay-btn:hover {
+  background: var(--gold-light);
+}
+
+/* ---- Info ---- */
+.card__info {
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  flex: 1;
+}
+
+/* Color dot signature */
+.card__dots {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 4px;
+}
+
+.card__dot {
+  display: block;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  opacity: 0.8;
+  flex-shrink: 0;
+}
+
+.card__name-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.card__name {
+  font-family: var(--font-display);
+  font-size: 1.6rem;
+  font-weight: 400;
+  font-style: italic;
+  color: var(--bone);
+  line-height: 1;
+}
+
+.card__price {
+  font-family: var(--font-body);
+  font-size: 1rem;
+  font-weight: 300;
+  color: var(--gold);
+  white-space: nowrap;
+}
+
+.card__subtitle {
+  font-size: 0.7rem;
+  font-weight: 500;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--mist);
+}
+
+.card__description {
+  font-size: 0.875rem;
+  color: var(--fog);
+  line-height: 1.7;
+  margin-top: 8px;
+  display: -webkit-box;
+  -webkit-line-clamp: 4;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.card__footer {
+  margin-top: auto;
+  padding-top: 16px;
+  border-top: 1px solid var(--ash);
+}
+
+.card__detail {
+  font-size: 0.75rem;
+  color: var(--mist);
+}
