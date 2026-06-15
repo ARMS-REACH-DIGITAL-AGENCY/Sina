@@ -59,8 +59,8 @@ export default function Hero() {
 
         <div className="hero__stats reveal reveal-5">
           <div className="hero__stat">
-            <span className="hero__stat-num">345+</span>
-            <span className="hero__stat-label">Pieces Created</span>
+            <span className="hero__stat-num">350+</span>
+            <span className="hero__stat-label">Children Named</span>
           </div>
           <div className="hero__stat-divider" aria-hidden="true" />
           <div className="hero__stat">

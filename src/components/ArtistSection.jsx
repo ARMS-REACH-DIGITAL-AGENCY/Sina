@@ -10,18 +10,11 @@ export default function ArtistSection() {
           {/* Left — visual element */}
           <div className="artist__visual" aria-hidden="true">
             <div className="artist__portrait-frame">
-              <div className="artist__portrait-placeholder">
-                <div className="artist__portrait-orbs">
-                  <div className="a-orb" style={{ background: '#C9A96E', top: '20%', left: '15%' }} />
-                  <div className="a-orb" style={{ background: '#1ABC9C', top: '50%', right: '10%' }} />
-                  <div className="a-orb" style={{ background: '#7D3C98', bottom: '15%', left: '30%' }} />
-                </div>
-                <img 
-                  src="/images/thomasina.jpg" 
-                  alt="Thomasina Schnepf — Artist" 
-                  style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-                />
-              </div>
+              <img
+                src="/images/thomasina.jpg"
+                alt="Thomasina Schnepf — Artist"
+                style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center top' }}
+              />
             </div>
             <div className="artist__quote-card">
               <blockquote>

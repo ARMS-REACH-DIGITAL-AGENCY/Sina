@@ -12,39 +12,47 @@ export default function ProductCard({ product }) {
     >
       {/* Image area — placeholder until real photos are added */}
       <div className="card__image">
-        <div className="card__image-placeholder" aria-hidden="true">
-          {/* Glass palette orbs — the signature element */}
-          <div className="card__glass-field">
-            {product.colors.map((color, i) => (
-              <div
-                key={i}
-                className="card__glass-orb"
-                style={{
-                  background: color,
-                  '--orb-index': i,
-                }}
-              />
-            ))}
+        {product.image ? (
+          <img
+            src={product.image}
+            alt={product.name}
+            style={{
+              width: '100%',
+              height: '100%',
+              objectFit: 'cover',
+              objectPosition: 'center',
+              display: 'block',
+            }}
+          />
+        ) : (
+          <div className="card__image-placeholder" aria-hidden="true">
+            <div className="card__glass-field">
+              {product.colors.map((color, i) => (
+                <div
+                  key={i}
+                  className="card__glass-orb"
+                  style={{ background: color, '--orb-index': i }}
+                />
+              ))}
+            </div>
+            <div className="card__glass-shimmer" aria-hidden="true" />
           </div>
-          <div className="card__glass-shimmer" aria-hidden="true" />
-        </div>
+        )}
 
-        {/* Badge */}
         {product.badge && (
           <span className="card__badge">{product.badge}</span>
         )}
 
-        {/* Hover overlay */}
         <div className="card__overlay">
           <a
-            href={`#contact`}
+            href="#contact"
             className="card__overlay-btn"
             onClick={(e) => {
               e.preventDefault();
               document.getElementById('contact')?.scrollIntoView({ behavior: 'smooth' });
             }}
           >
-            Inquire About This Piece
+            Give This One a Home
           </a>
         </div>
       </div>
