@@ -9,7 +9,7 @@ export default function Footer() {
           <div className="footer__brand">
             <div className="footer__logo">
               <span className="footer__logo-sina">Sina's</span>
-              <span className="footer__logo-glass">Glass</span>
+              <span className="footer__logo-creations">Creations</span>
             </div>
             <p className="footer__tagline">
               Born from a different kind of vision.<br />
@@ -51,19 +51,20 @@ export default function Footer() {
             <div className="footer__col">
               <span className="footer__col-title">Navigate</span>
               <ul>
-                <li><a href="#shop">Shop</a></li>
-                <li><a href="#artist">The Artist</a></li>
-                <li><a href="#gallery">Gallery</a></li>
-                <li><a href="#commission">Commission</a></li>
+                <li><a href="#creations">The Creations</a></li>
+                <li><a href="#artist">About Thomasina</a></li>
+                <li><a href="#commission">Custom Orders</a></li>
+                <li><a href="#contact">Contact</a></li>
               </ul>
             </div>
             <div className="footer__col">
               <span className="footer__col-title">Collections</span>
               <ul>
-                <li><a href="#shop">Pendants</a></li>
-                <li><a href="#shop">Earrings</a></li>
-                <li><a href="#shop">Ornaments</a></li>
-                <li><a href="#shop">Plates & Wall Art</a></li>
+                <li><a href="#creations">Pendants</a></li>
+                <li><a href="#creations">Earrings</a></li>
+                <li><a href="#creations">Ornaments</a></li>
+                <li><a href="#creations">Plates & Wall Art</a></li>
+                <li><a href="#creations">Sina's Glass</a></li>
               </ul>
             </div>
             <div className="footer__col">
@@ -80,7 +81,7 @@ export default function Footer() {
 
         <div className="footer__bottom">
           <p className="body-sm">
-            © {new Date().getFullYear()} Sina's Glass · Thomasina Schnepf · All rights reserved.
+            © {new Date().getFullYear()} Sina's Creations · Thomasina Schnepf · All rights reserved.
           </p>
           <p className="body-sm footer__legal">
             All sales final · Custom commissions welcome · Each piece is one of one.

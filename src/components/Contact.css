@@ -1,5 +1,5 @@
 .contact {
-  border-top: 1px solid var(--ash);
+  border-top: 1px solid var(--sand);
 }
 
 .contact__inner {
@@ -24,7 +24,7 @@
 }
 
 .contact__sub {
-  color: var(--fog);
+  color: var(--umber);
   margin-bottom: 40px;
 }
 
@@ -45,23 +45,23 @@
 }
 
 a.contact__detail-item:hover {
-  color: var(--gold);
+  color: var(--gold-deep);
 }
 
 a.contact__detail-item:hover .contact__detail-icon {
-  border-color: var(--gold);
-  color: var(--gold);
+  border-color: var(--gold-deep);
+  color: var(--gold-deep);
 }
 
 .contact__detail-icon {
   width: 40px;
   height: 40px;
-  border: 1px solid var(--ash);
+  border: 1px solid var(--sand);
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  color: var(--mist);
+  color: var(--taupe);
   flex-shrink: 0;
   transition: border-color var(--transition), color var(--transition);
 }
@@ -72,25 +72,25 @@ a.contact__detail-item:hover .contact__detail-icon {
   font-weight: 500;
   letter-spacing: 0.14em;
   text-transform: uppercase;
-  color: var(--mist);
+  color: var(--taupe);
   margin-bottom: 2px;
 }
 
 .contact__detail-value {
   display: block;
   font-size: 0.9rem;
-  color: var(--bone);
+  color: var(--ink);
 }
 
 .contact__note {
-  border: 1px solid var(--ash);
+  border: 1px solid var(--sand);
   border-radius: var(--radius-sm);
   padding: 16px 20px;
-  background: rgba(255,255,255,0.02);
+  background: var(--cream);
 }
 
 .contact__note .body-sm {
-  color: var(--mist);
+  color: var(--umber);
   line-height: 1.7;
 }
 

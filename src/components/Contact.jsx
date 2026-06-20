@@ -25,10 +25,10 @@ export default function Contact() {
 
           {/* Left — info */}
           <div className="contact__info">
-            <p className="eyebrow">Commission & Inquiries</p>
+            <p className="eyebrow">Custom Orders & Inquiries</p>
             <h2 className="heading-lg contact__title">
               Let's make<br />
-              <em style={{ fontStyle: 'italic', color: 'var(--gold)' }}>something</em><br />
+              <em style={{ fontStyle: 'italic', color: 'var(--gold-deep)' }}>something</em><br />
               that's yours.
             </h2>
             <hr className="divider-gold" />
@@ -78,7 +78,7 @@ export default function Contact() {
               </div>
             </div>
 
-            <div className="contact__note">
+            <div className="contact__note" id="commission">
               <p className="body-sm">
                 Custom commissions carry a $5 service fee. Shipping is included
                 in all pricing. All sales are final — each piece is made for you specifically.

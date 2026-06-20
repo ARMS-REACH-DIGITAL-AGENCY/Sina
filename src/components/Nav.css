@@ -9,7 +9,7 @@
 }
 
 .nav--scrolled {
-  background: rgba(13, 13, 13, 0.95);
+  background: rgba(13, 11, 9, 0.95);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
   padding: 18px var(--gutter);
@@ -36,18 +36,28 @@
   font-size: 1.5rem;
   font-weight: 400;
   font-style: italic;
-  color: var(--bone);
+  color: var(--ink);
   letter-spacing: 0.01em;
+  transition: color var(--transition);
 }
 
-.nav__logo-glass {
+.nav__logo-creations {
   font-family: var(--font-body);
   font-size: 0.6rem;
   font-weight: 500;
   letter-spacing: 0.25em;
   text-transform: uppercase;
-  color: var(--gold);
+  color: var(--gold-deep);
   margin-top: 2px;
+  transition: color var(--transition);
+}
+
+.nav--scrolled .nav__logo-sina {
+  color: var(--bone);
+}
+
+.nav--scrolled .nav__logo-creations {
+  color: var(--gold);
 }
 
 .nav__links {
@@ -63,24 +73,41 @@
   font-weight: 400;
   letter-spacing: 0.12em;
   text-transform: uppercase;
-  color: var(--fog);
+  color: var(--umber);
   transition: color var(--transition);
   text-decoration: none;
 }
 
 .nav__links a:hover {
+  color: var(--ink);
+}
+
+.nav--scrolled .nav__links a {
+  color: var(--fog);
+}
+
+.nav--scrolled .nav__links a:hover {
   color: var(--bone);
 }
 
 .nav__cta {
-  color: var(--gold) !important;
-  border: 1px solid var(--ash);
+  color: var(--gold-deep) !important;
+  border: 1px solid var(--sand);
   padding: 8px 20px;
   border-radius: var(--radius-sm);
   transition: border-color var(--transition) !important;
 }
 
 .nav__cta:hover {
+  border-color: var(--gold-deep) !important;
+}
+
+.nav--scrolled .nav__cta {
+  color: var(--gold) !important;
+  border-color: var(--ash);
+}
+
+.nav--scrolled .nav__cta:hover {
   border-color: var(--gold) !important;
 }
 
@@ -98,8 +125,12 @@
   display: block;
   width: 24px;
   height: 1px;
+  background: var(--ink);
+  transition: transform var(--transition), opacity var(--transition), background var(--transition);
+}
+
+.nav--scrolled .nav__burger span {
   background: var(--bone);
-  transition: transform var(--transition), opacity var(--transition);
 }
 
 .nav__burger--open span:nth-child(1) {
@@ -139,5 +170,13 @@
 
   .nav__links a {
     font-size: 0.85rem;
+  }
+
+  .nav__links--open a {
+    color: var(--fog);
+  }
+
+  .nav__links--open a:hover {
+    color: var(--bone);
   }
 }

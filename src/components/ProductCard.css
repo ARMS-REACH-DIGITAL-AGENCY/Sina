@@ -13,6 +13,23 @@
   transform: translateY(-4px);
 }
 
+.card--adopted .card__image img,
+.card--adopted .card__image-placeholder {
+  filter: grayscale(0.6) brightness(0.6);
+}
+
+.card__badge--adopted {
+  border-color: var(--mist);
+  color: var(--fog);
+}
+
+.card__overlay-btn--adopted {
+  background: transparent;
+  border: 1px solid var(--mist);
+  color: var(--fog);
+  cursor: default;
+}
+
 /* ---- Image area ---- */
 .card__image {
   position: relative;

@@ -16,14 +16,13 @@ export default function Nav() {
       <div className="nav__inner">
         <a href="/" className="nav__logo">
           <span className="nav__logo-sina">Sina's</span>
-          <span className="nav__logo-glass">Glass</span>
+          <span className="nav__logo-creations">Creations</span>
         </a>
 
         <ul className={`nav__links ${menuOpen ? 'nav__links--open' : ''}`}>
-          <li><a href="#shop" onClick={() => setMenuOpen(false)}>Shop</a></li>
-          <li><a href="#artist" onClick={() => setMenuOpen(false)}>The Artist</a></li>
-          <li><a href="#gallery" onClick={() => setMenuOpen(false)}>Gallery</a></li>
-          <li><a href="#commission" onClick={() => setMenuOpen(false)}>Commission</a></li>
+          <li><a href="#creations" onClick={() => setMenuOpen(false)}>The Creations</a></li>
+          <li><a href="#artist" onClick={() => setMenuOpen(false)}>About Thomasina</a></li>
+          <li><a href="#commission" onClick={() => setMenuOpen(false)}>Custom Orders</a></li>
           <li>
             <a href="#contact" className="nav__cta" onClick={() => setMenuOpen(false)}>
               Contact

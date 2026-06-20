@@ -1,5 +1,5 @@
 .footer {
-  border-top: 1px solid var(--ash);
+  border-top: 1px solid var(--sand);
   padding-top: 60px;
   padding-bottom: 40px;
 }
@@ -28,22 +28,22 @@
   font-size: 1.6rem;
   font-weight: 400;
   font-style: italic;
-  color: var(--bone);
+  color: var(--ink);
 }
 
-.footer__logo-glass {
+.footer__logo-creations {
   font-family: var(--font-body);
   font-size: 0.6rem;
   font-weight: 500;
   letter-spacing: 0.25em;
   text-transform: uppercase;
-  color: var(--gold);
+  color: var(--gold-deep);
   margin-top: 3px;
 }
 
 .footer__tagline {
   font-size: 0.8rem;
-  color: var(--mist);
+  color: var(--umber);
   line-height: 1.7;
 }
 
@@ -59,15 +59,15 @@
   justify-content: center;
   width: 34px;
   height: 34px;
-  border: 1px solid var(--ash);
+  border: 1px solid var(--sand);
   border-radius: 50%;
-  color: var(--mist);
+  color: var(--taupe);
   transition: color var(--transition), border-color var(--transition);
 }
 
 .footer__social a:hover {
-  color: var(--bone);
-  border-color: var(--gold);
+  color: var(--ink);
+  border-color: var(--gold-deep);
 }
 
 .footer__links {
@@ -88,7 +88,7 @@
   font-weight: 500;
   letter-spacing: 0.18em;
   text-transform: uppercase;
-  color: var(--gold);
+  color: var(--gold-deep);
 }
 
 .footer__col ul {
@@ -100,13 +100,13 @@
 
 .footer__col a {
   font-size: 0.85rem;
-  color: var(--mist);
+  color: var(--taupe);
   text-decoration: none;
   transition: color var(--transition);
 }
 
 .footer__col a:hover {
-  color: var(--bone);
+  color: var(--ink);
 }
 
 .footer__divider {

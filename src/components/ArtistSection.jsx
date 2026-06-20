@@ -41,6 +41,10 @@ export default function ArtistSection() {
               sees the world. What could have ended her — it became her art instead.
             </p>
 
+            <p className="artist__pullquote">
+              She sees what others miss. Up close, everything is her child.
+            </p>
+
             <div className="artist__body">
               <p>
                 Legally blind, Thomasina works closer to her glass than any

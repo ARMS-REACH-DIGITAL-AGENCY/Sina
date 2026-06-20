@@ -3,10 +3,12 @@ import './ProductCard.css';
 
 export default function ProductCard({ product }) {
   const [hovered, setHovered] = useState(false);
+  const status = product.status || 'available';
+  const adopted = status === 'adopted';
 
   return (
     <article
-      className={`card ${hovered ? 'card--hovered' : ''}`}
+      className={`card ${hovered ? 'card--hovered' : ''} ${adopted ? 'card--adopted' : ''}`}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
     >
@@ -39,21 +41,27 @@ export default function ProductCard({ product }) {
           </div>
         )}
 
-        {product.badge && (
+        {adopted ? (
+          <span className="card__badge card__badge--adopted">Adopted</span>
+        ) : product.badge && (
           <span className="card__badge">{product.badge}</span>
         )}
 
         <div className="card__overlay">
-          <a
-            href="#contact"
-            className="card__overlay-btn"
-            onClick={(e) => {
-              e.preventDefault();
-              document.getElementById('contact')?.scrollIntoView({ behavior: 'smooth' });
-            }}
-          >
-            Give This One a Home
-          </a>
+          {adopted ? (
+            <span className="card__overlay-btn card__overlay-btn--adopted">Adopted</span>
+          ) : (
+            <a
+              href="#contact"
+              className="card__overlay-btn"
+              onClick={(e) => {
+                e.preventDefault();
+                document.getElementById('contact')?.scrollIntoView({ behavior: 'smooth' });
+              }}
+            >
+              Give This One a Home
+            </a>
+          )}
         </div>
       </div>
 

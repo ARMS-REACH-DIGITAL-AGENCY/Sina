@@ -6,22 +6,24 @@ import './Shop.css';
 export default function Shop() {
   const [activeCollection, setActiveCollection] = useState('all');
 
-  const filtered = activeCollection === 'all'
-    ? products
-    : products.filter(p => p.collection === activeCollection);
+  const filtered = activeCollection === 'adopted'
+    ? products.filter(p => (p.status || 'available') === 'adopted')
+    : activeCollection === 'all'
+      ? products
+      : products.filter(p => p.collection === activeCollection);
 
   return (
-    <section className="shop section" id="shop">
+    <section className="shop section" id="creations">
       <div className="container">
         <div className="shop__header">
-          <p className="eyebrow">The Collection</p>
+          <p className="eyebrow">Sina's Glass Collection</p>
           <h2 className="heading-lg shop__title">
             Each one has<br />
-            <em style={{ fontStyle: 'italic', color: 'var(--gold)' }}>a name.</em>
+            <em style={{ fontStyle: 'italic', color: 'var(--gold-deep)' }}>a name.</em>
           </h2>
           <p className="body-lg shop__sub">
-            No two pieces are ever repeated. Every creation is named, 
-            numbered, and released once. When it's gone, it's gone.
+            No two creations are ever repeated. Each one is named, numbered,
+            and waits to find its home. Once she's adopted, she's gone for good.
           </p>
         </div>
 
@@ -33,7 +35,7 @@ export default function Shop() {
             role="tab"
             aria-selected={activeCollection === 'all'}
           >
-            All Pieces
+            All Creations
           </button>
           {collections.map(col => (
             <button
@@ -46,6 +48,14 @@ export default function Shop() {
               {col.label}
             </button>
           ))}
+          <button
+            className={`shop__filter-btn ${activeCollection === 'adopted' ? 'active' : ''}`}
+            onClick={() => setActiveCollection('adopted')}
+            role="tab"
+            aria-selected={activeCollection === 'adopted'}
+          >
+            Adopted
+          </button>
         </div>
 
         {/* Collection tagline */}
@@ -70,10 +80,10 @@ export default function Shop() {
 
         <div className="shop__footer">
           <p className="body-sm">
-            350 children, each waiting for a home.
+            350 creations named, each waiting for a home.
           </p>
           <a href="#contact" className="btn-ghost">
-            Commission a New Life
+            Commission a New Creation
             <svg width="12" height="12" viewBox="0 0 14 14" fill="none">
               <path d="M1 7h12M7 1l6 6-6 6" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
             </svg>

@@ -30,31 +30,31 @@ export default function Hero() {
       </div>
 
       <div className="hero__content container">
-        <p className="eyebrow reveal reveal-1">Chandler, Arizona · Est. 2010</p>
+        <p className="eyebrow reveal reveal-1">Sina's Creations · Chandler, Arizona</p>
 
         <h1 className="display reveal reveal-2">
-          Born from a<br />
-          <em>different kind</em><br />
-          of vision.
+          One-of-one pieces.<br />
+          Named, loved, and<br />
+          <em>waiting to be adopted.</em>
         </h1>
 
         <hr className="divider-gold reveal reveal-3" />
 
         <p className="body-lg hero__sub reveal reveal-3">
-          Thomasina Schnepf has been legally blind since age four.
-          She makes glass jewelry by pressing close — closer than anyone
+          One-of-one creations by Thomasina Schnepf, who has been legally
+          blind since age four. She works closer to the glass than anyone
           else ever would — until every color, every edge, every piece
           of light is exactly where it belongs.
         </p>
 
         <div className="hero__actions reveal reveal-4">
-          <a href="#shop" className="btn-primary">
-            Explore the Collection
+          <a href="#creations" className="btn-primary">
+            Meet the Creations
             <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
               <path d="M1 7h12M7 1l6 6-6 6" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
             </svg>
           </a>
-          <a href="#artist" className="btn-ghost">Her Story</a>
+          <a href="#artist" className="btn-ghost">Meet Thomasina</a>
         </div>
 
         <div className="hero__stats reveal reveal-5">

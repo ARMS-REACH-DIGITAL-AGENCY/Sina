@@ -106,9 +106,22 @@
   margin-bottom: 16px;
 }
 
+.artist__copy .eyebrow {
+  color: var(--gold);
+}
+
 .artist__name {
   font-family: var(--font-display);
+  color: var(--bone);
   margin-bottom: 0;
+}
+
+.artist__pullquote {
+  font-family: var(--font-display);
+  font-style: italic;
+  font-size: 1.2rem;
+  color: var(--gold-light);
+  margin-bottom: 28px;
 }
 
 .artist__name + .divider-gold {
