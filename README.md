@@ -1,4 +1,4 @@
-# Sina's Creations — New Site
+# Sina's Glass — New Site
 
 Redesign for Thomasina Schnepf · sinascreations.com  
 Built with React + Vite · Deployable to Vercel

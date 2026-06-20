@@ -31,7 +31,7 @@
   color: var(--bone);
 }
 
-.footer__logo-creations {
+.footer__logo-glass {
   font-family: var(--font-body);
   font-size: 0.6rem;
   font-weight: 500;
@@ -45,6 +45,29 @@
   font-size: 0.8rem;
   color: var(--mist);
   line-height: 1.7;
+}
+
+.footer__social {
+  display: flex;
+  gap: 14px;
+  margin-top: 20px;
+}
+
+.footer__social a {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  border: 1px solid var(--ash);
+  border-radius: 50%;
+  color: var(--mist);
+  transition: color var(--transition), border-color var(--transition);
+}
+
+.footer__social a:hover {
+  color: var(--bone);
+  border-color: var(--gold);
 }
 
 .footer__links {

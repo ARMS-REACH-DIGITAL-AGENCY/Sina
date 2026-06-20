@@ -16,7 +16,7 @@ export default function Nav() {
       <div className="nav__inner">
         <a href="/" className="nav__logo">
           <span className="nav__logo-sina">Sina's</span>
-          <span className="nav__logo-creations">Creations</span>
+          <span className="nav__logo-glass">Glass</span>
         </a>
 
         <ul className={`nav__links ${menuOpen ? 'nav__links--open' : ''}`}>
