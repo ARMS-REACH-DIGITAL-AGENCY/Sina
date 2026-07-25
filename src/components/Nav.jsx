@@ -20,9 +20,9 @@ export default function Nav() {
         </a>
 
         <ul className={`nav__links ${menuOpen ? 'nav__links--open' : ''}`}>
-          <li><a href="#shop" onClick={() => setMenuOpen(false)}>Shop</a></li>
-          <li><a href="#artist" onClick={() => setMenuOpen(false)}>The Artist</a></li>
+          <li><a href="#shop" onClick={() => setMenuOpen(false)}>Meet the Creations</a></li>
           <li><a href="#gallery" onClick={() => setMenuOpen(false)}>Gallery</a></li>
+          <li><a href="#artist" onClick={() => setMenuOpen(false)}>The Artist</a></li>
           <li><a href="#commission" onClick={() => setMenuOpen(false)}>Commission</a></li>
           <li>
             <a href="#contact" className="nav__cta" onClick={() => setMenuOpen(false)}>
