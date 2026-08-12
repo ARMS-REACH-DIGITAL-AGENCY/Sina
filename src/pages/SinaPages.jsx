@@ -16,6 +16,7 @@ const products = [
 ];
 
 const collections = ['All', 'Pendants', 'Wire Wrapped', 'Necklaces', 'Ocean Necklaces', 'Plates', 'Wall Art', 'Charms', 'Sets'];
+const logoPath = '/images/brand/sinas-creations-logo.png';
 
 function Layout({ children }) {
   const [open, setOpen] = useState(false);
@@ -23,9 +24,9 @@ function Layout({ children }) {
   return (
     <div className="site-shell">
       <header className="site-header">
-        <Link className="brand" to="/" onClick={close} aria-label="Sina's Creations home">
-          <span className="brand-main">Sina</span>
-          <span className="brand-sub">Creations</span>
+        <Link className="brand logo-brand" to="/" onClick={close} aria-label="Sina's Creations home">
+          <img className="brand-logo" src={logoPath} alt="Sina's Creations" />
+          <span className="brand-fallback" aria-hidden="true"><span>Sina</span><small>Creations</small></span>
         </Link>
         <nav className="desktop-nav" aria-label="Main navigation">
           <NavLink to="/story">Our Story</NavLink>
@@ -250,7 +251,10 @@ function CTA({ title, copy }) {
 function Footer() {
   return (
     <footer className="footer">
-      <div className="footer-brand"><strong>Sina</strong><span>Creations</span><p>One-of-one fused glass art. Named, numbered, and adopted once.</p></div>
+      <div className="footer-brand">
+        <img className="footer-logo" src={logoPath} alt="Sina's Creations" />
+        <p>One-of-one fused glass art. Named, numbered, and adopted once.</p>
+      </div>
       <div><h4>Navigate</h4><Link to="/story">Our Story</Link><Link to="/collections">Collections</Link><Link to="/shop">Shop</Link></div>
       <div><h4>Get Involved</h4><Link to="/collaborate">Collaborate</Link><Link to="/wholesale">Wholesale</Link><Link to="/schedule">Schedule</Link></div>
       <div><h4>Adopt</h4><p>Join the first adoption catalog and help shape the system.</p><Link className="button primary footer-button" to="/shop">Adopt</Link></div>
