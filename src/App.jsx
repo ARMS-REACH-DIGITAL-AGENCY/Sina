@@ -1,22 +1,39 @@
 import React from 'react';
-import Nav from './components/Nav';
-import Hero from './components/Hero';
-import Shop from './components/Shop';
-import ArtistSection from './components/ArtistSection';
-import Contact from './components/Contact';
-import Footer from './components/Footer';
+import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom';
+import {
+  Home,
+  Story,
+  Collections,
+  Collaborate,
+  Wholesale,
+  Shop,
+  Schedule,
+  NotFound,
+} from './pages/SinaPages.jsx';
+
+function ScrollToTop() {
+  const { pathname } = useLocation();
+  React.useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [pathname]);
+  return null;
+}
 
 export default function App() {
   return (
-    <>
-      <Nav />
-      <main>
-        <Hero />
-        <Shop />
-        <ArtistSection />
-        <Contact />
-      </main>
-      <Footer />
-    </>
+    <BrowserRouter>
+      <ScrollToTop />
+      <Routes>
+        <Route path="/" element={<Home />} />
+        <Route path="/story" element={<Story />} />
+        <Route path="/collections" element={<Collections />} />
+        <Route path="/collaborate" element={<Collaborate />} />
+        <Route path="/wholesale" element={<Wholesale />} />
+        <Route path="/shop" element={<Shop />} />
+        <Route path="/schedule" element={<Schedule />} />
+        <Route path="/contact" element={<Navigate to="/schedule" replace />} />
+        <Route path="*" element={<NotFound />} />
+      </Routes>
+    </BrowserRouter>
   );
 }
