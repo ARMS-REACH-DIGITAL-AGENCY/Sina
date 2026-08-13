@@ -1,22 +1,121 @@
 import React, { useState } from 'react';
 import { Link, NavLink } from 'react-router-dom';
+import InteractiveMosaic from '../components/InteractiveMosaic.jsx';
 
 const products = [
-  { sku: 'LNY-36', name: 'Toby', category: 'Charms', price: 75, image: '/images/products/36.JPG', line: 'She turns the everyday into a little ceremony.' },
-  { sku: 'NKL-166', name: 'Celeste Maxima', category: 'Necklaces', price: 225, image: '/images/products/166.JPG', line: 'She was too much for one panel.' },
-  { sku: 'NKLO-82', name: 'Anne', category: 'Ocean Necklaces', price: 145, image: '/images/products/82.JPG', line: 'She leaps where the deep water sings.' },
-  { sku: 'PLQ-FG-LG-45', name: 'Justina', category: 'Wall Art', price: 325, image: '/images/products/45.JPG', line: 'She holds a whole celebration in one frame.' },
-  { sku: 'PLQ-FG-MD-67', name: 'Judith', category: 'Wall Art', price: 120, image: '/images/products/67.JPG', line: 'Four textures, one brilliant story.' },
-  { sku: 'PLT-FG-31', name: 'Ashley', category: 'Plates', price: 95, image: '/images/products/31.JPG', line: 'Quiet smoke, soft light, steady grace.' },
-  { sku: 'PND-MD-240', name: 'Renee', category: 'Pendants', price: 75, image: '/images/products/240.JPG', line: 'Desert stripes meet ocean shimmer.' },
-  { sku: 'PND-SM-183', name: 'Jane', category: 'Pendants', price: 75, image: '/images/products/183.JPG', line: 'Bold as sunshine, sharp as style.' },
-  { sku: 'PND-WW-MD-170', name: 'Greta', category: 'Wire Wrapped', price: 55, image: '/images/products/170.JPG', line: 'Cool water caught in silver.' },
-  { sku: 'PND-WW-SM-65', name: 'Vicki', category: 'Wire Wrapped', price: 85, image: '/images/products/65.JPG', line: 'Silver frost meets a rainbow storm.' },
-  { sku: 'SET-NKL-EAR-BRA-37', name: 'Farah', category: 'Sets', price: 185, image: '/images/products/37.JPG', line: 'Playful, polished, and a little bit mischief.' },
+  {
+    sku: 'LNY-36',
+    name: 'Toby',
+    category: 'Charms',
+    price: 75,
+    image: '/images/products/36.JPG',
+    line: 'She turns the everyday into a little ceremony.',
+    description: 'Toby is a hand-beaded lanyard in deep black, garnet red, amber, and gold tones, finished with a functional clip for a badge, keys, or daily carry piece.',
+    shopifyProductUrl: '',
+  },
+  {
+    sku: 'NKL-166',
+    name: 'Celeste Maxima',
+    category: 'Necklaces',
+    price: 225,
+    image: '/images/products/166.JPG',
+    line: 'She was too much for one panel.',
+    description: 'Celeste Maxima is a complete beaded necklace built around electric pink-magenta dichroic glass panels, black glass frames, iridescent cube beads, and silver flower spacers.',
+    shopifyProductUrl: '',
+  },
+  {
+    sku: 'NKLO-82',
+    name: 'Anne',
+    category: 'Ocean Necklaces',
+    price: 145,
+    image: '/images/products/82.JPG',
+    line: 'She leaps where the deep water sings.',
+    description: 'Anne is an ocean-style necklace with a fused glass orca pendant, sea-inspired beads, and matching story details for someone drawn to deep water and freedom.',
+    shopifyProductUrl: '',
+  },
+  {
+    sku: 'PLQ-FG-LG-45',
+    name: 'Justina',
+    category: 'Wall Art',
+    price: 325,
+    image: '/images/products/45.JPG',
+    line: 'She holds a whole celebration in one frame.',
+    description: 'Justina is a large framed fused-glass wall piece with a bold black frame, layered geometric glass, soft white and blue structure, pink and yellow accents, and raised lines that guide the eye across the composition.',
+    shopifyProductUrl: '',
+  },
+  {
+    sku: 'PLQ-FG-MD-67',
+    name: 'Judith',
+    category: 'Wall Art',
+    price: 120,
+    image: '/images/products/67.JPG',
+    line: 'Four textures, one brilliant story.',
+    description: 'Judith brings together four distinct dichroic glass elements on a clear white base: ridged purple-pink, black and teal grid, cobalt texture, and bubbled teal-blue glass.',
+    shopifyProductUrl: '',
+  },
+  {
+    sku: 'PLT-FG-31',
+    name: 'Ashley',
+    category: 'Plates',
+    price: 95,
+    image: '/images/products/31.JPG',
+    line: 'Quiet smoke, soft light, steady grace.',
+    description: 'Ashley is a square fused-glass plate with softly raised sides and a smoky gray marbled center that drifts from charcoal into white.',
+    shopifyProductUrl: '',
+  },
+  {
+    sku: 'PND-MD-240',
+    name: 'Renee',
+    category: 'Pendants',
+    price: 75,
+    image: '/images/products/240.JPG',
+    line: 'Desert stripes meet ocean shimmer.',
+    description: 'Renee is a tall rectangular fused-glass pendant with warm amber and sage striping beneath a bold diamond-set dichroic focal in electric teal, violet, copper, and deep blue-green.',
+    shopifyProductUrl: '',
+  },
+  {
+    sku: 'PND-SM-183',
+    name: 'Jane',
+    category: 'Pendants',
+    price: 75,
+    image: '/images/products/183.JPG',
+    line: 'Bold as sunshine, sharp as style.',
+    description: 'Jane is a striking arrowhead-shaped pendant that layers deep black glass against vivid sunflower yellow, with a smaller black triangular focal piece nested at the center.',
+    shopifyProductUrl: '',
+  },
+  {
+    sku: 'PND-WW-MD-170',
+    name: 'Greta',
+    category: 'Wire Wrapped',
+    price: 55,
+    image: '/images/products/170.JPG',
+    line: 'Cool water caught in silver.',
+    description: 'Greta is a soft aqua-seafoam glass pendant with silver wire wrapping that follows the natural organic shape without covering the translucent glass.',
+    shopifyProductUrl: '',
+  },
+  {
+    sku: 'PND-WW-SM-65',
+    name: 'Vicki',
+    category: 'Wire Wrapped',
+    price: 85,
+    image: '/images/products/65.JPG',
+    line: 'Silver frost meets a rainbow storm.',
+    description: 'Vicki is built on a frosted white glass base with silver dichroic sparkle, deep violet glass, magenta-gold-green rainbow glass, and hand-twisted silver wire wrapping.',
+    shopifyProductUrl: '',
+  },
+  {
+    sku: 'SET-NKL-EAR-BRA-37',
+    name: 'Farah',
+    category: 'Sets',
+    price: 185,
+    image: '/images/products/37.JPG',
+    line: 'Playful, polished, and a little bit mischief.',
+    description: 'Farah is a coordinated necklace, earrings, and bracelet set with warm amber beads, black seed beads, gold-tone accents, and a fused-glass cat focal piece.',
+    shopifyProductUrl: '',
+  },
 ];
 
 const collections = ['All', 'Pendants', 'Wire Wrapped', 'Necklaces', 'Ocean Necklaces', 'Plates', 'Wall Art', 'Charms', 'Sets'];
-const mosaicTiles = [...products, ...products, ...products].slice(0, 27);
 const logoBlackPath = '/assets/brand/sinas-creations-black-logo.png';
 const logoWhitePath = '/assets/brand/sinas-creations-white-logo.png';
 
@@ -73,16 +172,7 @@ function Hero({ eyebrow, title, copy, primary = 'Adopt a Creation', primaryTo = 
           {secondary && <Link className="button ghost" to={secondaryTo}>{secondary}</Link>}
         </div>
       </div>
-      {mosaic && (
-        <div className="hero-mosaic-stage" aria-label="Mosaic portrait concept using Sina's Creations images">
-          <div className="hero-mosaic-tiles" aria-hidden="true">
-            {mosaicTiles.map((tile, index) => (
-              <img key={`${tile.sku}-${index}`} src={tile.image} alt="" loading="eager" />
-            ))}
-          </div>
-          <img className="hero-mosaic-portrait" src="/images/thomasina.jpg" alt="Thomasina Schnepf holding one of her fused glass creations" />
-        </div>
-      )}
+      {mosaic && <InteractiveMosaic products={products} />}
     </section>
   );
 }
@@ -111,7 +201,7 @@ export function Home() {
       <section className="cream-section split-section">
         <div>
           <SectionHeader eyebrow="The Mission" title="More than jewelry. A story you can hold." />
-          <p>Every creation begins as glass, but it becomes something more personal once Thomasina names it. Each piece is made by hand, chosen with intention, and offered to one person who feels connected to its color, texture, and story.</p>
+          <p>Every creation begins as glass, but it becomes something more personal once Thomasina names it. Each piece is made by hand, chosen with intention, and offered to the person who feels connected to its color, texture, and story.</p>
           <div className="tag-row"><span>Named once</span><span>Made by hand</span><span>Adopted once</span></div>
         </div>
         <div className="feature-card dark-card">
