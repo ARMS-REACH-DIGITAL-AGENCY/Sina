@@ -18,15 +18,15 @@ const products = [
 
 const collections = ['All', 'Pendants', 'Wire Wrapped', 'Necklaces', 'Ocean Necklaces', 'Plates', 'Wall Art', 'Charms', 'Sets'];
 const logoWhitePath = '/assets/brand/sinas-creations-white-logo.png';
-const heroImagePath = '/images/hero/thomasina-hero-full.jpg';
-const janeProduct = products.find((product) => product.sku === 'PND-SM-183') || products[0];
+const heroImagePath = '/images/hero/thomasina-full.jpg';
+const jane = products.find((product) => product.sku === 'PND-SM-183') || products[0];
 
 function Layout({ children }) {
   const [open, setOpen] = useState(false);
   const close = () => setOpen(false);
   return (
     <div className="site-shell">
-      <header className="site-header">
+      <header className="site-header mockup-header">
         <Link className="brand logo-brand" to="/" onClick={close} aria-label="Sina's Creations home">
           <img className="brand-logo" src={logoWhitePath} alt="Sina's Creations" />
           <span className="brand-fallback" aria-hidden="true"><span>Sina</span><small>Creations</small></span>
@@ -46,7 +46,7 @@ function Layout({ children }) {
         </button>
       </header>
       {open && (
-        <div className="mobile-menu">
+        <div className="mobile-menu mockup-mobile-menu">
           <NavLink onClick={close} to="/story">Our Story</NavLink>
           <NavLink onClick={close} to="/collections">Collections</NavLink>
           <NavLink onClick={close} to="/collaborate">Collaborate</NavLink>
@@ -62,93 +62,34 @@ function Layout({ children }) {
   );
 }
 
-function HomeHero() {
-  return (
-    <section className="sina-target-hero">
-      <div className="hero-copy-panel">
-        <span className="hero-kicker">1-of-1 fused glass art</span>
-        <h1>One-of-one fused glass art.</h1>
-        <em>She sees what others miss.</em>
-        <p>Each piece is handcrafted by Thomasina Schnepf. Once it's gone, it's gone.</p>
-        <Link className="button primary hero-adopt-button" to="/shop">Adopt a Piece</Link>
-      </div>
-      <div className="hero-photo-panel" aria-label="Thomasina Schnepf holding one of her fused glass creations">
-        <img src={heroImagePath} alt="Thomasina Schnepf holding one of her fused glass creations" />
-        <div className="hero-photo-fade" aria-hidden="true" />
-      </div>
-    </section>
-  );
-}
-
-function IconStrip() {
-  return (
-    <section className="icon-strip" aria-label="Sina's Creations values">
-      <div><span>♡</span><strong>1-of-1</strong><small>Never repeated.</small></div>
-      <div><span>✋</span><strong>Handcrafted</strong><small>Made by hand.</small></div>
-      <div><span>✦</span><strong>Made with heart</strong><small>Created with intention.</small></div>
-      <div><span>□</span><strong>Ships with care</strong><small>Ready to gift.</small></div>
-    </section>
-  );
-}
-
-function ProductFeature({ product }) {
-  const gallery = [product.image, product.image, product.image, product.image];
-  return (
-    <section className="product-feature-section" id="adopt">
-      <div className="product-gallery-shell">
-        <div className="product-thumbs">
-          {gallery.map((image, index) => (
-            <img key={`${product.sku}-thumb-${index}`} src={image} alt="" />
-          ))}
+function Hero({ eyebrow, title, copy, primary = 'Adopt a Creation', primaryTo = '/shop', secondary, secondaryTo = '/story', showcase = false }) {
+  if (!showcase) {
+    return (
+      <section className="hero hero-dark">
+        <div className="hero-inner">
+          {eyebrow && <div className="pill-eyebrow">{eyebrow}</div>}
+          <h1>{title}</h1>
+          <p>{copy}</p>
+          <div className="hero-actions">
+            <Link className="button primary" to={primaryTo}>{primary}</Link>
+            {secondary && <Link className="button ghost" to={secondaryTo}>{secondary}</Link>}
+          </div>
         </div>
-        <div className="product-main-image">
-          <img src={product.image} alt={`${product.name}, ${product.sku}`} />
-          <button type="button" aria-label="Previous image">‹</button>
-          <button type="button" aria-label="Next image">›</button>
-        </div>
-        <div className="product-tabs">
-          <button type="button">Details</button>
-          <button type="button">Artist's Note</button>
-          <button type="button">Shipping & Care</button>
-          <dl>
-            <div><dt>Materials</dt><dd>Fused glass, dichroic accents</dd></div>
-            <div><dt>Colors</dt><dd>Sunshine yellow, jet black, iridescent purple hints</dd></div>
-            <div><dt>Size</dt><dd>Small pendant, final measurement pending</dd></div>
-            <div><dt>Availability</dt><dd>1-of-1. Never repeated.</dd></div>
-          </dl>
-        </div>
-      </div>
-      <div className="product-story-panel">
-        <span>Pendants / Small</span>
-        <h2>{product.name}</h2>
-        <small>{product.sku}</small>
-        <strong>${product.price}</strong>
-        <h3>{product.line}</h3>
-        <p>{product.description} The glossy finish catches the light with a subtle iridescent shimmer in the black, giving it real depth and dimension.</p>
-        <ul>
-          <li>1-of-1 original</li>
-          <li>Fused glass, handcrafted</li>
-          <li>Pendant size: small</li>
-          <li>Named, numbered, and released once</li>
-        </ul>
-        <Link className="button primary product-adopt-button" to="/schedule?piece=PND-SM-183">Adopt Jane</Link>
-        <p className="product-fineprint">100% 1-of-1. Shipping included.</p>
-      </div>
-    </section>
-  );
-}
+      </section>
+    );
+  }
 
-function Hero({ eyebrow, title, copy, primary = 'Adopt a Creation', primaryTo = '/shop', secondary, secondaryTo = '/story' }) {
   return (
-    <section className="hero hero-dark">
-      <div className="hero-inner">
-        {eyebrow && <div className="pill-eyebrow">{eyebrow}</div>}
+    <section className="mockup-hero">
+      <div className="mockup-hero-copy">
+        {eyebrow && <span className="mockup-eyebrow">{eyebrow}</span>}
         <h1>{title}</h1>
+        <em>She sees what others miss.</em>
         <p>{copy}</p>
-        <div className="hero-actions">
-          <Link className="button primary" to={primaryTo}>{primary}</Link>
-          {secondary && <Link className="button ghost" to={secondaryTo}>{secondary}</Link>}
-        </div>
+        <Link className="mockup-adopt-button" to={primaryTo}>{primary}<span>♡</span></Link>
+      </div>
+      <div className="mockup-hero-photo" aria-label="Thomasina Schnepf holding a fused glass creation">
+        <img src={heroImagePath} alt="Thomasina Schnepf holding one of her fused glass creations" />
       </div>
     </section>
   );
@@ -164,17 +105,74 @@ function SectionHeader({ eyebrow, title, copy }) {
   );
 }
 
+function SignatureStrip() {
+  return (
+    <section className="signature-strip" aria-label="Sina's Creations promise">
+      <div><span>♡</span><strong>1-of-1</strong><small>Never repeated.</small></div>
+      <div><span>☝</span><strong>Handcrafted</strong><small>Made by hand.</small></div>
+      <div><span>✧</span><strong>Made with heart</strong><small>Created with intention.</small></div>
+      <div><span>□</span><strong>Ships with care</strong><small>Ready to gift.</small></div>
+    </section>
+  );
+}
+
+function JaneFeature() {
+  return (
+    <section className="jane-feature" id="jane">
+      <div className="jane-gallery">
+        <div className="jane-thumbs">
+          <img src={jane.image} alt="Jane pendant thumbnail" />
+          <img src={jane.image} alt="Jane pendant alternate thumbnail" />
+          <img src={jane.image} alt="Jane pendant detail thumbnail" />
+        </div>
+        <div className="jane-main-image">
+          <img src={jane.image} alt="Jane, PND-SM-183 fused glass pendant" />
+        </div>
+      </div>
+      <div className="jane-copy">
+        <span>Pendants / Small</span>
+        <h2>{jane.name}</h2>
+        <small>{jane.sku}</small>
+        <strong>${jane.price}</strong>
+        <h3>{jane.line}</h3>
+        <p>{jane.description} The glossy finish catches the light with real depth and dimension. She is 1-of-1, named, numbered, and released once.</p>
+        <ul>
+          <li>1-of-1 original</li>
+          <li>Fused glass, handcrafted</li>
+          <li>Pendant size: small</li>
+          <li>Includes chain unless noted otherwise</li>
+          <li>Ships with care</li>
+        </ul>
+        <Link className="mockup-adopt-button jane-button" to="/schedule?piece=PND-SM-183">Adopt Jane <span>♡</span></Link>
+        <p className="shipping-note">100% 1-of-1. Shipping included.</p>
+      </div>
+    </section>
+  );
+}
+
 export function Home() {
   return (
     <Layout>
-      <HomeHero />
-      <IconStrip />
-      <ProductFeature product={janeProduct} />
-      <section className="mosaic-catalog-section">
+      <Hero showcase eyebrow="1-of-1 fused glass art" title="One-of-one fused glass art." copy="Each piece begins with a spark of inspiration — and becomes a story only glass can tell." primary="Adopt a Piece" primaryTo="/shop" />
+      <SignatureStrip />
+      <JaneFeature />
+      <section className="mosaic-catalog-section" id="mosaic">
         <InteractiveMosaic products={products} />
       </section>
+      <section className="cream-section split-section">
+        <div>
+          <SectionHeader eyebrow="The Mission" title="More than jewelry. A story you can hold." />
+          <p>Every creation begins as glass, but it becomes something more personal once Thomasina names it. Each piece is made by hand, chosen with intention, and offered to the person who feels connected to its color, texture, and story.</p>
+          <div className="tag-row"><span>Named once</span><span>Made by hand</span><span>Adopted once</span></div>
+        </div>
+        <div className="feature-card dark-card">
+          <span>1-of-1</span>
+          <h3>Each creation waits for the person it was meant to find.</h3>
+          <p>When a piece is adopted, it leaves Thomasina's hands and begins its next story in a new home.</p>
+        </div>
+      </section>
       <FeaturedProducts />
-      <CTA title="Be the first to know when a new 1-of-1 is available." copy="Join the list for new releases, adoption updates, and special collection notes." />
+      <CTA title="Ready to meet the collection?" copy="Explore the first available pieces and choose the creation that speaks to you." />
     </Layout>
   );
 }
@@ -198,7 +196,7 @@ export function Story() {
 export function Collections() {
   return (
     <Layout>
-      <Hero eyebrow="The Collections" title="One body of work. Many ways to adopt." copy="Pendants, wire-wrapped pieces, necklaces, plaques, plates, wall art, lanyards, and sets - each one made by hand and released as its own original creation." primary="Shop Available Pieces" primaryTo="/shop" />
+      <Hero eyebrow="The Collections" title="One body of work. Many ways to adopt." copy="Pendants, wire-wrapped pieces, necklaces, plaques, plates, wall art, lanyards, and sets — each one made by hand and released as its own original creation." primary="Shop Available Pieces" primaryTo="/shop" />
       <section className="cream-section collection-grid">
         {collections.filter(c => c !== 'All').map((name) => (
           <Link className="collection-card" to={`/shop?collection=${encodeURIComponent(name)}`} key={name}>
@@ -310,7 +308,7 @@ function CTA({ title, copy }) {
     <section className="dark-cta">
       <h2>{title}</h2>
       <p>{copy}</p>
-      <Link className="button primary" to="/shop">Join the List</Link>
+      <Link className="button primary" to="/shop">Adopt a Creation</Link>
     </section>
   );
 }
