@@ -1,92 +1,81 @@
 import React, { useState } from 'react';
 import { Link, NavLink } from 'react-router-dom';
-import InteractiveMosaic from '../components/InteractiveMosaic.jsx';
+import LivingMosaicPreview from '../components/LivingMosaicPreview.jsx';
 
 const products = [
-  { sku: 'LNY-36', name: 'Toby', category: 'Charms', price: 75, image: '/images/products/36.JPG', line: 'She turns the everyday into a little ceremony.', description: 'Toby is a hand-beaded lanyard in deep black, garnet red, amber, and gold tones, finished with a functional clip for a badge, keys, or daily carry piece.', shopifyProductUrl: '' },
-  { sku: 'NKL-166', name: 'Celeste Maxima', category: 'Necklaces', price: 225, image: '/images/products/166.JPG', line: 'She was too much for one panel.', description: 'Celeste Maxima is a complete beaded necklace built around electric pink-magenta dichroic glass panels, black glass frames, iridescent cube beads, and silver flower spacers.', shopifyProductUrl: '' },
-  { sku: 'NKLO-82', name: 'Anne', category: 'Ocean Necklaces', price: 145, image: '/images/products/82.JPG', line: 'She leaps where the deep water sings.', description: 'Anne is an ocean-style necklace with a fused glass orca pendant, sea-inspired beads, and matching story details for someone drawn to deep water and freedom.', shopifyProductUrl: '' },
-  { sku: 'PLQ-FG-LG-45', name: 'Justina', category: 'Wall Art', price: 325, image: '/images/products/45.JPG', line: 'She holds a whole celebration in one frame.', description: 'Justina is a large framed fused-glass wall piece with a bold black frame, layered geometric glass, soft white and blue structure, pink and yellow accents, and raised lines that guide the eye across the composition.', shopifyProductUrl: '' },
-  { sku: 'PLQ-FG-MD-67', name: 'Judith', category: 'Wall Art', price: 120, image: '/images/products/67.JPG', line: 'Four textures, one brilliant story.', description: 'Judith brings together four distinct dichroic glass elements on a clear white base: ridged purple-pink, black and teal grid, cobalt texture, and bubbled teal-blue glass.', shopifyProductUrl: '' },
-  { sku: 'PLT-FG-31', name: 'Ashley', category: 'Plates', price: 95, image: '/images/products/31.JPG', line: 'Quiet smoke, soft light, steady grace.', description: 'Ashley is a square fused-glass plate with softly raised sides and a smoky gray marbled center that drifts from charcoal into white.', shopifyProductUrl: '' },
-  { sku: 'PND-MD-240', name: 'Renee', category: 'Pendants', price: 75, image: '/images/products/240.JPG', line: 'Desert stripes meet ocean shimmer.', description: 'Renee is a tall rectangular fused-glass pendant with warm amber and sage striping beneath a bold diamond-set dichroic focal in electric teal, violet, copper, and deep blue-green.', shopifyProductUrl: '' },
-  { sku: 'PND-SM-183', name: 'Jane', category: 'Pendants', price: 75, image: '/images/products/183.JPG', line: 'Bold as sunshine, sharp as style.', description: 'Jane is a striking arrowhead-shaped pendant that layers deep black glass against vivid sunflower yellow, with a smaller black triangular focal piece nested at the center.', shopifyProductUrl: '' },
-  { sku: 'PND-WW-MD-170', name: 'Greta', category: 'Wire Wrapped', price: 55, image: '/images/products/170.JPG', line: 'Cool water caught in silver.', description: 'Greta is a soft aqua-seafoam glass pendant with silver wire wrapping that follows the natural organic shape without covering the translucent glass.', shopifyProductUrl: '' },
-  { sku: 'PND-WW-SM-65', name: 'Vicki', category: 'Wire Wrapped', price: 85, image: '/images/products/65.JPG', line: 'Silver frost meets a rainbow storm.', description: 'Vicki is built on a frosted white glass base with silver dichroic sparkle, deep violet glass, magenta-gold-green rainbow glass, and hand-twisted silver wire wrapping.', shopifyProductUrl: '' },
-  { sku: 'SET-NKL-EAR-BRA-37', name: 'Farah', category: 'Sets', price: 185, image: '/images/products/37.JPG', line: 'Playful, polished, and a little bit mischief.', description: 'Farah is a coordinated necklace, earrings, and bracelet set with warm amber beads, black seed beads, gold-tone accents, and a fused-glass cat focal piece.', shopifyProductUrl: '' },
+  { sku: 'LNY-36', name: 'Toby', category: 'Charms', price: 75, image: '/images/products/36.JPG', line: 'She turns the everyday into a little ceremony.', description: 'A hand-beaded lanyard in deep black, garnet red, amber, and gold tones, finished for daily use as a badge, key, or carry piece.' },
+  { sku: 'NKL-166', name: 'Celeste Maxima', category: 'Necklaces', price: 225, image: '/images/products/166.JPG', line: 'She was too much for one panel.', description: 'Two electric pink-magenta dichroic panels set into a complete beaded necklace with black glass frames, iridescent cube beads, and silver accents.' },
+  { sku: 'NKLO-82', name: 'Anne', category: 'Ocean Necklaces', price: 145, image: '/images/products/82.JPG', line: 'She leaps where the deep water sings.', description: 'An ocean-style necklace with a fused-glass orca focal and sea-inspired beadwork for someone drawn to deep water and freedom.' },
+  { sku: 'PLQ-FG-LG-45', name: 'Justina', category: 'Wall Art', price: 325, image: '/images/products/45.JPG', line: 'She holds a whole celebration in one frame.', description: 'A large framed fused-glass wall piece with layered geometric glass, soft white and blue structure, and raised lines that guide the eye.' },
+  { sku: 'PLQ-FG-MD-67', name: 'Judith', category: 'Wall Art', price: 120, image: '/images/products/67.JPG', line: 'Four textures, one brilliant story.', description: 'A fused-glass plaque bringing together ridged purple-pink, black and teal grid, cobalt texture, and bubbled teal-blue glass.' },
+  { sku: 'PLT-FG-31', name: 'Ashley', category: 'Plates', price: 95, image: '/images/products/31.JPG', line: 'Quiet smoke, soft light, steady grace.', description: 'A square fused-glass plate with softly raised sides and a smoky gray marbled center drifting from charcoal into white.' },
+  { sku: 'PND-MD-240', name: 'Renee', category: 'Pendants', price: 75, image: '/images/products/240.JPG', line: 'Desert stripes meet ocean shimmer.', description: 'A tall rectangular fused-glass pendant with amber and sage striping beneath a diamond-set dichroic focal in teal, violet, copper, and blue-green.' },
+  { sku: 'PND-SM-183', name: 'Jane', category: 'Pendants', price: 75, image: '/images/products/183.JPG', line: 'Bold as sunshine, sharp as style.', description: 'A striking arrowhead-shaped pendant that layers deep black glass against vivid sunflower yellow, with a smaller black triangular focal piece at the center.' },
+  { sku: 'PND-WW-MD-170', name: 'Greta', category: 'Wire Wrapped', price: 55, image: '/images/products/170.JPG', line: 'Cool water caught in silver.', description: 'A soft aqua-seafoam glass pendant with silver wire wrapping that follows the natural shape without covering the translucent glass.' },
+  { sku: 'PND-WW-SM-65', name: 'Vicki', category: 'Wire Wrapped', price: 85, image: '/images/products/65.JPG', line: 'Silver frost meets a rainbow storm.', description: 'A frosted white glass base with silver dichroic sparkle, deep violet glass, magenta-gold-green rainbow glass, and hand-twisted silver wire.' },
+  { sku: 'SET-NKL-EAR-BRA-37', name: 'Farah', category: 'Sets', price: 185, image: '/images/products/37.JPG', line: 'Playful, polished, and a little bit mischief.', description: 'A coordinated necklace, earrings, and bracelet set with amber beads, black seed beads, gold-tone accents, and a fused-glass cat focal piece.' },
 ];
 
 const collections = ['All', 'Pendants', 'Wire Wrapped', 'Necklaces', 'Ocean Necklaces', 'Plates', 'Wall Art', 'Charms', 'Sets'];
+const heroImagePath = '/images/thomasina.jpg';
 const logoWhitePath = '/assets/brand/sinas-creations-white-logo.png';
-const heroImagePath = '/images/hero/thomasina-full.jpg';
 const jane = products.find((product) => product.sku === 'PND-SM-183') || products[0];
 
 function Layout({ children }) {
   const [open, setOpen] = useState(false);
   const close = () => setOpen(false);
+
   return (
-    <div className="site-shell">
+    <div className="site-shell preview-shell">
       <header className="site-header mockup-header">
         <Link className="brand logo-brand" to="/" onClick={close} aria-label="Sina's Creations home">
           <img className="brand-logo" src={logoWhitePath} alt="Sina's Creations" />
           <span className="brand-fallback" aria-hidden="true"><span>Sina</span><small>Creations</small></span>
         </Link>
         <nav className="desktop-nav" aria-label="Main navigation">
-          <NavLink to="/story">Our Story</NavLink>
+          <NavLink to="/">Home</NavLink>
+          <NavLink to="/story">About</NavLink>
+          <NavLink to="/collections">Gallery</NavLink>
           <NavLink to="/collections">Collections</NavLink>
-          <NavLink to="/collaborate">Collaborate</NavLink>
-          <NavLink to="/wholesale">Wholesale</NavLink>
-          <NavLink to="/shop">Shop</NavLink>
+          <NavLink to="/story">The Artist</NavLink>
+          <NavLink to="/shop">Adopt</NavLink>
         </nav>
-        <Link className="nav-cta" to="/shop">Adopt</Link>
+        <Link className="nav-cta" to="/shop">Adopt a Piece ♡</Link>
         <button className="menu-button" onClick={() => setOpen(!open)} aria-label={open ? 'Close menu' : 'Open menu'}>
           <span className={open ? 'x' : ''}></span>
           <span className={open ? 'x' : ''}></span>
           <span className={open ? 'x' : ''}></span>
         </button>
       </header>
+
       {open && (
         <div className="mobile-menu mockup-mobile-menu">
-          <NavLink onClick={close} to="/story">Our Story</NavLink>
+          <NavLink onClick={close} to="/">Home</NavLink>
+          <NavLink onClick={close} to="/story">About</NavLink>
+          <NavLink onClick={close} to="/collections">Gallery</NavLink>
           <NavLink onClick={close} to="/collections">Collections</NavLink>
-          <NavLink onClick={close} to="/collaborate">Collaborate</NavLink>
-          <NavLink onClick={close} to="/wholesale">Wholesale</NavLink>
-          <NavLink onClick={close} to="/shop">Shop</NavLink>
-          <NavLink onClick={close} to="/schedule">Schedule a Call</NavLink>
-          <Link onClick={close} className="mobile-adopt" to="/shop">Adopt a Creation</Link>
+          <NavLink onClick={close} to="/story">The Artist</NavLink>
+          <NavLink onClick={close} to="/shop">Adopt</NavLink>
+          <Link onClick={close} className="mobile-adopt" to="/shop">Adopt a Piece</Link>
         </div>
       )}
+
       {children}
       <Footer />
     </div>
   );
 }
 
-function Hero({ eyebrow, title, copy, primary = 'Adopt a Creation', primaryTo = '/shop', secondary, secondaryTo = '/story', showcase = false }) {
-  if (!showcase) {
-    return (
-      <section className="hero hero-dark">
-        <div className="hero-inner">
-          {eyebrow && <div className="pill-eyebrow">{eyebrow}</div>}
-          <h1>{title}</h1>
-          <p>{copy}</p>
-          <div className="hero-actions">
-            <Link className="button primary" to={primaryTo}>{primary}</Link>
-            {secondary && <Link className="button ghost" to={secondaryTo}>{secondary}</Link>}
-          </div>
-        </div>
-      </section>
-    );
-  }
-
+function HomeHero() {
   return (
-    <section className="mockup-hero">
+    <section className="mockup-hero target-home-hero">
       <div className="mockup-hero-copy">
-        {eyebrow && <span className="mockup-eyebrow">{eyebrow}</span>}
-        <h1>{title}</h1>
+        <span className="mockup-eyebrow">1-of-1 fused glass art</span>
+        <h1>1-of-1 fused glass art.</h1>
         <em>She sees what others miss.</em>
-        <p>{copy}</p>
-        <Link className="mockup-adopt-button" to={primaryTo}>{primary}<span>♡</span></Link>
+        <div className="gold-rule"><span></span></div>
+        <p>Every piece begins with a spark of inspiration — and becomes a story only glass can tell.</p>
+        <Link className="mockup-adopt-button" to="/shop">Adopt a Piece <span>♡</span></Link>
       </div>
       <div className="mockup-hero-photo" aria-label="Thomasina Schnepf holding a fused glass creation">
         <img src={heroImagePath} alt="Thomasina Schnepf holding one of her fused glass creations" />
@@ -95,13 +84,16 @@ function Hero({ eyebrow, title, copy, primary = 'Adopt a Creation', primaryTo = 
   );
 }
 
-function SectionHeader({ eyebrow, title, copy }) {
+function PageHero({ eyebrow, title, copy, button = 'Explore', to = '/shop' }) {
   return (
-    <div className="section-header">
-      <span>{eyebrow}</span>
-      <h2>{title}</h2>
-      {copy && <p>{copy}</p>}
-    </div>
+    <section className="page-hero-simple">
+      <div>
+        <span>{eyebrow}</span>
+        <h1>{title}</h1>
+        <p>{copy}</p>
+        <Link to={to}>{button}</Link>
+      </div>
+    </section>
   );
 }
 
@@ -135,17 +127,55 @@ function JaneFeature() {
         <small>{jane.sku}</small>
         <strong>${jane.price}</strong>
         <h3>{jane.line}</h3>
-        <p>{jane.description} The glossy finish catches the light with real depth and dimension. She is 1-of-1, named, numbered, and released once.</p>
+        <p>{jane.description} She is 1-of-1, named, numbered, and released once.</p>
         <ul>
           <li>1-of-1 original</li>
           <li>Fused glass, handcrafted</li>
           <li>Pendant size: small</li>
-          <li>Includes chain unless noted otherwise</li>
-          <li>Ships with care</li>
+          <li>Shipping included unless noted otherwise</li>
         </ul>
         <Link className="mockup-adopt-button jane-button" to="/schedule?piece=PND-SM-183">Adopt Jane <span>♡</span></Link>
-        <p className="shipping-note">100% 1-of-1. Shipping included.</p>
       </div>
+    </section>
+  );
+}
+
+function FeaturedProducts() {
+  return (
+    <section className="featured-products">
+      <div className="section-header">
+        <span>The First Release</span>
+        <h2>Available pieces from the local fallback catalog.</h2>
+        <p>These cards are temporary until the Shopify catalog becomes the source of truth.</p>
+      </div>
+      <div className="product-grid">
+        {products.slice(0, 6).map((product) => <ProductCard key={product.sku} product={product} />)}
+      </div>
+    </section>
+  );
+}
+
+function ProductCard({ product }) {
+  return (
+    <article className="preview-product-card">
+      <img src={product.image} alt={product.name} />
+      <div>
+        <span>{product.sku}</span>
+        <h3>{product.name}</h3>
+        <p>{product.line}</p>
+        <strong>${product.price}</strong>
+        <Link to={`/schedule?piece=${encodeURIComponent(product.sku)}`}>Adopt {product.name}</Link>
+      </div>
+    </article>
+  );
+}
+
+function CTA({ title, copy }) {
+  return (
+    <section className="join-strip">
+      <h2>{title}</h2>
+      <p>{copy}</p>
+      <Link to="/shop">Explore available pieces</Link>
     </section>
   );
 }
@@ -153,26 +183,12 @@ function JaneFeature() {
 export function Home() {
   return (
     <Layout>
-      <Hero showcase eyebrow="1-of-1 fused glass art" title="One-of-one fused glass art." copy="Each piece begins with a spark of inspiration — and becomes a story only glass can tell." primary="Adopt a Piece" primaryTo="/shop" />
+      <HomeHero />
+      <LivingMosaicPreview products={products} />
       <SignatureStrip />
       <JaneFeature />
-      <section className="mosaic-catalog-section" id="mosaic">
-        <InteractiveMosaic products={products} />
-      </section>
-      <section className="cream-section split-section">
-        <div>
-          <SectionHeader eyebrow="The Mission" title="More than jewelry. A story you can hold." />
-          <p>Every creation begins as glass, but it becomes something more personal once Thomasina names it. Each piece is made by hand, chosen with intention, and offered to the person who feels connected to its color, texture, and story.</p>
-          <div className="tag-row"><span>Named once</span><span>Made by hand</span><span>Adopted once</span></div>
-        </div>
-        <div className="feature-card dark-card">
-          <span>1-of-1</span>
-          <h3>Each creation waits for the person it was meant to find.</h3>
-          <p>When a piece is adopted, it leaves Thomasina's hands and begins its next story in a new home.</p>
-        </div>
-      </section>
       <FeaturedProducts />
-      <CTA title="Ready to meet the collection?" copy="Explore the first available pieces and choose the creation that speaks to you." />
+      <CTA title="Be first to know when a new 1-of-1 creation is available." copy="The full system will connect this visual catalog to live Shopify product data." />
     </Layout>
   );
 }
@@ -180,13 +196,14 @@ export function Home() {
 export function Story() {
   return (
     <Layout>
-      <Hero eyebrow="Our Story" title="The artist who works closer than sight." copy="At age four, a tumor changed how Thomasina sees the world. What could have ended her art became part of her gift." primary="See the Collection" primaryTo="/collections" />
-      <section className="cream-section story-grid">
-        <div className="portrait-card"><img src={heroImagePath} alt="Thomasina Schnepf" /></div>
+      <PageHero eyebrow="The Artist" title="The artist who works closer than sight." copy="Thomasina's work is shaped by light, touch, form, color, and the way she has learned to see the world closely." button="View the collection" to="/collections" />
+      <section className="story-section">
+        <img src={heroImagePath} alt="Thomasina Schnepf" />
         <div>
-          <SectionHeader eyebrow="Thomasina Schnepf" title="Her art begins where most people stop looking." />
-          <p>Thomasina works close to her glass, noticing edges, seams, texture, and color shifts that others might miss at a glance. Her creations carry the evidence of that attention: layered materials, tactile choices, and details that reward close attention.</p>
-          <p>She does not make pieces to be repeated. She creates individual works that can be worn, displayed, gifted, collected, and remembered.</p>
+          <span>About Thomasina Schnepf</span>
+          <h2>She sees what others miss.</h2>
+          <p>At age four, a tumor on her optic nerve changed how she sees the world. Her work now turns that closeness into fused glass pieces that can be held, worn, gifted, and remembered.</p>
+          <p>Every piece is created by hand and released once.</p>
         </div>
       </section>
     </Layout>
@@ -196,11 +213,11 @@ export function Story() {
 export function Collections() {
   return (
     <Layout>
-      <Hero eyebrow="The Collections" title="One body of work. Many ways to adopt." copy="Pendants, wire-wrapped pieces, necklaces, plaques, plates, wall art, lanyards, and sets — each one made by hand and released as its own original creation." primary="Shop Available Pieces" primaryTo="/shop" />
-      <section className="cream-section collection-grid">
-        {collections.filter(c => c !== 'All').map((name) => (
-          <Link className="collection-card" to={`/shop?collection=${encodeURIComponent(name)}`} key={name}>
-            <span>{name}</span>
+      <PageHero eyebrow="The Collections" title="One body of work. Many ways to adopt." copy="Browse the first MVP categories and pieces while the Shopify catalog connection is prepared." button="Shop pieces" to="/shop" />
+      <section className="collection-grid">
+        {collections.filter((item) => item !== 'All').map((collection) => (
+          <Link className="collection-card" key={collection} to={`/shop?collection=${encodeURIComponent(collection)}`}>
+            <span>{collection}</span>
             <strong>View pieces →</strong>
           </Link>
         ))}
@@ -212,8 +229,8 @@ export function Collections() {
 export function Collaborate() {
   return (
     <Layout>
-      <Hero eyebrow="Community & Collaboration" title="Art with a story can bring people together." copy="Sina's Creations welcomes conversations with churches, schools, galleries, disability-awareness groups, charity events, and community partners who want art to carry a deeper message." primary="Request a Conversation" primaryTo="/schedule" />
-      <FormPage title="Start a collaboration conversation" intro="Tell us about the audience, cause, occasion, or community you want to support." />
+      <PageHero eyebrow="Community" title="Art with a story can bring people together." copy="For churches, schools, galleries, events, and community partners who want Sina's story to support a deeper purpose." button="Start a conversation" to="/schedule" />
+      <FormPage title="Start a collaboration conversation" />
     </Layout>
   );
 }
@@ -221,108 +238,71 @@ export function Collaborate() {
 export function Wholesale() {
   return (
     <Layout>
-      <Hero eyebrow="Wholesale" title="Carry Sina's Creations in your store." copy="Retailers, galleries, boutiques, and community partners can apply to carry selected 1-of-1 creations, adoption cards, and story-based displays." primary="Apply for Wholesale" primaryTo="/schedule" />
-      <FormPage title="Wholesale application" intro="Tell us about your store, gallery, boutique, or event space and the type of pieces you would like to carry." wholesale />
+      <PageHero eyebrow="Wholesale" title="Carry Sina's Creations in your store." copy="Retailers, galleries, boutiques, and event partners can inquire about carrying selected 1-of-1 creations." button="Apply for wholesale" to="/schedule" />
+      <FormPage title="Wholesale inquiry" />
     </Layout>
   );
 }
 
 export function Shop() {
   const [filter, setFilter] = useState('All');
-  const visible = filter === 'All' ? products : products.filter(p => p.category === filter);
+  const visible = filter === 'All' ? products : products.filter((product) => product.category === filter);
+
   return (
     <Layout>
-      <Hero eyebrow="Available for Adoption" title="The first release is ready to meet you." copy="Each piece shown here is handmade, named, priced, and available as a 1-of-1 creation." primary="Ask About a Piece" primaryTo="/schedule" />
+      <PageHero eyebrow="Available for Adoption" title="The first release is ready to meet you." copy="Each piece shown here is handmade, named, priced, and available as a 1-of-1 creation in the local fallback catalog." button="Ask about a piece" to="/schedule" />
       <section className="shop-section">
         <div className="tabs" role="tablist" aria-label="Filter products by collection">
-          {collections.map(tab => <button key={tab} className={filter === tab ? 'active' : ''} onClick={() => setFilter(tab)}>{tab}</button>)}
+          {collections.map((tab) => <button key={tab} type="button" className={filter === tab ? 'active' : ''} onClick={() => setFilter(tab)}>{tab}</button>)}
         </div>
         <div className="product-grid">
-          {visible.map(product => <ProductCard product={product} key={product.sku} />)}
+          {visible.map((product) => <ProductCard key={product.sku} product={product} />)}
         </div>
       </section>
     </Layout>
   );
 }
 
-function ProductCard({ product }) {
-  return (
-    <article className="product-card">
-      <div className="product-image"><img src={product.image} alt={`${product.name}, ${product.category} by Sina's Creations`} /></div>
-      <div className="product-body">
-        <div className="sku-row"><span>{product.category}</span><strong>1-of-1</strong></div>
-        <h3>{product.name}</h3>
-        <p>{product.line}</p>
-        <div className="price-row"><span>Adoption price</span><strong>${product.price}</strong></div>
-        <Link className="small-link" to="/schedule">Ask about this piece →</Link>
-      </div>
-    </article>
-  );
-}
-
-function FeaturedProducts() {
-  return (
-    <section className="cream-section">
-      <SectionHeader eyebrow="Available Now" title="Featured pieces ready for adoption" copy="Begin with a few of the creations currently available from Thomasina's first release." />
-      <div className="product-grid compact">
-        {products.slice(0, 3).map(product => <ProductCard product={product} key={product.sku} />)}
-      </div>
-    </section>
-  );
-}
-
 export function Schedule() {
   return (
     <Layout>
-      <Hero eyebrow="Let's Talk" title="Schedule a Sina's Creations conversation." copy="Ask about an available piece, request a custom commission, explore wholesale, or start a collaboration conversation." primary="View Shop" primaryTo="/shop" />
-      <FormPage title="Book your conversation" intro="Send the details and we will follow up with the right next step." />
+      <PageHero eyebrow="Contact" title="Ask about a piece or a commission." copy="Use this temporary inquiry form while the Shopify checkout connection is being prepared." button="View shop" to="/shop" />
+      <FormPage title="Send a message" />
     </Layout>
   );
 }
 
-function FormPage({ title, intro, wholesale = false }) {
+function FormPage({ title }) {
   return (
-    <section className="cream-section form-layout">
+    <section className="form-section">
       <div>
-        <SectionHeader eyebrow="Start Here" title={title} copy={intro} />
-        <div className="option-list">
-          {['Adoption inquiry', 'Custom commission', 'Collaboration', 'Wholesale', 'Community event', 'General question'].map(item => <div key={item}>{item}</div>)}
-        </div>
+        <span>Inquiry</span>
+        <h2>{title}</h2>
+        <p>This visual shell keeps the form simple for now. Final routing can connect to HighLevel or Shopify workflows when ready.</p>
       </div>
-      <form className="lead-form">
-        <label>First name<input placeholder="First name" /></label>
-        <label>Last name<input placeholder="Last name" /></label>
-        <label>Email<input placeholder="you@email.com" /></label>
-        <label>Phone<input placeholder="(555) 000-0000" /></label>
-        {wholesale && <label>Business name<input placeholder="Business or gallery" /></label>}
-        <label>Interest<select defaultValue=""><option value="" disabled>Select one...</option><option>Adoption</option><option>Wholesale</option><option>Collaboration</option><option>Commission</option></select></label>
-        <label className="full">Message<textarea placeholder="Tell us what you have in mind..." /></label>
-        <button type="button" className="button primary form-button">Submit</button>
+      <form>
+        <label>First name<input type="text" placeholder="First name" /></label>
+        <label>Email<input type="email" placeholder="you@email.com" /></label>
+        <label>Message<textarea placeholder="Tell us what you have in mind"></textarea></label>
+        <button type="button">Send Message</button>
       </form>
-    </section>
-  );
-}
-
-function CTA({ title, copy }) {
-  return (
-    <section className="dark-cta">
-      <h2>{title}</h2>
-      <p>{copy}</p>
-      <Link className="button primary" to="/shop">Adopt a Creation</Link>
     </section>
   );
 }
 
 function Footer() {
   return (
-    <footer className="footer">
-      <div className="footer-brand">
-        <img className="footer-logo" src={logoWhitePath} alt="Sina's Creations" />
-        <p>1-of-1 fused glass art. Named, made by hand, and adopted once.</p>
+    <footer className="site-footer">
+      <div>
+        <strong>Sina's Creations</strong>
+        <p>1-of-1 fused glass art. Made with heart.</p>
       </div>
-      <div><h4>Navigate</h4><Link to="/story">Our Story</Link><Link to="/collections">Collections</Link><Link to="/shop">Shop</Link></div>
-      <div><h4>Get Involved</h4><Link to="/collaborate">Collaborate</Link><Link to="/wholesale">Wholesale</Link><Link to="/schedule">Schedule</Link></div>
-      <div><h4>Adopt</h4><p>Choose a piece, ask a question, or start a custom conversation.</p><Link className="button primary footer-button" to="/shop">Adopt</Link></div>
+      <nav>
+        <Link to="/story">The Artist</Link>
+        <Link to="/collections">Collections</Link>
+        <Link to="/shop">Adopt</Link>
+        <Link to="/schedule">Contact</Link>
+      </nav>
     </footer>
   );
 }
@@ -330,7 +310,7 @@ function Footer() {
 export function NotFound() {
   return (
     <Layout>
-      <Hero eyebrow="Not Found" title="This page is still being created." copy="Use the navigation to return to the active Sina's Creations pages." primary="Go Home" primaryTo="/" />
+      <PageHero eyebrow="404" title="That page is not available." copy="Return to the collection or the home page." button="Return home" to="/" />
     </Layout>
   );
 }
