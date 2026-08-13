@@ -14,9 +14,18 @@ export default function Nav() {
   return (
     <nav className={`nav ${scrolled ? 'nav--scrolled' : ''}`}>
       <div className="nav__inner">
-        <a href="/" className="nav__logo">
-          <span className="nav__logo-sina">Sina's</span>
-          <span className="nav__logo-creations">Creations</span>
+        <a href="/" className="nav__logo" aria-label="Sina's Creations home">
+          <img
+            className="nav__logo-img nav__logo-img--light"
+            src="/assets/brand/sinas-creations-white-logo.png"
+            alt="Sina's Creations"
+          />
+          <img
+            className="nav__logo-img nav__logo-img--dark"
+            src="/assets/brand/sinas-creations-black-logo.png"
+            alt=""
+            aria-hidden="true"
+          />
         </a>
 
         <ul className={`nav__links ${menuOpen ? 'nav__links--open' : ''}`}>
