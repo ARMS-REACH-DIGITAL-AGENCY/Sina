@@ -1,0 +1,25 @@
+{
+  "name": "Sina's Creations",
+  "short_name": "Sina's",
+  "description": "One-of-one fused glass creations by Thomasina Schnepf.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#f4ead8",
+  "theme_color": "#f4ead8",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/assets/brand/sinas-creations-favicon.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/assets/brand/sinas-creations-favicon.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
