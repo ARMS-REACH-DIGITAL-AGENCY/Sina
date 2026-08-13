@@ -3,121 +3,23 @@ import { Link, NavLink } from 'react-router-dom';
 import InteractiveMosaic from '../components/InteractiveMosaic.jsx';
 
 const products = [
-  {
-    sku: 'LNY-36',
-    name: 'Toby',
-    category: 'Charms',
-    price: 75,
-    image: '/images/products/36.JPG',
-    line: 'She turns the everyday into a little ceremony.',
-    description: 'Toby is a hand-beaded lanyard in deep black, garnet red, amber, and gold tones, finished with a functional clip for a badge, keys, or daily carry piece.',
-    shopifyProductUrl: '',
-  },
-  {
-    sku: 'NKL-166',
-    name: 'Celeste Maxima',
-    category: 'Necklaces',
-    price: 225,
-    image: '/images/products/166.JPG',
-    line: 'She was too much for one panel.',
-    description: 'Celeste Maxima is a complete beaded necklace built around electric pink-magenta dichroic glass panels, black glass frames, iridescent cube beads, and silver flower spacers.',
-    shopifyProductUrl: '',
-  },
-  {
-    sku: 'NKLO-82',
-    name: 'Anne',
-    category: 'Ocean Necklaces',
-    price: 145,
-    image: '/images/products/82.JPG',
-    line: 'She leaps where the deep water sings.',
-    description: 'Anne is an ocean-style necklace with a fused glass orca pendant, sea-inspired beads, and matching story details for someone drawn to deep water and freedom.',
-    shopifyProductUrl: '',
-  },
-  {
-    sku: 'PLQ-FG-LG-45',
-    name: 'Justina',
-    category: 'Wall Art',
-    price: 325,
-    image: '/images/products/45.JPG',
-    line: 'She holds a whole celebration in one frame.',
-    description: 'Justina is a large framed fused-glass wall piece with a bold black frame, layered geometric glass, soft white and blue structure, pink and yellow accents, and raised lines that guide the eye across the composition.',
-    shopifyProductUrl: '',
-  },
-  {
-    sku: 'PLQ-FG-MD-67',
-    name: 'Judith',
-    category: 'Wall Art',
-    price: 120,
-    image: '/images/products/67.JPG',
-    line: 'Four textures, one brilliant story.',
-    description: 'Judith brings together four distinct dichroic glass elements on a clear white base: ridged purple-pink, black and teal grid, cobalt texture, and bubbled teal-blue glass.',
-    shopifyProductUrl: '',
-  },
-  {
-    sku: 'PLT-FG-31',
-    name: 'Ashley',
-    category: 'Plates',
-    price: 95,
-    image: '/images/products/31.JPG',
-    line: 'Quiet smoke, soft light, steady grace.',
-    description: 'Ashley is a square fused-glass plate with softly raised sides and a smoky gray marbled center that drifts from charcoal into white.',
-    shopifyProductUrl: '',
-  },
-  {
-    sku: 'PND-MD-240',
-    name: 'Renee',
-    category: 'Pendants',
-    price: 75,
-    image: '/images/products/240.JPG',
-    line: 'Desert stripes meet ocean shimmer.',
-    description: 'Renee is a tall rectangular fused-glass pendant with warm amber and sage striping beneath a bold diamond-set dichroic focal in electric teal, violet, copper, and deep blue-green.',
-    shopifyProductUrl: '',
-  },
-  {
-    sku: 'PND-SM-183',
-    name: 'Jane',
-    category: 'Pendants',
-    price: 75,
-    image: '/images/products/183.JPG',
-    line: 'Bold as sunshine, sharp as style.',
-    description: 'Jane is a striking arrowhead-shaped pendant that layers deep black glass against vivid sunflower yellow, with a smaller black triangular focal piece nested at the center.',
-    shopifyProductUrl: '',
-  },
-  {
-    sku: 'PND-WW-MD-170',
-    name: 'Greta',
-    category: 'Wire Wrapped',
-    price: 55,
-    image: '/images/products/170.JPG',
-    line: 'Cool water caught in silver.',
-    description: 'Greta is a soft aqua-seafoam glass pendant with silver wire wrapping that follows the natural organic shape without covering the translucent glass.',
-    shopifyProductUrl: '',
-  },
-  {
-    sku: 'PND-WW-SM-65',
-    name: 'Vicki',
-    category: 'Wire Wrapped',
-    price: 85,
-    image: '/images/products/65.JPG',
-    line: 'Silver frost meets a rainbow storm.',
-    description: 'Vicki is built on a frosted white glass base with silver dichroic sparkle, deep violet glass, magenta-gold-green rainbow glass, and hand-twisted silver wire wrapping.',
-    shopifyProductUrl: '',
-  },
-  {
-    sku: 'SET-NKL-EAR-BRA-37',
-    name: 'Farah',
-    category: 'Sets',
-    price: 185,
-    image: '/images/products/37.JPG',
-    line: 'Playful, polished, and a little bit mischief.',
-    description: 'Farah is a coordinated necklace, earrings, and bracelet set with warm amber beads, black seed beads, gold-tone accents, and a fused-glass cat focal piece.',
-    shopifyProductUrl: '',
-  },
+  { sku: 'LNY-36', name: 'Toby', category: 'Charms', price: 75, image: '/images/products/36.JPG', line: 'She turns the everyday into a little ceremony.', description: 'Toby is a hand-beaded lanyard in deep black, garnet red, amber, and gold tones, finished with a functional clip for a badge, keys, or daily carry piece.', shopifyProductUrl: '' },
+  { sku: 'NKL-166', name: 'Celeste Maxima', category: 'Necklaces', price: 225, image: '/images/products/166.JPG', line: 'She was too much for one panel.', description: 'Celeste Maxima is a complete beaded necklace built around electric pink-magenta dichroic glass panels, black glass frames, iridescent cube beads, and silver flower spacers.', shopifyProductUrl: '' },
+  { sku: 'NKLO-82', name: 'Anne', category: 'Ocean Necklaces', price: 145, image: '/images/products/82.JPG', line: 'She leaps where the deep water sings.', description: 'Anne is an ocean-style necklace with a fused glass orca pendant, sea-inspired beads, and matching story details for someone drawn to deep water and freedom.', shopifyProductUrl: '' },
+  { sku: 'PLQ-FG-LG-45', name: 'Justina', category: 'Wall Art', price: 325, image: '/images/products/45.JPG', line: 'She holds a whole celebration in one frame.', description: 'Justina is a large framed fused-glass wall piece with a bold black frame, layered geometric glass, soft white and blue structure, pink and yellow accents, and raised lines that guide the eye across the composition.', shopifyProductUrl: '' },
+  { sku: 'PLQ-FG-MD-67', name: 'Judith', category: 'Wall Art', price: 120, image: '/images/products/67.JPG', line: 'Four textures, one brilliant story.', description: 'Judith brings together four distinct dichroic glass elements on a clear white base: ridged purple-pink, black and teal grid, cobalt texture, and bubbled teal-blue glass.', shopifyProductUrl: '' },
+  { sku: 'PLT-FG-31', name: 'Ashley', category: 'Plates', price: 95, image: '/images/products/31.JPG', line: 'Quiet smoke, soft light, steady grace.', description: 'Ashley is a square fused-glass plate with softly raised sides and a smoky gray marbled center that drifts from charcoal into white.', shopifyProductUrl: '' },
+  { sku: 'PND-MD-240', name: 'Renee', category: 'Pendants', price: 75, image: '/images/products/240.JPG', line: 'Desert stripes meet ocean shimmer.', description: 'Renee is a tall rectangular fused-glass pendant with warm amber and sage striping beneath a bold diamond-set dichroic focal in electric teal, violet, copper, and deep blue-green.', shopifyProductUrl: '' },
+  { sku: 'PND-SM-183', name: 'Jane', category: 'Pendants', price: 75, image: '/images/products/183.JPG', line: 'Bold as sunshine, sharp as style.', description: 'Jane is a striking arrowhead-shaped pendant that layers deep black glass against vivid sunflower yellow, with a smaller black triangular focal piece nested at the center.', shopifyProductUrl: '' },
+  { sku: 'PND-WW-MD-170', name: 'Greta', category: 'Wire Wrapped', price: 55, image: '/images/products/170.JPG', line: 'Cool water caught in silver.', description: 'Greta is a soft aqua-seafoam glass pendant with silver wire wrapping that follows the natural organic shape without covering the translucent glass.', shopifyProductUrl: '' },
+  { sku: 'PND-WW-SM-65', name: 'Vicki', category: 'Wire Wrapped', price: 85, image: '/images/products/65.JPG', line: 'Silver frost meets a rainbow storm.', description: 'Vicki is built on a frosted white glass base with silver dichroic sparkle, deep violet glass, magenta-gold-green rainbow glass, and hand-twisted silver wire wrapping.', shopifyProductUrl: '' },
+  { sku: 'SET-NKL-EAR-BRA-37', name: 'Farah', category: 'Sets', price: 185, image: '/images/products/37.JPG', line: 'Playful, polished, and a little bit mischief.', description: 'Farah is a coordinated necklace, earrings, and bracelet set with warm amber beads, black seed beads, gold-tone accents, and a fused-glass cat focal piece.', shopifyProductUrl: '' },
 ];
 
 const collections = ['All', 'Pendants', 'Wire Wrapped', 'Necklaces', 'Ocean Necklaces', 'Plates', 'Wall Art', 'Charms', 'Sets'];
-const logoBlackPath = '/assets/brand/sinas-creations-black-logo.png';
 const logoWhitePath = '/assets/brand/sinas-creations-white-logo.png';
+const heroImagePath = '/images/hero/thomasina-hero-full.jpg';
+const janeProduct = products.find((product) => product.sku === 'PND-SM-183') || products[0];
 
 function Layout({ children }) {
   const [open, setOpen] = useState(false);
@@ -160,9 +62,85 @@ function Layout({ children }) {
   );
 }
 
-function Hero({ eyebrow, title, copy, primary = 'Adopt a Creation', primaryTo = '/shop', secondary, secondaryTo = '/story', mosaic = false }) {
+function HomeHero() {
   return (
-    <section className={`hero ${mosaic ? 'hero-mosaic-preview' : 'hero-dark'}`}>
+    <section className="sina-target-hero">
+      <div className="hero-copy-panel">
+        <span className="hero-kicker">1-of-1 fused glass art</span>
+        <h1>One-of-one fused glass art.</h1>
+        <em>She sees what others miss.</em>
+        <p>Each piece is handcrafted by Thomasina Schnepf. Once it's gone, it's gone.</p>
+        <Link className="button primary hero-adopt-button" to="/shop">Adopt a Piece</Link>
+      </div>
+      <div className="hero-photo-panel" aria-label="Thomasina Schnepf holding one of her fused glass creations">
+        <img src={heroImagePath} alt="Thomasina Schnepf holding one of her fused glass creations" />
+        <div className="hero-photo-fade" aria-hidden="true" />
+      </div>
+    </section>
+  );
+}
+
+function IconStrip() {
+  return (
+    <section className="icon-strip" aria-label="Sina's Creations values">
+      <div><span>♡</span><strong>1-of-1</strong><small>Never repeated.</small></div>
+      <div><span>✋</span><strong>Handcrafted</strong><small>Made by hand.</small></div>
+      <div><span>✦</span><strong>Made with heart</strong><small>Created with intention.</small></div>
+      <div><span>□</span><strong>Ships with care</strong><small>Ready to gift.</small></div>
+    </section>
+  );
+}
+
+function ProductFeature({ product }) {
+  const gallery = [product.image, product.image, product.image, product.image];
+  return (
+    <section className="product-feature-section" id="adopt">
+      <div className="product-gallery-shell">
+        <div className="product-thumbs">
+          {gallery.map((image, index) => (
+            <img key={`${product.sku}-thumb-${index}`} src={image} alt="" />
+          ))}
+        </div>
+        <div className="product-main-image">
+          <img src={product.image} alt={`${product.name}, ${product.sku}`} />
+          <button type="button" aria-label="Previous image">‹</button>
+          <button type="button" aria-label="Next image">›</button>
+        </div>
+        <div className="product-tabs">
+          <button type="button">Details</button>
+          <button type="button">Artist's Note</button>
+          <button type="button">Shipping & Care</button>
+          <dl>
+            <div><dt>Materials</dt><dd>Fused glass, dichroic accents</dd></div>
+            <div><dt>Colors</dt><dd>Sunshine yellow, jet black, iridescent purple hints</dd></div>
+            <div><dt>Size</dt><dd>Small pendant, final measurement pending</dd></div>
+            <div><dt>Availability</dt><dd>1-of-1. Never repeated.</dd></div>
+          </dl>
+        </div>
+      </div>
+      <div className="product-story-panel">
+        <span>Pendants / Small</span>
+        <h2>{product.name}</h2>
+        <small>{product.sku}</small>
+        <strong>${product.price}</strong>
+        <h3>{product.line}</h3>
+        <p>{product.description} The glossy finish catches the light with a subtle iridescent shimmer in the black, giving it real depth and dimension.</p>
+        <ul>
+          <li>1-of-1 original</li>
+          <li>Fused glass, handcrafted</li>
+          <li>Pendant size: small</li>
+          <li>Named, numbered, and released once</li>
+        </ul>
+        <Link className="button primary product-adopt-button" to="/schedule?piece=PND-SM-183">Adopt Jane</Link>
+        <p className="product-fineprint">100% 1-of-1. Shipping included.</p>
+      </div>
+    </section>
+  );
+}
+
+function Hero({ eyebrow, title, copy, primary = 'Adopt a Creation', primaryTo = '/shop', secondary, secondaryTo = '/story' }) {
+  return (
+    <section className="hero hero-dark">
       <div className="hero-inner">
         {eyebrow && <div className="pill-eyebrow">{eyebrow}</div>}
         <h1>{title}</h1>
@@ -172,7 +150,6 @@ function Hero({ eyebrow, title, copy, primary = 'Adopt a Creation', primaryTo = 
           {secondary && <Link className="button ghost" to={secondaryTo}>{secondary}</Link>}
         </div>
       </div>
-      {mosaic && <InteractiveMosaic products={products} />}
     </section>
   );
 }
@@ -190,28 +167,14 @@ function SectionHeader({ eyebrow, title, copy }) {
 export function Home() {
   return (
     <Layout>
-      <Hero
-        mosaic
-        eyebrow="1-of-1 fused glass art"
-        title="She sees what others miss."
-        copy="Each piece is handcrafted by Thomasina Schnepf. Once it's gone, it's gone."
-        primary="Adopt a Piece"
-        secondary="Our Story"
-      />
-      <section className="cream-section split-section">
-        <div>
-          <SectionHeader eyebrow="The Mission" title="More than jewelry. A story you can hold." />
-          <p>Every creation begins as glass, but it becomes something more personal once Thomasina names it. Each piece is made by hand, chosen with intention, and offered to the person who feels connected to its color, texture, and story.</p>
-          <div className="tag-row"><span>Named once</span><span>Made by hand</span><span>Adopted once</span></div>
-        </div>
-        <div className="feature-card dark-card">
-          <span>1-of-1</span>
-          <h3>Each creation waits for the person it was meant to find.</h3>
-          <p>When a piece is adopted, it leaves Thomasina's hands and begins its next story in a new home.</p>
-        </div>
+      <HomeHero />
+      <IconStrip />
+      <ProductFeature product={janeProduct} />
+      <section className="mosaic-catalog-section">
+        <InteractiveMosaic products={products} />
       </section>
       <FeaturedProducts />
-      <CTA title="Ready to meet the collection?" copy="Explore the first available pieces and choose the creation that speaks to you." />
+      <CTA title="Be the first to know when a new 1-of-1 is available." copy="Join the list for new releases, adoption updates, and special collection notes." />
     </Layout>
   );
 }
@@ -221,7 +184,7 @@ export function Story() {
     <Layout>
       <Hero eyebrow="Our Story" title="The artist who works closer than sight." copy="At age four, a tumor changed how Thomasina sees the world. What could have ended her art became part of her gift." primary="See the Collection" primaryTo="/collections" />
       <section className="cream-section story-grid">
-        <div className="portrait-card"><img src="/images/thomasina.jpg" alt="Thomasina Schnepf" /></div>
+        <div className="portrait-card"><img src={heroImagePath} alt="Thomasina Schnepf" /></div>
         <div>
           <SectionHeader eyebrow="Thomasina Schnepf" title="Her art begins where most people stop looking." />
           <p>Thomasina works close to her glass, noticing edges, seams, texture, and color shifts that others might miss at a glance. Her creations carry the evidence of that attention: layered materials, tactile choices, and details that reward close attention.</p>
@@ -235,7 +198,7 @@ export function Story() {
 export function Collections() {
   return (
     <Layout>
-      <Hero eyebrow="The Collections" title="One body of work. Many ways to adopt." copy="Pendants, wire-wrapped pieces, necklaces, plaques, plates, wall art, lanyards, and sets — each one made by hand and released as its own original creation." primary="Shop Available Pieces" primaryTo="/shop" />
+      <Hero eyebrow="The Collections" title="One body of work. Many ways to adopt." copy="Pendants, wire-wrapped pieces, necklaces, plaques, plates, wall art, lanyards, and sets - each one made by hand and released as its own original creation." primary="Shop Available Pieces" primaryTo="/shop" />
       <section className="cream-section collection-grid">
         {collections.filter(c => c !== 'All').map((name) => (
           <Link className="collection-card" to={`/shop?collection=${encodeURIComponent(name)}`} key={name}>
@@ -347,7 +310,7 @@ function CTA({ title, copy }) {
     <section className="dark-cta">
       <h2>{title}</h2>
       <p>{copy}</p>
-      <Link className="button primary" to="/shop">Adopt a Creation</Link>
+      <Link className="button primary" to="/shop">Join the List</Link>
     </section>
   );
 }
