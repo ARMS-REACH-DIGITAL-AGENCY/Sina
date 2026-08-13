@@ -16,7 +16,8 @@ const products = [
 ];
 
 const collections = ['All', 'Pendants', 'Wire Wrapped', 'Necklaces', 'Ocean Necklaces', 'Plates', 'Wall Art', 'Charms', 'Sets'];
-const logoPath = '/images/brand/sinas-creations-logo.png';
+const logoBlackPath = '/assets/brand/sinas-creations-black-logo.png';
+const logoWhitePath = '/assets/brand/sinas-creations-white-logo.png';
 
 function Layout({ children }) {
   const [open, setOpen] = useState(false);
@@ -25,7 +26,7 @@ function Layout({ children }) {
     <div className="site-shell">
       <header className="site-header">
         <Link className="brand logo-brand" to="/" onClick={close} aria-label="Sina's Creations home">
-          <img className="brand-logo" src={logoPath} alt="Sina's Creations" />
+          <img className="brand-logo" src={logoBlackPath} alt="Sina's Creations" />
           <span className="brand-fallback" aria-hidden="true"><span>Sina</span><small>Creations</small></span>
         </Link>
         <nav className="desktop-nav" aria-label="Main navigation">
@@ -252,7 +253,7 @@ function Footer() {
   return (
     <footer className="footer">
       <div className="footer-brand">
-        <img className="footer-logo" src={logoPath} alt="Sina's Creations" />
+        <img className="footer-logo" src={logoWhitePath} alt="Sina's Creations" />
         <p>One-of-one fused glass art. Named, numbered, and adopted once.</p>
       </div>
       <div><h4>Navigate</h4><Link to="/story">Our Story</Link><Link to="/collections">Collections</Link><Link to="/shop">Shop</Link></div>
