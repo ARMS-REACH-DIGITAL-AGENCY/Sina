@@ -16,6 +16,7 @@ const products = [
 ];
 
 const collections = ['All', 'Pendants', 'Wire Wrapped', 'Necklaces', 'Ocean Necklaces', 'Plates', 'Wall Art', 'Charms', 'Sets'];
+const mosaicTiles = [...products, ...products, ...products].slice(0, 27);
 const logoBlackPath = '/assets/brand/sinas-creations-black-logo.png';
 const logoWhitePath = '/assets/brand/sinas-creations-white-logo.png';
 
@@ -26,7 +27,7 @@ function Layout({ children }) {
     <div className="site-shell">
       <header className="site-header">
         <Link className="brand logo-brand" to="/" onClick={close} aria-label="Sina's Creations home">
-          <img className="brand-logo" src={logoBlackPath} alt="Sina's Creations" />
+          <img className="brand-logo" src={logoWhitePath} alt="Sina's Creations" />
           <span className="brand-fallback" aria-hidden="true"><span>Sina</span><small>Creations</small></span>
         </Link>
         <nav className="desktop-nav" aria-label="Main navigation">
@@ -60,9 +61,9 @@ function Layout({ children }) {
   );
 }
 
-function Hero({ eyebrow, title, copy, primary = 'Adopt a Creation', primaryTo = '/shop', secondary, secondaryTo = '/story' }) {
+function Hero({ eyebrow, title, copy, primary = 'Adopt a Creation', primaryTo = '/shop', secondary, secondaryTo = '/story', mosaic = false }) {
   return (
-    <section className="hero hero-dark">
+    <section className={`hero ${mosaic ? 'hero-mosaic-preview' : 'hero-dark'}`}>
       <div className="hero-inner">
         {eyebrow && <div className="pill-eyebrow">{eyebrow}</div>}
         <h1>{title}</h1>
@@ -72,6 +73,16 @@ function Hero({ eyebrow, title, copy, primary = 'Adopt a Creation', primaryTo = 
           {secondary && <Link className="button ghost" to={secondaryTo}>{secondary}</Link>}
         </div>
       </div>
+      {mosaic && (
+        <div className="hero-mosaic-stage" aria-label="Mosaic portrait concept using Sina's Creations images">
+          <div className="hero-mosaic-tiles" aria-hidden="true">
+            {mosaicTiles.map((tile, index) => (
+              <img key={`${tile.sku}-${index}`} src={tile.image} alt="" loading="eager" />
+            ))}
+          </div>
+          <img className="hero-mosaic-portrait" src="/images/thomasina.jpg" alt="Thomasina Schnepf holding one of her fused glass creations" />
+        </div>
+      )}
     </section>
   );
 }
@@ -90,9 +101,11 @@ export function Home() {
   return (
     <Layout>
       <Hero
-        eyebrow="One-of-one fused glass art"
+        mosaic
+        eyebrow="1-of-1 fused glass art"
         title="She sees what others miss."
-        copy="Art, jewelry, and community work by Thomasina Schnepf — a legally blind artist who turns glass, color, texture, and faith into pieces that are named, loved, and released once."
+        copy="Each piece is handcrafted by Thomasina Schnepf. Once it's gone, it's gone."
+        primary="Adopt a Piece"
         secondary="Our Story"
       />
       <section className="cream-section split-section">
@@ -102,7 +115,7 @@ export function Home() {
           <div className="tag-row"><span>Named once</span><span>Made by hand</span><span>Adopted once</span></div>
         </div>
         <div className="feature-card dark-card">
-          <span>One of One</span>
+          <span>1-of-1</span>
           <h3>Each creation waits for the person it was meant to find.</h3>
           <p>When a piece is adopted, it leaves Thomasina's hands and begins its next story in a new home.</p>
         </div>
@@ -157,7 +170,7 @@ export function Collaborate() {
 export function Wholesale() {
   return (
     <Layout>
-      <Hero eyebrow="Wholesale" title="Carry Sina's Creations in your store." copy="Retailers, galleries, boutiques, and community partners can apply to carry selected one-of-one creations, adoption cards, and story-based displays." primary="Apply for Wholesale" primaryTo="/schedule" />
+      <Hero eyebrow="Wholesale" title="Carry Sina's Creations in your store." copy="Retailers, galleries, boutiques, and community partners can apply to carry selected 1-of-1 creations, adoption cards, and story-based displays." primary="Apply for Wholesale" primaryTo="/schedule" />
       <FormPage title="Wholesale application" intro="Tell us about your store, gallery, boutique, or event space and the type of pieces you would like to carry." wholesale />
     </Layout>
   );
@@ -168,7 +181,7 @@ export function Shop() {
   const visible = filter === 'All' ? products : products.filter(p => p.category === filter);
   return (
     <Layout>
-      <Hero eyebrow="Available for Adoption" title="The first release is ready to meet you." copy="Each piece shown here is handmade, named, priced, and available as a one-of-one creation." primary="Ask About a Piece" primaryTo="/schedule" />
+      <Hero eyebrow="Available for Adoption" title="The first release is ready to meet you." copy="Each piece shown here is handmade, named, priced, and available as a 1-of-1 creation." primary="Ask About a Piece" primaryTo="/schedule" />
       <section className="shop-section">
         <div className="tabs" role="tablist" aria-label="Filter products by collection">
           {collections.map(tab => <button key={tab} className={filter === tab ? 'active' : ''} onClick={() => setFilter(tab)}>{tab}</button>)}
@@ -186,7 +199,7 @@ function ProductCard({ product }) {
     <article className="product-card">
       <div className="product-image"><img src={product.image} alt={`${product.name}, ${product.category} by Sina's Creations`} /></div>
       <div className="product-body">
-        <div className="sku-row"><span>{product.category}</span><strong>One of one</strong></div>
+        <div className="sku-row"><span>{product.category}</span><strong>1-of-1</strong></div>
         <h3>{product.name}</h3>
         <p>{product.line}</p>
         <div className="price-row"><span>Adoption price</span><strong>${product.price}</strong></div>
@@ -254,7 +267,7 @@ function Footer() {
     <footer className="footer">
       <div className="footer-brand">
         <img className="footer-logo" src={logoWhitePath} alt="Sina's Creations" />
-        <p>One-of-one fused glass art. Named, made by hand, and adopted once.</p>
+        <p>1-of-1 fused glass art. Named, made by hand, and adopted once.</p>
       </div>
       <div><h4>Navigate</h4><Link to="/story">Our Story</Link><Link to="/collections">Collections</Link><Link to="/shop">Shop</Link></div>
       <div><h4>Get Involved</h4><Link to="/collaborate">Collaborate</Link><Link to="/wholesale">Wholesale</Link><Link to="/schedule">Schedule</Link></div>
