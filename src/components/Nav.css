@@ -4,15 +4,15 @@
   left: 0;
   right: 0;
   z-index: 100;
-  padding: 28px var(--gutter);
-  transition: background var(--transition), padding var(--transition);
+  padding: 24px var(--gutter);
+  transition: background var(--transition), padding var(--transition), border-color var(--transition);
 }
 
 .nav--scrolled {
   background: rgba(13, 13, 13, 0.95);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
-  padding: 18px var(--gutter);
+  padding: 14px var(--gutter);
   border-bottom: 1px solid var(--ash);
 }
 
@@ -25,29 +25,38 @@
 }
 
 .nav__logo {
-  display: flex;
-  flex-direction: column;
-  line-height: 1;
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  width: clamp(118px, 13vw, 170px);
+  height: 58px;
   text-decoration: none;
 }
 
-.nav__logo-sina {
-  font-family: var(--font-display);
-  font-size: 1.5rem;
-  font-weight: 400;
-  font-style: italic;
-  color: var(--bone);
-  letter-spacing: 0.01em;
+.nav__logo-img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  object-position: left center;
+  transition: opacity var(--transition);
 }
 
-.nav__logo-creations {
-  font-family: var(--font-body);
-  font-size: 0.6rem;
-  font-weight: 500;
-  letter-spacing: 0.25em;
-  text-transform: uppercase;
-  color: var(--gold);
-  margin-top: 2px;
+.nav__logo-img--light {
+  opacity: 1;
+}
+
+.nav__logo-img--dark {
+  opacity: 0;
+}
+
+.nav--light .nav__logo-img--light {
+  opacity: 0;
+}
+
+.nav--light .nav__logo-img--dark {
+  opacity: 1;
 }
 
 .nav__links {
@@ -99,7 +108,11 @@
   width: 24px;
   height: 1px;
   background: var(--bone);
-  transition: transform var(--transition), opacity var(--transition);
+  transition: transform var(--transition), opacity var(--transition), background var(--transition);
+}
+
+.nav--light .nav__burger span {
+  background: #151515;
 }
 
 .nav__burger--open span:nth-child(1) {
@@ -113,6 +126,19 @@
 }
 
 @media (max-width: 768px) {
+  .nav {
+    padding: 16px var(--gutter);
+  }
+
+  .nav--scrolled {
+    padding: 12px var(--gutter);
+  }
+
+  .nav__logo {
+    width: 132px;
+    height: 50px;
+  }
+
   .nav__burger {
     display: flex;
   }
