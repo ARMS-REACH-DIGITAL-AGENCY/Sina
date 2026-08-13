@@ -92,23 +92,23 @@ export function Home() {
       <Hero
         eyebrow="One-of-one fused glass art"
         title="She sees what others miss."
-        copy="Art, jewelry, and community work by Thomasina Schnepf — a legally blind artist turning glass, color, texture, and faith into pieces that are named, numbered, and adopted once."
+        copy="Art, jewelry, and community work by Thomasina Schnepf — a legally blind artist who turns glass, color, texture, and faith into pieces that are named, loved, and released once."
         secondary="Our Story"
       />
       <section className="cream-section split-section">
         <div>
-          <SectionHeader eyebrow="The Mission" title="More than a store. A story people can hold." />
-          <p>Every creation begins as glass, but it becomes something more personal once Thomasina names it. The public site is the front door. Underneath it is a system for story, catalog control, adoption, community, and giving back.</p>
-          <div className="tag-row"><span>Named once</span><span>Numbered once</span><span>Adopted once</span></div>
+          <SectionHeader eyebrow="The Mission" title="More than jewelry. A story you can hold." />
+          <p>Every creation begins as glass, but it becomes something more personal once Thomasina names it. Each piece is made by hand, chosen with intention, and offered to one person who feels connected to its color, texture, and story.</p>
+          <div className="tag-row"><span>Named once</span><span>Made by hand</span><span>Adopted once</span></div>
         </div>
         <div className="feature-card dark-card">
-          <span>Golden Equation</span>
-          <h3>1 creation + 1 image + 1 name + 1 SKU + 1 adoption path.</h3>
-          <p>That operating system protects the one-of-one nature of Thomasina's work.</p>
+          <span>One of One</span>
+          <h3>Each creation waits for the person it was meant to find.</h3>
+          <p>When a piece is adopted, it leaves Thomasina's hands and begins its next story in a new home.</p>
         </div>
       </section>
       <FeaturedProducts />
-      <CTA title="Ready to meet the children?" copy="Start with the first adopted collection and help shape the next phase of Sina's Creations." />
+      <CTA title="Ready to meet the collection?" copy="Explore the first available pieces and choose the creation that speaks to you." />
     </Layout>
   );
 }
@@ -116,13 +116,13 @@ export function Home() {
 export function Story() {
   return (
     <Layout>
-      <Hero eyebrow="Our Story" title="The artist who works closer than sight." copy="At age four, a tumor changed how Thomasina sees the world. What could have ended her art became part of her method." primary="See the Collection" primaryTo="/collections" />
+      <Hero eyebrow="Our Story" title="The artist who works closer than sight." copy="At age four, a tumor changed how Thomasina sees the world. What could have ended her art became part of her gift." primary="See the Collection" primaryTo="/collections" />
       <section className="cream-section story-grid">
         <div className="portrait-card"><img src="/images/thomasina.jpg" alt="Thomasina Schnepf" /></div>
         <div>
-          <SectionHeader eyebrow="Thomasina Schnepf" title="The limitation became the method." />
-          <p>Thomasina works close to her glass, noticing edges, seams, texture, and color shifts that others would miss at a glance. Each piece carries the evidence of that process: layered materials, tactile choices, and details that reward close attention.</p>
-          <p>The goal is not to mass-produce art. It is to release individual creations into homes, communities, and stories where they can continue doing what Thomasina made them to do.</p>
+          <SectionHeader eyebrow="Thomasina Schnepf" title="Her art begins where most people stop looking." />
+          <p>Thomasina works close to her glass, noticing edges, seams, texture, and color shifts that others might miss at a glance. Her creations carry the evidence of that attention: layered materials, tactile choices, and details that reward close attention.</p>
+          <p>She does not make pieces to be repeated. She creates individual works that can be worn, displayed, gifted, collected, and remembered.</p>
         </div>
       </section>
     </Layout>
@@ -132,7 +132,7 @@ export function Story() {
 export function Collections() {
   return (
     <Layout>
-      <Hero eyebrow="The Collections" title="One body of work. Many ways to adopt." copy="Pendants, wire-wrapped pieces, necklaces, plaques, plates, wall art, lanyards, and sets — each category supports a cleaner catalog and adoption experience." primary="Shop the MVP Set" primaryTo="/shop" />
+      <Hero eyebrow="The Collections" title="One body of work. Many ways to adopt." copy="Pendants, wire-wrapped pieces, necklaces, plaques, plates, wall art, lanyards, and sets — each one made by hand and released as its own original creation." primary="Shop Available Pieces" primaryTo="/shop" />
       <section className="cream-section collection-grid">
         {collections.filter(c => c !== 'All').map((name) => (
           <Link className="collection-card" to={`/shop?collection=${encodeURIComponent(name)}`} key={name}>
@@ -148,8 +148,8 @@ export function Collections() {
 export function Collaborate() {
   return (
     <Layout>
-      <Hero eyebrow="Collaboration Model" title="Organizations, communities & causes." copy="Sina's Creations can support church groups, schools, disability-awareness events, charity campaigns, and community partnerships through art, story, and custom adoption experiences." primary="Request a Concept" primaryTo="/schedule" />
-      <FormPage title="Request a collaboration concept" intro="Tell us about the audience, cause, occasion, or community you want to lift." />
+      <Hero eyebrow="Community & Collaboration" title="Art with a story can bring people together." copy="Sina's Creations welcomes conversations with churches, schools, galleries, disability-awareness groups, charity events, and community partners who want art to carry a deeper message." primary="Request a Conversation" primaryTo="/schedule" />
+      <FormPage title="Start a collaboration conversation" intro="Tell us about the audience, cause, occasion, or community you want to support." />
     </Layout>
   );
 }
@@ -158,7 +158,7 @@ export function Wholesale() {
   return (
     <Layout>
       <Hero eyebrow="Wholesale" title="Carry Sina's Creations in your store." copy="Retailers, galleries, boutiques, and community partners can apply to carry selected one-of-one creations, adoption cards, and story-based displays." primary="Apply for Wholesale" primaryTo="/schedule" />
-      <FormPage title="Wholesale application" intro="Start the conversation. Final wholesale terms, inventory control, and benefits-safe structure still require review." wholesale />
+      <FormPage title="Wholesale application" intro="Tell us about your store, gallery, boutique, or event space and the type of pieces you would like to carry." wholesale />
     </Layout>
   );
 }
@@ -168,7 +168,7 @@ export function Shop() {
   const visible = filter === 'All' ? products : products.filter(p => p.category === filter);
   return (
     <Layout>
-      <Hero eyebrow="MVP Adoption Catalog" title="The first eleven creations." copy="This pilot set proves the system: physical item, verified image, human name, SKU, price, and adoption path." primary="Schedule Help" primaryTo="/schedule" />
+      <Hero eyebrow="Available for Adoption" title="The first release is ready to meet you." copy="Each piece shown here is handmade, named, priced, and available as a one-of-one creation." primary="Ask About a Piece" primaryTo="/schedule" />
       <section className="shop-section">
         <div className="tabs" role="tablist" aria-label="Filter products by collection">
           {collections.map(tab => <button key={tab} className={filter === tab ? 'active' : ''} onClick={() => setFilter(tab)}>{tab}</button>)}
@@ -184,12 +184,12 @@ export function Shop() {
 function ProductCard({ product }) {
   return (
     <article className="product-card">
-      <div className="product-image"><img src={product.image} alt={`${product.name} ${product.sku}`} /></div>
+      <div className="product-image"><img src={product.image} alt={`${product.name}, ${product.category} by Sina's Creations`} /></div>
       <div className="product-body">
-        <div className="sku-row"><span>{product.category}</span><strong>{product.sku}</strong></div>
+        <div className="sku-row"><span>{product.category}</span><strong>One of one</strong></div>
         <h3>{product.name}</h3>
         <p>{product.line}</p>
-        <div className="price-row"><span>Adoption investment</span><strong>${product.price}</strong></div>
+        <div className="price-row"><span>Adoption price</span><strong>${product.price}</strong></div>
         <Link className="small-link" to="/schedule">Ask about this piece →</Link>
       </div>
     </article>
@@ -199,7 +199,7 @@ function ProductCard({ product }) {
 function FeaturedProducts() {
   return (
     <section className="cream-section">
-      <SectionHeader eyebrow="MVP Collection" title="First pieces in the adoption catalog" copy="These are the first confirmed categories being used to prove the catalog, checkout, and front-end experience." />
+      <SectionHeader eyebrow="Available Now" title="Featured pieces ready for adoption" copy="Begin with a few of the creations currently available from Thomasina's first release." />
       <div className="product-grid compact">
         {products.slice(0, 3).map(product => <ProductCard product={product} key={product.sku} />)}
       </div>
@@ -210,7 +210,7 @@ function FeaturedProducts() {
 export function Schedule() {
   return (
     <Layout>
-      <Hero eyebrow="Let's Talk" title="Schedule a Sina's Creations conversation." copy="Choose the type of conversation that fits your interest. We can discuss adoption, collaboration, wholesale, commissions, or the catalog build." primary="View Shop" primaryTo="/shop" />
+      <Hero eyebrow="Let's Talk" title="Schedule a Sina's Creations conversation." copy="Ask about an available piece, request a custom commission, explore wholesale, or start a collaboration conversation." primary="View Shop" primaryTo="/shop" />
       <FormPage title="Book your conversation" intro="Send the details and we will follow up with the right next step." />
     </Layout>
   );
@@ -254,11 +254,11 @@ function Footer() {
     <footer className="footer">
       <div className="footer-brand">
         <img className="footer-logo" src={logoWhitePath} alt="Sina's Creations" />
-        <p>One-of-one fused glass art. Named, numbered, and adopted once.</p>
+        <p>One-of-one fused glass art. Named, made by hand, and adopted once.</p>
       </div>
       <div><h4>Navigate</h4><Link to="/story">Our Story</Link><Link to="/collections">Collections</Link><Link to="/shop">Shop</Link></div>
       <div><h4>Get Involved</h4><Link to="/collaborate">Collaborate</Link><Link to="/wholesale">Wholesale</Link><Link to="/schedule">Schedule</Link></div>
-      <div><h4>Adopt</h4><p>Join the first adoption catalog and help shape the system.</p><Link className="button primary footer-button" to="/shop">Adopt</Link></div>
+      <div><h4>Adopt</h4><p>Choose a piece, ask a question, or start a custom conversation.</p><Link className="button primary footer-button" to="/shop">Adopt</Link></div>
     </footer>
   );
 }
