@@ -8,7 +8,7 @@
 }
 
 .site-header .brand-logo {
-  filter: brightness(0) invert(1);
+  filter: none;
 }
 
 .site-header .desktop-nav a {
@@ -89,7 +89,7 @@
 
 .living-mosaic__story-copy {
   max-width: 520px;
-  margin: 0;
+  margin: 0 0 14px;
   color: rgba(35,35,31,.7);
   font-size: clamp(14px, 1.1vw, 18px);
   line-height: 1.6;
@@ -100,7 +100,7 @@
   align-items: center;
   gap: 16px;
   flex-wrap: wrap;
-  margin-top: 28px;
+  margin-top: 16px;
 }
 
 .living-mosaic__hero-actions .button.primary {
@@ -133,6 +133,7 @@
 }
 
 .living-mosaic__frame {
+  position: relative;
   width: 100%;
   height: 100%;
   min-height: min(78vh, 860px);
@@ -141,17 +142,49 @@
   border-radius: 0;
   box-shadow: none;
   background: #090909;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  overflow: hidden;
+}
+
+.living-mosaic__portrait-reveal,
+.living-mosaic__grid-reveal {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.living-mosaic__portrait-reveal {
+  z-index: 2;
+  object-fit: cover;
+  object-position: center 35%;
+  opacity: 1;
+  filter: saturate(.96) contrast(1.02) brightness(.92);
+  transition: opacity 1.15s ease, filter 1.15s ease;
+  pointer-events: none;
+}
+
+.living-mosaic__grid-reveal {
+  z-index: 1;
+  opacity: 0;
+  transition: opacity 1.15s ease;
+}
+
+.living-mosaic__frame.is-mosaic-ready .living-mosaic__grid-reveal {
+  opacity: 1;
+}
+
+.living-mosaic__frame.is-mosaic-ready .living-mosaic__portrait-reveal {
+  opacity: .16;
+  filter: saturate(.72) contrast(1.04) brightness(.96);
 }
 
 .living-mosaic__grid {
   width: 100%;
+  height: 100%;
   max-height: none;
   margin: 0;
   gap: 0;
-  aspect-ratio: 29 / 51;
+  aspect-ratio: auto;
 }
 
 .mosaic-tile,
@@ -163,13 +196,16 @@
   border: 0;
 }
 
-.living-mosaic__loading {
-  width: 100%;
-  height: 100%;
-  min-height: min(78vh, 860px);
-  max-height: none;
-  margin: 0;
-  aspect-ratio: auto;
+.living-mosaic__sr-status {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
 }
 
 .living-mosaic__caption {
@@ -202,6 +238,13 @@
   backdrop-filter: blur(6px);
 }
 
+@media (prefers-reduced-motion: reduce) {
+  .living-mosaic__portrait-reveal,
+  .living-mosaic__grid-reveal {
+    transition: none;
+  }
+}
+
 @media (max-width: 760px) {
   .living-mosaic__hero-shell {
     grid-template-columns: 1fr;
@@ -219,8 +262,7 @@
   }
 
   .living-mosaic__visual,
-  .living-mosaic__frame,
-  .living-mosaic__loading {
+  .living-mosaic__frame {
     min-height: 62svh;
   }
 
