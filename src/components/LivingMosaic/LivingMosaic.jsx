@@ -8,7 +8,7 @@ import MeetSinaPanel from './MeetSinaPanel.jsx';
 import './living-mosaic.css';
 import './mosaic-experiment-overrides.css';
 
-// Keep Claude's working mosaic runtime exactly as-is; only swap the portrait source.
+// Claude's working matcher and 29x51 grid stay unchanged.
 const PORTRAIT_SRC = '/images/hero/PLQ-FG-LG-45.JPG';
 const GRID_COLS = 29;
 const GRID_ROWS = 51;
@@ -109,11 +109,11 @@ export default function LivingMosaic() {
         <div className="living-mosaic__story">
           <span className="living-mosaic__eyebrow">1 of 1 fused glass art</span>
           <h1>She sees what others miss.</h1>
-          <p className="living-mosaic__lead">Each piece is handcrafted by Thomasina Schnepf. Once it&rsquo;s gone, it&rsquo;s gone.</p>
-          <p className="living-mosaic__story-copy">These are Sina&rsquo;s creations, arranged to become part of her portrait. Step back to see the artist. Get closer to see the details she sees.</p>
+          <p className="living-mosaic__lead">Every image in this portrait is one of Sina&rsquo;s creations. From a distance, they become the artist. Up close, each one becomes itself.</p>
+          <p className="living-mosaic__story-copy">Thomasina works close to her glass, finding color, texture, and detail others might pass by. Come closer. See the collection the way she does.</p>
           <div className="living-mosaic__hero-actions">
             <Link className="button primary" to="/shop">Adopt a Piece</Link>
-            <button type="button" className="living-mosaic__story-link" onClick={() => setMeetSinaOpen(true)}>Meet the Artist &rarr;</button>
+            <button type="button" className="living-mosaic__story-link" onClick={() => setMeetSinaOpen(true)}>Meet Sina &rarr;</button>
           </div>
         </div>
 
@@ -147,7 +147,7 @@ export default function LivingMosaic() {
               </div>
             )}
           </div>
-          <p className="living-mosaic__caption">Step back to see Sina. Get closer to discover what she sees.</p>
+          <p className="living-mosaic__caption">Step back to see the artist. Move closer to discover the work.</p>
         </div>
       </div>
 
