@@ -4,7 +4,6 @@ import useMosaicProducts from '../../hooks/useMosaicProducts.js';
 import { buildMosaicGrid } from './colorMatch.js';
 import MosaicTile from './MosaicTile.jsx';
 import ProductModal from './ProductModal.jsx';
-import MeetSinaPanel from './MeetSinaPanel.jsx';
 import './living-mosaic.css';
 import './mosaic-experiment-overrides.css';
 import './mosaic-brand-alignment.css';
@@ -22,7 +21,6 @@ export default function LivingMosaic() {
   const [gridError, setGridError] = useState(false);
   const [portraitLoaded, setPortraitLoaded] = useState(false);
   const [modalProduct, setModalProduct] = useState(null);
-  const [meetSinaOpen, setMeetSinaOpen] = useState(false);
   const [active, setActive] = useState(false);
   const [showNames, setShowNames] = useState(false);
 
@@ -104,7 +102,7 @@ export default function LivingMosaic() {
 
           <div className="living-mosaic__hero-actions">
             <Link className="button primary" to="/shop">Adopt the one that finds you.</Link>
-            <button type="button" className="button ghost" onClick={() => setMeetSinaOpen(true)}>Meet Sina</button>
+            <Link className="button ghost" to="/meet-sina">A Message From The Designer</Link>
           </div>
         </div>
 
@@ -163,7 +161,6 @@ export default function LivingMosaic() {
       </div>
 
       {modalProduct && <ProductModal product={modalProduct} onClose={() => setModalProduct(null)} />}
-      {meetSinaOpen && <MeetSinaPanel onClose={() => setMeetSinaOpen(false)} />}
     </section>
   );
 }
