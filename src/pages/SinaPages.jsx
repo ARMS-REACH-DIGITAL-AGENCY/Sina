@@ -3,7 +3,6 @@ import { Link, NavLink } from 'react-router-dom';
 import { products, collections } from '../data/products.js';
 import LivingMosaic from '../components/LivingMosaic/LivingMosaic.jsx';
 
-const logoBlackPath = '/assets/brand/sinas-creations-black-logo.png';
 const logoWhitePath = '/assets/brand/sinas-creations-white-logo.png';
 
 function Layout({ children }) {
@@ -13,7 +12,7 @@ function Layout({ children }) {
     <div className="site-shell">
       <header className="site-header">
         <Link className="brand logo-brand" to="/" onClick={close} aria-label="Sina's Creations home">
-          <img className="brand-logo" src={logoBlackPath} alt="Sina's Creations" />
+          <img className="brand-logo" src={logoWhitePath} alt="Sina's Creations" />
           <span className="brand-fallback" aria-hidden="true"><span>Sina</span><small>Creations</small></span>
         </Link>
         <nav className="desktop-nav" aria-label="Main navigation">
