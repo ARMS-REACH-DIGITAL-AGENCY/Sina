@@ -62,9 +62,26 @@ function Layout({ children }) {
   );
 }
 
-function Hero({ eyebrow, title, copy, primary = 'Adopt a Creation', primaryTo = '/shop', secondary, secondaryTo = '/meet-sina' }) {
+function Hero({
+  eyebrow,
+  title,
+  copy,
+  primary = 'Adopt a Creation',
+  primaryTo = '/shop',
+  secondary,
+  secondaryTo = '/meet-sina',
+  backgroundImage,
+  backgroundPosition = 'center center',
+}) {
+  const style = backgroundImage
+    ? {
+        '--hero-background-image': `url(${backgroundImage})`,
+        '--hero-background-position': backgroundPosition,
+      }
+    : undefined;
+
   return (
-    <section className="hero hero-dark">
+    <section className={`hero hero-dark${backgroundImage ? ' hero-with-image' : ''}`} style={style}>
       <div className="hero-inner">
         {eyebrow && <div className="pill-eyebrow">{eyebrow}</div>}
         <h1>{title}</h1>
@@ -119,6 +136,8 @@ export function Story() {
         copy="Thomasina Schnepf creates by touch, light, color, and close attention. Her work is personal, tactile, and made to be worn, displayed, gifted, and remembered one original at a time."
         primary="See the Creations"
         primaryTo="/creations"
+        backgroundImage="/images/thomasina.jpg"
+        backgroundPosition="78% 32%"
       />
       <section className="cream-section meet-sina-page">
         <div className="meet-sina-message">
@@ -161,7 +180,15 @@ export function Story() {
 export function Collections() {
   return (
     <Layout>
-      <Hero eyebrow="1-of-1 Creations" title="One body of work. Many ways to adopt." copy="Pendants, wire-wrapped pieces, necklaces, plaques, plates, wall art, lanyards, and sets &mdash; each one made by hand and released as its own original creation." primary="Shop Available Pieces" primaryTo="/shop" />
+      <Hero
+        eyebrow="1-of-1 Creations"
+        title="One body of work. Many ways to adopt."
+        copy="Pendants, wire-wrapped pieces, necklaces, plaques, plates, wall art, lanyards, and sets &mdash; each one made by hand and released as its own original creation."
+        primary="Shop Available Pieces"
+        primaryTo="/shop"
+        backgroundImage="/images/hero/PLQ-FG-LG-45.JPG"
+        backgroundPosition="78% center"
+      />
       <section className="cream-section collection-grid">
         {collections.filter((name) => name !== 'All').map((name) => (
           <Link className="collection-card" to={`/shop?collection=${encodeURIComponent(name)}`} key={name}>
@@ -177,7 +204,15 @@ export function Collections() {
 export function Collaborate() {
   return (
     <Layout>
-      <Hero eyebrow="Commission" title="Begin a custom piece with Sina." copy="If you want a piece shaped around a person, memory, color story, or meaning, start the conversation here and we will guide the next step together." primary="Start a Commission" primaryTo="/schedule" />
+      <Hero
+        eyebrow="Commission"
+        title="Begin a custom piece with Sina."
+        copy="If you want a piece shaped around a person, memory, color story, or meaning, start the conversation here and we will guide the next step together."
+        primary="Start a Commission"
+        primaryTo="/schedule"
+        backgroundImage="/images/thomasina.jpg"
+        backgroundPosition="74% 36%"
+      />
       <FormPage title="Commission inquiry" intro="Tell us about the person, palette, occasion, symbolism, or feeling you want the piece to carry." />
     </Layout>
   );
@@ -186,7 +221,15 @@ export function Collaborate() {
 export function Wholesale() {
   return (
     <Layout>
-      <Hero eyebrow="Wholesale" title="Carry Sina's Creations in your store." copy="Retailers, galleries, boutiques, and community partners can apply to carry selected 1 of 1 creations, adoption cards, and story-based displays." primary="Apply for Wholesale" primaryTo="/schedule" />
+      <Hero
+        eyebrow="Wholesale"
+        title="Carry Sina's Creations in your store."
+        copy="Retailers, galleries, boutiques, and community partners can apply to carry selected 1 of 1 creations, adoption cards, and story-based displays."
+        primary="Apply for Wholesale"
+        primaryTo="/schedule"
+        backgroundImage="/images/hero/PLQ-FG-LG-45.JPG"
+        backgroundPosition="72% center"
+      />
       <FormPage title="Wholesale application" intro="Tell us about your store, gallery, boutique, or event space and the type of pieces you would like to carry." wholesale />
     </Layout>
   );
@@ -208,7 +251,15 @@ export function Shop() {
 
   return (
     <Layout>
-      <Hero eyebrow="Available for Adoption" title="The first release is ready to meet you." copy="Each piece shown here is handmade, named, priced, and available as a 1 of 1 creation." primary="Ask About a Piece" primaryTo="/schedule" />
+      <Hero
+        eyebrow="Available for Adoption"
+        title="The first release is ready to meet you."
+        copy="Each piece shown here is handmade, named, priced, and available as a 1 of 1 creation."
+        primary="Ask About a Piece"
+        primaryTo="/schedule"
+        backgroundImage="/images/hero/PLQ-FG-LG-45.JPG"
+        backgroundPosition="80% 42%"
+      />
       <section className="shop-section">
         <div className="tabs" role="tablist" aria-label="Filter products by collection">
           {collections.map((tab) => (
@@ -252,7 +303,15 @@ function FeaturedProducts() {
 export function Schedule() {
   return (
     <Layout>
-      <Hero eyebrow="Let's Talk" title="Schedule a Sina's Creations conversation." copy="Ask about an available piece, request a commission, explore wholesale, or reach out after reading Sina's message." primary="View Available Pieces" primaryTo="/shop" />
+      <Hero
+        eyebrow="Let's Talk"
+        title="Schedule a Sina's Creations conversation."
+        copy="Ask about an available piece, request a commission, explore wholesale, or reach out after reading Sina's message."
+        primary="View Available Pieces"
+        primaryTo="/shop"
+        backgroundImage="/images/thomasina.jpg"
+        backgroundPosition="76% 28%"
+      />
       <FormPage title="Book your conversation" intro="Send the details and we will follow up with the right next step." />
     </Layout>
   );
