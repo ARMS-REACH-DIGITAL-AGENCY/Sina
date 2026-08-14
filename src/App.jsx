@@ -25,9 +25,12 @@ export default function App() {
       <ScrollToTop />
       <Routes>
         <Route path="/" element={<Home />} />
-        <Route path="/story" element={<Story />} />
-        <Route path="/collections" element={<Collections />} />
-        <Route path="/collaborate" element={<Collaborate />} />
+        <Route path="/meet-sina" element={<Story />} />
+        <Route path="/story" element={<Navigate to="/meet-sina" replace />} />
+        <Route path="/creations" element={<Collections />} />
+        <Route path="/collections" element={<Navigate to="/creations" replace />} />
+        <Route path="/commission" element={<Collaborate />} />
+        <Route path="/collaborate" element={<Navigate to="/commission" replace />} />
         <Route path="/wholesale" element={<Wholesale />} />
         <Route path="/shop" element={<Shop />} />
         <Route path="/schedule" element={<Schedule />} />
