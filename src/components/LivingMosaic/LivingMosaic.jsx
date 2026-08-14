@@ -4,7 +4,6 @@ import useMosaicProducts from '../../hooks/useMosaicProducts.js';
 import { buildMosaicGrid } from './colorMatch.js';
 import MosaicTile from './MosaicTile.jsx';
 import ProductModal from './ProductModal.jsx';
-import MeetSinaPanel from './MeetSinaPanel.jsx';
 import './living-mosaic.css';
 import './mosaic-experiment-overrides.css';
 
@@ -35,7 +34,6 @@ export default function LivingMosaic() {
   const [portraitLoaded, setPortraitLoaded] = useState(false);
   const [flipped, setFlipped] = useState(() => new Set());
   const [modalProduct, setModalProduct] = useState(null);
-  const [meetSinaOpen, setMeetSinaOpen] = useState(false);
   const [active, setActive] = useState(false);
 
   const sectionRef = useRef(null);
@@ -110,14 +108,15 @@ export default function LivingMosaic() {
     <section className="living-mosaic living-mosaic--hero" id="collection" ref={sectionRef}>
       <div className="living-mosaic__hero-shell">
         <div className="living-mosaic__story">
-          <span className="living-mosaic__eyebrow">Her Story &amp; Her Collection</span>
-          <h1>A portrait built from the creations only she could see.</h1>
-          <p className="living-mosaic__lead">From a distance, you see Sina.</p>
-          <p className="living-mosaic__story-copy">Up close, you meet her creations &mdash; each one shaped from glass, light, color, and touch. Every tile represents a named piece: wearable art, display art, gifts, keepsakes, and 1 of 1 creations waiting for the right person to find them.</p>
-          <p className="living-mosaic__story-copy">Touch a tile to reveal its name. Open the creation to read its story. Adopt the one that speaks to you.</p>
+          <span className="living-mosaic__eyebrow">Her Story &amp; Her Creations</span>
+          <h1>The closer you get, the more you see.</h1>
+          <p className="living-mosaic__story-copy">Every named creation carries a piece of Sina&rsquo;s vision &mdash; glass, light, color, texture, and touch shaped into something that will never exist again.</p>
+          <p className="living-mosaic__story-copy">Some are worn. Some are displayed. Some are gifted. All are made by hand and released only once.</p>
+          <p className="living-mosaic__lead">Step back to see the artist.</p>
+          <p className="living-mosaic__lead">Come closer to meet the creations.</p>
           <div className="living-mosaic__hero-actions">
-            <Link className="button primary" to="/shop">Adopt a Piece</Link>
-            <button type="button" className="living-mosaic__story-link" onClick={() => setMeetSinaOpen(true)}>Meet Sina &rarr;</button>
+            <Link className="button primary" to="/shop">Adopt the one that finds you.</Link>
+            <a className="button ghost" href="#sinas-letter">Meet Sina</a>
           </div>
         </div>
 
@@ -169,7 +168,6 @@ export default function LivingMosaic() {
       </div>
 
       {modalProduct && <ProductModal product={modalProduct} onClose={() => setModalProduct(null)} />}
-      {meetSinaOpen && <MeetSinaPanel onClose={() => setMeetSinaOpen(false)} />}
     </section>
   );
 }
