@@ -8,6 +8,8 @@ export default function MosaicTile({ cell, product, flipped, active, reducedMoti
     ? `${product.name}, ${product.category}. Press again to view and adopt this piece.`
     : `Hidden piece. Press to reveal its name.`;
 
+  const tileColor = rgbToCss(cell.color);
+
   return (
     <div
       className={`mosaic-tile${flipped ? ' is-flipped' : ''}${reducedMotion ? ' no-flip-motion' : ''}`}
@@ -26,7 +28,7 @@ export default function MosaicTile({ cell, product, flipped, active, reducedMoti
       <div className="mosaic-tile__inner">
         <div
           className="mosaic-tile__face mosaic-tile__face--front"
-          style={{ backgroundColor: rgbToCss(cell.color) }}
+          style={{ backgroundColor: tileColor, '--tile-target-color': tileColor }}
         >
           {active && (
             <img src={product.image} alt="" loading="lazy" decoding="async" aria-hidden="true" />
