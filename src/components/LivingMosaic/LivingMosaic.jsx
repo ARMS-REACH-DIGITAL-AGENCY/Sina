@@ -6,6 +6,7 @@ import MosaicTile from './MosaicTile.jsx';
 import ProductModal from './ProductModal.jsx';
 import MeetSinaPanel from './MeetSinaPanel.jsx';
 import './living-mosaic.css';
+import './mosaic-experiment-overrides.css';
 
 // Real image asset already in the Sina repo history. This wider portrait gives
 // the face more horizontal resolution than the previous 9:16 source.
