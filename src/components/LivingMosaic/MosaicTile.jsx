@@ -1,12 +1,12 @@
 import React from 'react';
 import { rgbToCss } from './colorMatch.js';
 
-export default function MosaicTile({ cell, product, active, onTap }) {
+export default function MosaicTile({ cell, product, active, onTap, showNames }) {
   if (!product) return <div className="mosaic-tile mosaic-tile--empty" aria-hidden="true" />;
 
   return (
     <div
-      className="mosaic-tile"
+      className={`mosaic-tile${showNames ? ' has-name-overlay' : ''}`}
       role="button"
       tabIndex={0}
       aria-label={`Open ${product.name}, ${product.category}`}
@@ -26,6 +26,7 @@ export default function MosaicTile({ cell, product, active, onTap }) {
           <img src={product.image} alt="" loading="lazy" decoding="async" aria-hidden="true" />
         )}
       </div>
+      <span className="mosaic-tile__name" aria-hidden="true">{product.name}</span>
     </div>
   );
 }
