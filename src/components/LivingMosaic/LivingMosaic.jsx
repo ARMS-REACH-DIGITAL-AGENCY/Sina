@@ -32,6 +32,7 @@ export default function LivingMosaic() {
   const [grid, setGrid] = useState([]);
   const [gridLoading, setGridLoading] = useState(true);
   const [gridError, setGridError] = useState(false);
+  const [portraitLoaded, setPortraitLoaded] = useState(false);
   const [flipped, setFlipped] = useState(() => new Set());
   const [modalProduct, setModalProduct] = useState(null);
   const [meetSinaOpen, setMeetSinaOpen] = useState(false);
@@ -82,6 +83,8 @@ export default function LivingMosaic() {
     return (cell) => (cell ? products[cell.productIndex] : null);
   }, [products]);
 
+  const mosaicReady = portraitLoaded && !productsLoading && !gridLoading && !gridError && grid.length > 0;
+
   function handleTap(cell) {
     const key = `${cell.col}-${cell.row}`;
     setFlipped((prev) => {
@@ -119,34 +122,42 @@ export default function LivingMosaic() {
         </div>
 
         <div className="living-mosaic__visual">
-          <div className="living-mosaic__frame">
-            {(gridLoading || productsLoading) && (
-              <div className="living-mosaic__loading" role="status">Assembling the mosaic&hellip;</div>
-            )}
-            {gridError && (
-              <div className="living-mosaic__loading" role="status">The mosaic couldn&rsquo;t load right now. Please refresh to try again.</div>
-            )}
-            {!gridLoading && !gridError && !grid.length && (
-              <div className="living-mosaic__loading" role="status">No product photos are available yet to build the mosaic.</div>
-            )}
-            {!gridLoading && !gridError && grid.length > 0 && (
-              <div className="living-mosaic__grid" style={{ '--mosaic-cols': GRID_COLS, '--mosaic-rows': GRID_ROWS }}>
-                {grid.map((cell) => {
-                  const key = `${cell.col}-${cell.row}`;
-                  return (
-                    <MosaicTile
-                      key={key}
-                      cell={cell}
-                      product={cellProduct(cell)}
-                      flipped={flipped.has(key)}
-                      active={active}
-                      reducedMotion={reducedMotion}
-                      onTap={handleTap}
-                    />
-                  );
-                })}
+          <div className={`living-mosaic__frame${mosaicReady ? ' is-mosaic-ready' : ''}`}>
+            <img
+              className="living-mosaic__portrait-reveal"
+              src={PORTRAIT_SRC}
+              alt="Thomasina Schnepf holding one of her fused-glass creations"
+              onLoad={() => setPortraitLoaded(true)}
+            />
+
+            {!gridError && grid.length > 0 && (
+              <div className="living-mosaic__grid-reveal" aria-hidden={!mosaicReady}>
+                <div className="living-mosaic__grid" style={{ '--mosaic-cols': GRID_COLS, '--mosaic-rows': GRID_ROWS }}>
+                  {grid.map((cell) => {
+                    const key = `${cell.col}-${cell.row}`;
+                    return (
+                      <MosaicTile
+                        key={key}
+                        cell={cell}
+                        product={cellProduct(cell)}
+                        flipped={flipped.has(key)}
+                        active={active}
+                        reducedMotion={reducedMotion}
+                        onTap={handleTap}
+                      />
+                    );
+                  })}
+                </div>
               </div>
             )}
+
+            <div className="living-mosaic__sr-status" role="status" aria-live="polite">
+              {gridError
+                ? 'The portrait is visible. The mosaic could not be assembled right now.'
+                : mosaicReady
+                  ? 'The mosaic is ready.'
+                  : 'The portrait is visible while the mosaic is being assembled.'}
+            </div>
           </div>
           <p className="living-mosaic__caption">Step back to see the artist. Move closer to discover the work.</p>
         </div>
