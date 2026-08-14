@@ -1,3 +1,29 @@
+.site-header {
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  background: #11110f;
+  border-bottom: 2px solid var(--burnt-orange);
+  box-shadow: 0 4px 18px rgba(0,0,0,.28);
+}
+
+.site-header .brand-logo {
+  filter: brightness(0) invert(1);
+}
+
+.site-header .desktop-nav a {
+  color: rgba(247,244,236,.78);
+}
+
+.site-header .desktop-nav a.active,
+.site-header .desktop-nav a:hover {
+  color: var(--sand);
+}
+
+.site-header .menu-button span {
+  background: var(--off-white);
+}
+
 .living-mosaic--hero {
   position: relative;
   max-width: none;
@@ -111,6 +137,7 @@
   height: 100%;
   min-height: min(78vh, 860px);
   padding: 0;
+  border: 0;
   border-radius: 0;
   box-shadow: none;
   background: #090909;
@@ -123,8 +150,17 @@
   width: 100%;
   max-height: none;
   margin: 0;
-  gap: 2px;
+  gap: 0;
   aspect-ratio: 29 / 51;
+}
+
+.mosaic-tile,
+.mosaic-tile__inner,
+.mosaic-tile__face,
+.mosaic-tile__face--front img {
+  margin: 0;
+  padding: 0;
+  border: 0;
 }
 
 .living-mosaic__loading {
