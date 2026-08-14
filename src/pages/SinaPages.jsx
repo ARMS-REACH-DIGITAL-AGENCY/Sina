@@ -1,13 +1,37 @@
 import React, { useState } from 'react';
-import { Link, NavLink } from 'react-router-dom';
+import { Link, NavLink, useLocation } from 'react-router-dom';
 import { products, collections } from '../data/products.js';
+import meetSinaCloseup from '../data/meetSinaCloseup.js';
+import meetSinaSmile from '../data/meetSinaSmile.js';
+import meetSinaStudio from '../data/meetSinaStudio.js';
+import meetSinaTray from '../data/meetSinaTray.js';
 import LivingMosaic from '../components/LivingMosaic/LivingMosaic.jsx';
 
 const logoWhitePath = '/assets/brand/sinas-creations-white-logo.png';
 
+const primaryNav = [
+  { to: '/meet-sina', label: 'Meet Sina' },
+  { to: '/creations', label: 'Creations' },
+  { to: '/commission', label: 'Commission' },
+  { to: '/wholesale', label: 'Wholesale' },
+];
+
+const footerNav = [
+  { to: '/meet-sina', label: 'Meet Sina' },
+  { to: '/creations', label: 'Creations' },
+  { to: '/shop', label: 'Adopt' },
+];
+
+const footerConnect = [
+  { to: '/commission', label: 'Commission' },
+  { to: '/wholesale', label: 'Wholesale' },
+  { to: '/schedule', label: 'Schedule' },
+];
+
 function Layout({ children }) {
   const [open, setOpen] = useState(false);
   const close = () => setOpen(false);
+
   return (
     <div className="site-shell">
       <header className="site-header">
@@ -16,11 +40,7 @@ function Layout({ children }) {
           <span className="brand-fallback" aria-hidden="true"><span>Sina</span><small>Creations</small></span>
         </Link>
         <nav className="desktop-nav" aria-label="Main navigation">
-          <NavLink to="/story">Our Story</NavLink>
-          <NavLink to="/collections">Collections</NavLink>
-          <NavLink to="/collaborate">Collaborate</NavLink>
-          <NavLink to="/wholesale">Wholesale</NavLink>
-          <NavLink to="/shop">Shop</NavLink>
+          {primaryNav.map((item) => <NavLink key={item.to} to={item.to}>{item.label}</NavLink>)}
         </nav>
         <Link className="nav-cta" to="/shop">Adopt</Link>
         <button className="menu-button" onClick={() => setOpen(!open)} aria-label={open ? 'Close menu' : 'Open menu'}>
@@ -31,11 +51,7 @@ function Layout({ children }) {
       </header>
       {open && (
         <div className="mobile-menu">
-          <NavLink onClick={close} to="/story">Our Story</NavLink>
-          <NavLink onClick={close} to="/collections">Collections</NavLink>
-          <NavLink onClick={close} to="/collaborate">Collaborate</NavLink>
-          <NavLink onClick={close} to="/wholesale">Wholesale</NavLink>
-          <NavLink onClick={close} to="/shop">Shop</NavLink>
+          {primaryNav.map((item) => <NavLink key={item.to} onClick={close} to={item.to}>{item.label}</NavLink>)}
           <NavLink onClick={close} to="/schedule">Schedule a Call</NavLink>
           <Link onClick={close} className="mobile-adopt" to="/shop">Adopt a Creation</Link>
         </div>
@@ -46,7 +62,7 @@ function Layout({ children }) {
   );
 }
 
-function Hero({ eyebrow, title, copy, primary = 'Adopt a Creation', primaryTo = '/shop', secondary, secondaryTo = '/story' }) {
+function Hero({ eyebrow, title, copy, primary = 'Adopt a Creation', primaryTo = '/shop', secondary, secondaryTo = '/meet-sina' }) {
   return (
     <section className="hero hero-dark">
       <div className="hero-inner">
@@ -97,13 +113,45 @@ export function Home() {
 export function Story() {
   return (
     <Layout>
-      <Hero eyebrow="Our Story" title="The artist who works closer than sight." copy="At age four, a tumor changed how Thomasina sees the world. What could have ended her art became part of her gift." primary="See the Collection" primaryTo="/collections" />
-      <section className="cream-section story-grid">
-        <div className="portrait-card"><img src="/images/thomasina.jpg" alt="Thomasina Schnepf" /></div>
-        <div>
-          <SectionHeader eyebrow="Thomasina Schnepf" title="Her art begins where most people stop looking." />
-          <p>Thomasina works close to her glass, noticing edges, seams, texture, and color shifts that others might miss at a glance. Her creations carry the evidence of that attention: layered materials, tactile choices, and details that reward close attention.</p>
-          <p>She does not make pieces to be repeated. She creates individual works that can be worn, displayed, gifted, collected, and remembered.</p>
+      <Hero
+        eyebrow="Meet Sina"
+        title="The artist behind every 1-of-1 creation."
+        copy="Thomasina Schnepf creates by touch, light, color, and close attention. Her work is personal, tactile, and made to be worn, displayed, gifted, and remembered one original at a time."
+        primary="See the Creations"
+        primaryTo="/creations"
+      />
+      <section className="cream-section meet-sina-page">
+        <div className="meet-sina-message">
+          <SectionHeader eyebrow="A Message From the Designer" title="My name is Thomasina Schnepf." />
+          <p className="meet-sina-pullquote">I am legally blind, and because of this, I create and &ldquo;view&rdquo; the world &mdash; and my work &mdash; very closely.</p>
+          <p>My disability is the result of a tumor on my optic nerve when I was four years old. For most people, vision shapes the way they see the world. For me, the loss of my sight has distorted my view of the world, but it has also caused me to examine everything much more closely in order to &ldquo;see&rdquo; what is truly there.</p>
+          <p>It is from this kind of &ldquo;vision&rdquo; that I create my pieces. My artwork is shaped by my experiences, and each piece is intended to convey a part of the way I see and feel the world.</p>
+          <p>Forms help me understand and create. They allow me to lay out my designs and guide my hands as I create individual, one-of-a-kind pieces. I need excellent lighting in order to see at all, so light plays an important role in my work.</p>
+          <p>Because my view of the world is different, forms are not always separate, distinct, or concrete to me. Together with light and glass, they create fields of color and reflection that interact with one another. Up close, they create a believable world &mdash; one that I can see, feel, and be part of.</p>
+          <p>Each unique, one-of-a-kind piece is created using various combinations of fused colored glass, glass gems, glass beads, glass stringers, and glass noodles.</p>
+          <p>I hope you enjoy my creations as much as I have enjoyed creating each one especially for you.</p>
+          <p className="meet-sina-signoff">God Bless,<br />Sina</p>
+        </div>
+        <div className="meet-sina-media">
+          <article className="meet-sina-photo-card meet-sina-photo-card--portrait">
+            <img src={meetSinaSmile} alt="Thomasina Schnepf smiling while working with fused glass pieces." />
+          </article>
+          <div className="meet-sina-note">
+            <span>Working Close</span>
+            <h3>Every piece begins with touch, light, patience, and intention.</h3>
+            <p>These studio photos show how close Sina works to the glass as she arranges color, shape, and texture into a one-of-one creation.</p>
+          </div>
+          <div className="meet-sina-media-grid">
+            <article className="meet-sina-photo-card">
+              <img src={meetSinaCloseup} alt="Close-up of Sina arranging small glass pieces by hand on a blue work tray." />
+            </article>
+            <article className="meet-sina-photo-card">
+              <img src={meetSinaStudio} alt="Wide view of Sina's work table with glass materials, tools, and trays." />
+            </article>
+            <article className="meet-sina-photo-card meet-sina-photo-card--wide">
+              <img src={meetSinaTray} alt="Finished and in-progress fused glass pieces laid out on a blue tray in Sina's studio." />
+            </article>
+          </div>
         </div>
       </section>
     </Layout>
@@ -113,12 +161,12 @@ export function Story() {
 export function Collections() {
   return (
     <Layout>
-      <Hero eyebrow="The Collections" title="One body of work. Many ways to adopt." copy="Pendants, wire-wrapped pieces, necklaces, plaques, plates, wall art, lanyards, and sets — each one made by hand and released as its own original creation." primary="Shop Available Pieces" primaryTo="/shop" />
+      <Hero eyebrow="1-of-1 Creations" title="One body of work. Many ways to adopt." copy="Pendants, wire-wrapped pieces, necklaces, plaques, plates, wall art, lanyards, and sets &mdash; each one made by hand and released as its own original creation." primary="Shop Available Pieces" primaryTo="/shop" />
       <section className="cream-section collection-grid">
-        {collections.filter(c => c !== 'All').map((name) => (
+        {collections.filter((name) => name !== 'All').map((name) => (
           <Link className="collection-card" to={`/shop?collection=${encodeURIComponent(name)}`} key={name}>
             <span>{name}</span>
-            <strong>View pieces →</strong>
+            <strong>View pieces &rarr;</strong>
           </Link>
         ))}
       </section>
@@ -129,8 +177,8 @@ export function Collections() {
 export function Collaborate() {
   return (
     <Layout>
-      <Hero eyebrow="Community & Collaboration" title="Art with a story can bring people together." copy="Sina's Creations welcomes conversations with churches, schools, galleries, disability-awareness groups, charity events, and community partners who want art to carry a deeper message." primary="Request a Conversation" primaryTo="/schedule" />
-      <FormPage title="Start a collaboration conversation" intro="Tell us about the audience, cause, occasion, or community you want to support." />
+      <Hero eyebrow="Commission" title="Begin a custom piece with Sina." copy="If you want a piece shaped around a person, memory, color story, or meaning, start the conversation here and we will guide the next step together." primary="Start a Commission" primaryTo="/schedule" />
+      <FormPage title="Commission inquiry" intro="Tell us about the person, palette, occasion, symbolism, or feeling you want the piece to carry." />
     </Layout>
   );
 }
@@ -145,17 +193,30 @@ export function Wholesale() {
 }
 
 export function Shop() {
-  const [filter, setFilter] = useState('All');
-  const visible = filter === 'All' ? products : products.filter(p => p.category === filter);
+  const location = useLocation();
+  const queryFilter = React.useMemo(() => {
+    const requested = new URLSearchParams(location.search).get('collection');
+    return collections.includes(requested) ? requested : 'All';
+  }, [location.search]);
+  const [filter, setFilter] = useState(queryFilter);
+
+  React.useEffect(() => {
+    setFilter(queryFilter);
+  }, [queryFilter]);
+
+  const visible = filter === 'All' ? products : products.filter((product) => product.category === filter);
+
   return (
     <Layout>
       <Hero eyebrow="Available for Adoption" title="The first release is ready to meet you." copy="Each piece shown here is handmade, named, priced, and available as a 1 of 1 creation." primary="Ask About a Piece" primaryTo="/schedule" />
       <section className="shop-section">
         <div className="tabs" role="tablist" aria-label="Filter products by collection">
-          {collections.map(tab => <button key={tab} className={filter === tab ? 'active' : ''} onClick={() => setFilter(tab)}>{tab}</button>)}
+          {collections.map((tab) => (
+            <button key={tab} type="button" className={filter === tab ? 'active' : ''} onClick={() => setFilter(tab)}>{tab}</button>
+          ))}
         </div>
         <div className="product-grid">
-          {visible.map(product => <ProductCard product={product} key={product.sku} />)}
+          {visible.map((product) => <ProductCard product={product} key={product.sku} />)}
         </div>
       </section>
     </Layout>
@@ -171,7 +232,7 @@ function ProductCard({ product }) {
         <h3>{product.name}</h3>
         <p>{product.line}</p>
         <div className="price-row"><span>Adoption price</span><strong>${product.price}</strong></div>
-        <Link className="small-link" to="/schedule">Ask about this piece →</Link>
+        <Link className="small-link" to="/schedule">Ask about this piece &rarr;</Link>
       </div>
     </article>
   );
@@ -182,7 +243,7 @@ function FeaturedProducts() {
     <section className="cream-section">
       <SectionHeader eyebrow="Available Now" title="Featured pieces ready for adoption" copy="Begin with a few of the creations currently available from Thomasina's first release." />
       <div className="product-grid compact">
-        {products.slice(0, 3).map(product => <ProductCard product={product} key={product.sku} />)}
+        {products.slice(0, 3).map((product) => <ProductCard product={product} key={product.sku} />)}
       </div>
     </section>
   );
@@ -191,7 +252,7 @@ function FeaturedProducts() {
 export function Schedule() {
   return (
     <Layout>
-      <Hero eyebrow="Let's Talk" title="Schedule a Sina's Creations conversation." copy="Ask about an available piece, request a custom commission, explore wholesale, or start a collaboration conversation." primary="View Shop" primaryTo="/shop" />
+      <Hero eyebrow="Let's Talk" title="Schedule a Sina's Creations conversation." copy="Ask about an available piece, request a commission, explore wholesale, or reach out after reading Sina's message." primary="View Available Pieces" primaryTo="/shop" />
       <FormPage title="Book your conversation" intro="Send the details and we will follow up with the right next step." />
     </Layout>
   );
@@ -203,7 +264,7 @@ function FormPage({ title, intro, wholesale = false }) {
       <div>
         <SectionHeader eyebrow="Start Here" title={title} copy={intro} />
         <div className="option-list">
-          {['Adoption inquiry', 'Custom commission', 'Collaboration', 'Wholesale', 'Community event', 'General question'].map(item => <div key={item}>{item}</div>)}
+          {['Adoption inquiry', 'Commission', 'Wholesale', 'Meet Sina', 'Gift question', 'General question'].map((item) => <div key={item}>{item}</div>)}
         </div>
       </div>
       <form className="lead-form">
@@ -212,7 +273,7 @@ function FormPage({ title, intro, wholesale = false }) {
         <label>Email<input placeholder="you@email.com" /></label>
         <label>Phone<input placeholder="(555) 000-0000" /></label>
         {wholesale && <label>Business name<input placeholder="Business or gallery" /></label>}
-        <label>Interest<select defaultValue=""><option value="" disabled>Select one...</option><option>Adoption</option><option>Wholesale</option><option>Collaboration</option><option>Commission</option></select></label>
+        <label>Interest<select defaultValue=""><option value="" disabled>Select one...</option><option>Adoption</option><option>Commission</option><option>Wholesale</option><option>Meet Sina</option></select></label>
         <label className="full">Message<textarea placeholder="Tell us what you have in mind..." /></label>
         <button type="button" className="button primary form-button">Submit</button>
       </form>
@@ -237,8 +298,14 @@ function Footer() {
         <img className="footer-logo" src={logoWhitePath} alt="Sina's Creations" />
         <p>1 of 1 fused glass art. Named, made by hand, and adopted once.</p>
       </div>
-      <div><h4>Navigate</h4><Link to="/story">Our Story</Link><Link to="/collections">Collections</Link><Link to="/shop">Shop</Link></div>
-      <div><h4>Get Involved</h4><Link to="/collaborate">Collaborate</Link><Link to="/wholesale">Wholesale</Link><Link to="/schedule">Schedule</Link></div>
+      <div>
+        <h4>Navigate</h4>
+        {footerNav.map((item) => <Link key={item.to} to={item.to}>{item.label}</Link>)}
+      </div>
+      <div>
+        <h4>Connect</h4>
+        {footerConnect.map((item) => <Link key={item.to} to={item.to}>{item.label}</Link>)}
+      </div>
       <div><h4>Adopt</h4><p>Choose a piece, ask a question, or start a custom conversation.</p><Link className="button primary footer-button" to="/shop">Adopt</Link></div>
     </footer>
   );
