@@ -113,29 +113,18 @@
   letter-spacing: .12em;
 }
 
-.living-mosaic__story-link {
-  border: 0;
-  padding: 10px 0;
-  background: transparent;
-  color: #805b2e;
-  font: inherit;
-  font-size: 12px;
-  font-weight: 700;
-  letter-spacing: .08em;
-  text-transform: uppercase;
-  cursor: pointer;
-}
-
 .living-mosaic__visual {
   position: relative;
   min-width: 0;
+  display: flex;
+  flex-direction: column;
   background: #090909;
 }
 
 .living-mosaic__frame {
   position: relative;
   width: 100%;
-  height: 100%;
+  flex: 1 1 auto;
   min-height: min(78vh, 860px);
   padding: 0;
   border: 0;
@@ -153,8 +142,14 @@
   height: 100%;
 }
 
+.living-mosaic__grid-reveal {
+  z-index: 1;
+  opacity: 0;
+  transition: opacity 1.15s ease;
+}
+
 .living-mosaic__portrait-reveal {
-  z-index: 2;
+  z-index: 3;
   object-fit: cover;
   object-position: center 35%;
   opacity: 1;
@@ -163,19 +158,13 @@
   pointer-events: none;
 }
 
-.living-mosaic__grid-reveal {
-  z-index: 1;
-  opacity: 0;
-  transition: opacity 1.15s ease;
-}
-
 .living-mosaic__frame.is-mosaic-ready .living-mosaic__grid-reveal {
   opacity: 1;
 }
 
 .living-mosaic__frame.is-mosaic-ready .living-mosaic__portrait-reveal {
-  opacity: .16;
-  filter: saturate(.72) contrast(1.04) brightness(.96);
+  opacity: .27;
+  filter: saturate(.82) contrast(1.08) brightness(.98);
 }
 
 .living-mosaic__grid {
@@ -208,34 +197,190 @@
   border: 0;
 }
 
+.living-mosaic__visual-footer {
+  position: relative;
+  z-index: 5;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  padding: 10px 14px;
+  background: #11110f;
+  border-top: 1px solid rgba(229,189,117,.24);
+}
+
 .living-mosaic__caption {
-  position: absolute;
-  left: 18px;
-  right: 18px;
-  bottom: 14px;
-  z-index: 3;
+  position: static;
+  flex: 1 1 auto;
   margin: 0;
   color: rgba(244,239,229,.72);
   text-align: left;
   font-size: 11px;
+  line-height: 1.4;
 }
 
 .living-mosaic__secondary-actions {
-  position: absolute;
-  top: 16px;
-  right: 18px;
-  z-index: 4;
+  position: static;
   display: flex;
+  flex: 0 0 auto;
   gap: 8px;
 }
 
 .living-mosaic__secondary-actions .button {
-  min-height: 36px;
-  padding: 0 12px;
-  background: rgba(10,10,9,.72);
+  min-height: 34px;
+  padding: 0 11px;
+  background: transparent;
   color: #f4efe5;
-  border-color: rgba(244,239,229,.55);
-  backdrop-filter: blur(6px);
+  border: 1px solid rgba(244,239,229,.42);
+  box-shadow: none;
+  font-size: 10px;
+  letter-spacing: .08em;
+  white-space: nowrap;
+}
+
+.living-mosaic__secondary-actions .button:hover {
+  background: rgba(244,239,229,.08);
+}
+
+/* Product modal: keep the close control visible and make room for story/gallery views. */
+.mosaic-modal-bg {
+  padding: 12px;
+}
+
+.mosaic-modal {
+  position: relative;
+  width: min(680px, 100%);
+  max-width: 680px;
+  max-height: 92svh;
+  overflow: hidden;
+  border-radius: 12px;
+}
+
+.mosaic-modal__card {
+  max-height: 92svh;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  background: var(--off-white);
+}
+
+.mosaic-modal__side[aria-hidden="true"] {
+  display: none;
+}
+
+.mosaic-modal__close {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  z-index: 50;
+  display: grid;
+  place-items: center;
+  width: 46px;
+  height: 46px;
+  padding: 0;
+  border: 2px solid rgba(255,255,255,.9);
+  border-radius: 999px;
+  background: #11110f;
+  color: #fff;
+  box-shadow: 0 3px 12px rgba(0,0,0,.35);
+  font-size: 30px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.mosaic-modal__close span {
+  display: block;
+  transform: translateY(-1px);
+}
+
+.mosaic-modal__image {
+  aspect-ratio: 4 / 3;
+  background: #0b0b0a;
+}
+
+.mosaic-modal__image img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.mosaic-modal__thumbs {
+  display: flex;
+  gap: 8px;
+  padding: 10px 14px 0;
+  overflow-x: auto;
+  background: var(--off-white);
+}
+
+.mosaic-modal__thumbs button {
+  flex: 0 0 58px;
+  width: 58px;
+  height: 58px;
+  padding: 2px;
+  border: 1px solid rgba(41,42,40,.18);
+  border-radius: 6px;
+  background: transparent;
+  cursor: pointer;
+}
+
+.mosaic-modal__thumbs button.is-active {
+  border-color: var(--burnt-orange);
+  box-shadow: inset 0 0 0 1px var(--burnt-orange);
+}
+
+.mosaic-modal__thumbs img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 3px;
+}
+
+.mosaic-modal__flip {
+  width: 100%;
+  margin: 0 0 12px;
+}
+
+.mosaic-modal__story-panel {
+  min-height: min(70svh, 620px);
+  display: flex;
+  flex-direction: column;
+  padding: 54px 30px 30px;
+  background: var(--off-white);
+}
+
+.mosaic-modal__story-panel h3 {
+  margin: 0 0 18px;
+  color: var(--charcoal);
+  font-size: clamp(28px, 5vw, 38px);
+}
+
+.mosaic-modal__story-copy {
+  margin: 0 0 20px;
+  color: var(--muted-olive);
+  font-size: 16px;
+  line-height: 1.75;
+}
+
+.mosaic-modal__story-note {
+  margin: 0 0 24px;
+  padding-top: 16px;
+  border-top: 1px solid rgba(41,42,40,.14);
+  color: var(--earth-brown);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+}
+
+.mosaic-modal__story-panel .mosaic-modal__cta {
+  margin-top: 0;
+}
+
+/* Meet Sina stays a popup; use the existing artist/painting image and letter. */
+.meet-sina .mosaic-modal__close {
+  position: sticky;
+  top: 10px;
+  float: right;
+  margin: 10px 10px -56px 0;
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -266,9 +411,69 @@
     min-height: 62svh;
   }
 
+  .living-mosaic__frame.is-mosaic-ready .living-mosaic__portrait-reveal {
+    opacity: .3;
+  }
+
+  .living-mosaic__visual-footer {
+    align-items: stretch;
+    flex-direction: column;
+    gap: 8px;
+    padding: 10px 12px 12px;
+  }
+
+  .living-mosaic__caption {
+    font-size: 11px;
+  }
+
   .living-mosaic__secondary-actions {
-    top: auto;
-    right: 12px;
-    bottom: 40px;
+    width: 100%;
+  }
+
+  .living-mosaic__secondary-actions .button {
+    flex: 1 1 50%;
+    min-height: 38px;
+    padding: 0 8px;
+    font-size: 10px;
+  }
+
+  .mosaic-modal-bg {
+    align-items: flex-end;
+    padding: 8px;
+  }
+
+  .mosaic-modal {
+    width: 100%;
+    max-height: 94svh;
+    border-radius: 14px 14px 8px 8px;
+  }
+
+  .mosaic-modal__card {
+    max-height: 94svh;
+  }
+
+  .mosaic-modal__close {
+    top: 8px;
+    right: 8px;
+    width: 48px;
+    height: 48px;
+    font-size: 32px;
+  }
+
+  .mosaic-modal__image {
+    aspect-ratio: 4 / 3;
+  }
+
+  .mosaic-modal__body {
+    padding: 20px 20px 24px;
+  }
+
+  .mosaic-modal__story-panel {
+    min-height: 78svh;
+    padding: 64px 22px 28px;
+  }
+
+  .meet-sina {
+    max-height: 94svh;
   }
 }
