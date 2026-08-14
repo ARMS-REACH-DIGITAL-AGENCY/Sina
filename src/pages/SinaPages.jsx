@@ -76,12 +76,6 @@ function SectionHeader({ eyebrow, title, copy }) {
 export function Home() {
   return (
     <Layout>
-      <Hero
-        eyebrow="One-of-one fused glass art"
-        title="She sees what others miss."
-        copy="Art, jewelry, and community work by Thomasina Schnepf — a legally blind artist who turns glass, color, texture, and faith into pieces that are named, loved, and released once."
-        secondary="Our Story"
-      />
       <LivingMosaic />
       <section className="cream-section split-section">
         <div>
