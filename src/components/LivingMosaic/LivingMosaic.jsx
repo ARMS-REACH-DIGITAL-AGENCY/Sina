@@ -8,9 +8,15 @@ import './living-mosaic.css';
 
 // Portrait is 768x1360 (roughly 9:16). This grid shape keeps tiles square
 // while the overall mosaic reads as the same portrait proportions.
+//
+// 29x51 (~1,479 cells, ~5x the 302-piece catalog) trades unique-image
+// variety for resolution: with only ~300 real photos, a coarser grid
+// forces obvious repeats right next to each other, while denser tiling
+// gives buildMosaicGrid's neighbor-avoidance more room to work and lets
+// the portrait read as a photomosaic instead of a 300-tile checkerboard.
 const PORTRAIT_SRC = '/images/thomasina.jpg';
-const GRID_COLS = 13;
-const GRID_ROWS = 23;
+const GRID_COLS = 29;
+const GRID_ROWS = 51;
 
 function usePrefersReducedMotion() {
   const [reduced, setReduced] = useState(false);
