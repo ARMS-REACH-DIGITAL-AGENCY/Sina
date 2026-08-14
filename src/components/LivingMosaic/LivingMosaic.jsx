@@ -8,8 +8,8 @@ import MeetSinaPanel from './MeetSinaPanel.jsx';
 import './living-mosaic.css';
 import './mosaic-experiment-overrides.css';
 
-// Keep Claude's working mosaic runtime exactly as-is.
-const PORTRAIT_SRC = '/images/thomasina.jpg';
+// Keep Claude's working mosaic runtime exactly as-is; only swap the portrait source.
+const PORTRAIT_SRC = '/images/hero/thomasina-hero-full.jpg';
 const GRID_COLS = 29;
 const GRID_ROWS = 51;
 
