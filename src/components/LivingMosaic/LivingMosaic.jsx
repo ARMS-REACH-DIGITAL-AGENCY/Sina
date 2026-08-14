@@ -24,6 +24,7 @@ export default function LivingMosaic() {
   const [modalProduct, setModalProduct] = useState(null);
   const [meetSinaOpen, setMeetSinaOpen] = useState(false);
   const [active, setActive] = useState(false);
+  const [showNames, setShowNames] = useState(false);
 
   const sectionRef = useRef(null);
 
@@ -76,16 +77,31 @@ export default function LivingMosaic() {
     setModalProduct(cellProduct(cell));
   }
 
+  function handleToggleNames() {
+    setShowNames((value) => !value);
+  }
+
+  function handleResetTiles() {
+    setShowNames(false);
+  }
+
   return (
     <section className="living-mosaic living-mosaic--hero" id="collection" ref={sectionRef}>
       <div className="living-mosaic__hero-shell">
         <div className="living-mosaic__story">
-          <span className="living-mosaic__eyebrow">Her Story. Her Creations. Your Choice.</span>
+          <div className="pill-eyebrow living-mosaic__eyebrow">Her Story. Her Creations. Your Choice.</div>
           <h1>The closer you get, the more you see.</h1>
-          <p className="living-mosaic__story-copy">Every named creation carries a piece of Sina&rsquo;s vision &mdash; glass, light, color, texture, and touch shaped into something that will never exist again.</p>
-          <p className="living-mosaic__story-copy">Some are worn. Some are displayed. Some are gifted. All are made by hand and released only once.</p>
-          <p className="living-mosaic__lead">Step back to see this amazing legally blind artist.</p>
-          <p className="living-mosaic__lead">Come closer to meet her 1-of-1 creations.</p>
+
+          <div className="living-mosaic__copy-stack">
+            <p className="living-mosaic__story-copy">Every named creation carries a piece of Sina&rsquo;s vision &mdash; glass, light, color, texture, and touch shaped into something that will never exist again.</p>
+            <p className="living-mosaic__story-copy">Some are worn. Some are displayed. Some are gifted. All are made by hand and released only once.</p>
+          </div>
+
+          <div className="living-mosaic__lead-stack">
+            <p className="living-mosaic__lead">Step back to see this amazing legally blind artist.</p>
+            <p className="living-mosaic__lead">Come closer to meet her 1-of-1 creations.</p>
+          </div>
+
           <div className="living-mosaic__hero-actions">
             <Link className="button primary" to="/shop">Adopt the one that finds you.</Link>
             <button type="button" className="button ghost" onClick={() => setMeetSinaOpen(true)}>Meet Sina</button>
@@ -106,6 +122,7 @@ export default function LivingMosaic() {
                         product={cellProduct(cell)}
                         active={active}
                         onTap={handleTap}
+                        showNames={showNames}
                       />
                     );
                   })}
@@ -131,6 +148,16 @@ export default function LivingMosaic() {
 
           <div className="living-mosaic__visual-footer">
             <p className="living-mosaic__caption">Step back to see Sina. Come closer to meet the creations.</p>
+            <div className="living-mosaic__secondary-actions">
+              <button
+                type="button"
+                className={`button ghost${showNames ? ' is-active' : ''}`}
+                onClick={handleToggleNames}
+              >
+                {showNames ? 'Hide Names' : 'Show Names'}
+              </button>
+              <button type="button" className="button ghost" onClick={handleResetTiles}>Reset Tiles</button>
+            </div>
           </div>
         </div>
       </div>
