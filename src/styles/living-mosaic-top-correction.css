@@ -1,0 +1,8 @@
+/* Temporary correction: the Living Mosaic is the intended top hero composition. */
+.target-home-hero {
+  display: none !important;
+}
+
+.preview-shell .living-mosaic-preview.editorial-mosaic-hero {
+  margin-top: 0;
+}
