@@ -30,6 +30,9 @@
 }
 
 .living-mosaic__eyebrow {
+  align-self: flex-start;
+  width: max-content;
+  max-width: 100%;
   margin: 0 0 34px;
 }
 
@@ -148,7 +151,7 @@
   padding: 14px 0 0;
   align-items: flex-start;
   justify-content: space-between;
-  gap: 12px;
+  gap: 10px;
   background: transparent;
   border-top: 0;
 }
@@ -166,12 +169,12 @@
 .living-mosaic__secondary-actions {
   display: flex;
   flex: 0 0 auto;
-  gap: 10px;
+  gap: 8px;
 }
 
 .living-mosaic__secondary-actions .button {
-  min-height: 40px;
-  padding: 0 14px;
+  min-height: 38px;
+  padding: 0 12px;
   background: transparent;
   color: var(--off-white);
   border: 1px solid rgba(247,244,236,.42);
