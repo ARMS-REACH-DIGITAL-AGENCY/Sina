@@ -1,64 +1,93 @@
-/* Align the homepage mosaic hero with the established modern dark site system.
-   This file intentionally changes background tone, typography, and CTA presentation only. */
+/* Align the homepage mosaic hero to the shared dark-site hero system
+   while keeping the contained mosaic box and existing modal flow. */
 
 .living-mosaic--hero {
-  background:
-    radial-gradient(circle at top left, rgba(199,106,50,.18), transparent 34%),
-    linear-gradient(135deg, #11110f 0%, #171713 58%, #0a0a09 100%);
+  background: var(--black);
+  border-bottom: 2px solid var(--burnt-orange);
+}
+
+.living-mosaic__hero-shell {
+  --mosaic-frame-height: clamp(500px, calc(100svh - var(--header-height) - 148px), 650px);
+  width: min(1200px, calc(100% - (var(--page-gutter) * 2)));
+  min-height: 0;
+  margin: 0 auto;
+  padding: var(--page-gutter) 0 56px;
+  grid-template-columns: minmax(0, 1fr) minmax(360px, calc(var(--mosaic-frame-height) * 5 / 7));
+  gap: clamp(32px, 4.8vw, 56px);
+  align-items: start;
 }
 
 .living-mosaic__story {
+  height: calc(var(--mosaic-frame-height) + 64px);
+  min-height: 0;
+  margin: 0;
+  padding: 0;
+  justify-content: flex-start;
   color: var(--off-white);
   background: transparent;
+  pointer-events: auto;
+  overflow: visible;
 }
 
 .living-mosaic__eyebrow {
-  color: var(--sand);
-  font-family: var(--font-body);
-  font-size: 13px;
-  line-height: 1.4;
-  font-weight: 800;
-  letter-spacing: .14em;
-  text-transform: uppercase;
+  margin: 0 0 34px;
 }
 
 .living-mosaic__story h1 {
-  max-width: 620px;
+  max-width: 640px;
+  margin: 0;
   color: var(--off-white);
   font-family: var(--font-display);
   font-style: normal;
   font-weight: 800;
-  line-height: .98;
-  letter-spacing: -.04em;
+  font-size: clamp(50px, 5.2vw, 78px);
+  line-height: 1.02;
+  letter-spacing: -.035em;
+}
+
+.living-mosaic__copy-stack {
+  display: grid;
+  gap: 18px;
+  max-width: 620px;
+  margin-top: 34px;
 }
 
 .living-mosaic__story-copy,
 .living-mosaic__lead {
+  max-width: none;
+  margin: 0;
   font-family: var(--font-body);
 }
 
 .living-mosaic__story-copy {
-  max-width: 560px;
-  color: rgba(247,244,236,.76);
-  font-size: clamp(16px, 1.35vw, 20px);
-  line-height: 1.65;
+  color: rgba(247,244,236,.74);
+  font-size: clamp(17px, 1.45vw, 20px);
+  line-height: 1.6;
+}
+
+.living-mosaic__lead-stack {
+  display: grid;
+  gap: 10px;
+  max-width: 620px;
+  margin-top: 26px;
 }
 
 .living-mosaic__lead {
-  max-width: 540px;
-  color: rgba(247,244,236,.92);
-  font-size: clamp(18px, 1.55vw, 24px);
-  line-height: 1.5;
+  color: var(--off-white);
+  font-size: clamp(18px, 1.55vw, 22px);
+  line-height: 1.38;
   font-weight: 800;
 }
 
 .living-mosaic__hero-actions {
-  width: 100%;
+  width: min(100%, 552px);
   display: grid;
-  grid-template-columns: minmax(0, 1.45fr) minmax(160px, .55fr);
+  grid-template-columns: minmax(0, 1.7fr) minmax(156px, .74fr);
   align-items: stretch;
   gap: 12px;
   flex-wrap: nowrap;
+  margin-top: auto;
+  padding-top: 34px;
 }
 
 .living-mosaic__hero-actions .button {
@@ -82,19 +111,99 @@
 }
 
 .living-mosaic__hero-actions .button.ghost:hover,
-.living-mosaic__hero-actions .button.ghost:focus-visible {
+.living-mosaic__hero-actions .button.ghost:focus-visible,
+.living-mosaic__secondary-actions .button:hover,
+.living-mosaic__secondary-actions .button:focus-visible,
+.living-mosaic__secondary-actions .button.is-active {
   background: rgba(247,244,236,.08);
   border-color: var(--off-white);
   color: var(--off-white);
 }
 
+.living-mosaic__visual {
+  width: min(100%, calc(var(--mosaic-frame-height) * 5 / 7));
+  min-height: 0;
+  height: calc(var(--mosaic-frame-height) + 64px);
+  justify-self: end;
+  align-self: start;
+  background: transparent;
+}
+
 .living-mosaic__frame {
+  width: 100%;
+  height: var(--mosaic-frame-height);
+  min-height: 0;
+  flex: 0 0 auto;
+  aspect-ratio: 5 / 7;
+  padding: 0;
   border: 1px solid rgba(247,244,236,.14);
+  border-radius: 2px;
   box-shadow: 0 24px 56px rgba(0,0,0,.42);
+  background: #090909;
+}
+
+.living-mosaic__visual-footer {
+  width: 100%;
+  min-height: 64px;
+  padding: 14px 0 0;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  background: transparent;
+  border-top: 0;
 }
 
 .living-mosaic__caption {
+  position: static;
+  flex: 1 1 auto;
+  margin: 0;
   color: rgba(247,244,236,.68);
+  text-align: left;
+  font-size: 12px;
+  line-height: 1.45;
+}
+
+.living-mosaic__secondary-actions {
+  display: flex;
+  flex: 0 0 auto;
+  gap: 10px;
+}
+
+.living-mosaic__secondary-actions .button {
+  min-height: 40px;
+  padding: 0 14px;
+  background: transparent;
+  color: var(--off-white);
+  border: 1px solid rgba(247,244,236,.42);
+  box-shadow: none;
+  font-size: 10px;
+  letter-spacing: .08em;
+  white-space: nowrap;
+}
+
+.mosaic-tile__face--front {
+  transition: opacity .24s ease;
+}
+
+.mosaic-tile__name {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1px;
+  background: rgba(41,42,40,.94);
+  opacity: 0;
+  transition: opacity .24s ease;
+  pointer-events: none;
+}
+
+.mosaic-tile.has-name-overlay .mosaic-tile__face--front {
+  opacity: 0;
+}
+
+.mosaic-tile.has-name-overlay .mosaic-tile__name {
+  opacity: 1;
 }
 
 /* Gate 1A: keep the real portrait above the mosaic as a stronger optical guide. */
@@ -104,45 +213,45 @@
 }
 
 @media (min-width: 960px) {
-  .living-mosaic--hero {
-    background:
-      radial-gradient(circle at top left, rgba(199,106,50,.18), transparent 34%),
-      linear-gradient(135deg, #11110f 0%, #171713 58%, #0a0a09 100%);
-  }
-
   .living-mosaic__eyebrow {
-    margin-bottom: 18px;
-  }
-
-  .living-mosaic__story h1 {
-    font-size: clamp(50px, 4.9vw, 76px);
-  }
-
-  .living-mosaic__story-copy {
-    font-size: clamp(16px, 1.28vw, 19px);
-  }
-
-  .living-mosaic__lead {
-    font-size: clamp(18px, 1.45vw, 22px);
-  }
-
-  .living-mosaic__hero-actions {
-    margin-top: auto;
-    padding-top: 20px;
+    margin-bottom: 36px;
   }
 }
 
 @media (max-width: 959px) {
+  .living-mosaic__hero-shell {
+    width: auto;
+    padding: var(--page-gutter) var(--page-gutter) 56px;
+    grid-template-columns: 1fr;
+    gap: 32px;
+  }
+
+  .living-mosaic__story {
+    height: auto;
+    padding: 0;
+  }
+
   .living-mosaic__eyebrow {
-    font-size: 11px;
+    margin-bottom: 28px;
   }
 
   .living-mosaic__story h1 {
-    font-size: clamp(46px, 12vw, 62px);
+    max-width: 680px;
+    font-size: clamp(44px, 11vw, 58px);
+  }
+
+  .living-mosaic__copy-stack {
+    margin-top: 28px;
+    gap: 16px;
   }
 
   .living-mosaic__story-copy {
     font-size: 16px;
+  }
+
+  .living-mosaic__lead-stack {
+    margin-top: 22px;
+    gap: 8px;
   }
 
   .living-mosaic__lead {
@@ -150,7 +259,39 @@
   }
 
   .living-mosaic__hero-actions {
+    width: 100%;
     grid-template-columns: 1fr;
+    padding-top: 30px;
+  }
+
+  .living-mosaic__visual {
+    width: 100%;
+    max-width: 560px;
+    height: auto;
+    justify-self: start;
+  }
+
+  .living-mosaic__frame {
+    height: auto;
+    min-height: 0;
+  }
+
+  .living-mosaic__visual-footer {
+    min-height: 0;
+    padding-top: 12px;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+  }
+
+  .living-mosaic__secondary-actions {
+    width: 100%;
+  }
+
+  .living-mosaic__secondary-actions .button {
+    flex: 1 1 50%;
+    min-height: 38px;
+    padding: 0 10px;
   }
 
   .living-mosaic__frame.is-mosaic-ready .living-mosaic__portrait-reveal {
