@@ -2,7 +2,13 @@
    Keep the Sina logo at its natural aspect ratio: no stretching or perspective change. */
 
 .site-header {
+  position: sticky !important;
+  top: 0 !important;
+  z-index: 1000 !important;
   overflow: hidden !important;
+  background: #11110f !important;
+  border-bottom: 2px solid var(--burnt-orange) !important;
+  box-shadow: 0 4px 18px rgba(0,0,0,.28) !important;
 }
 
 .logo-brand {
@@ -24,6 +30,20 @@
   max-height: 52px !important;
   object-fit: contain !important;
   object-position: left center !important;
+  filter: brightness(0) invert(1) !important;
+}
+
+.desktop-nav a {
+  color: rgba(247,244,236,.78) !important;
+}
+
+.desktop-nav a.active,
+.desktop-nav a:hover {
+  color: var(--sand) !important;
+}
+
+.menu-button span {
+  background: var(--off-white) !important;
 }
 
 .footer-logo {
