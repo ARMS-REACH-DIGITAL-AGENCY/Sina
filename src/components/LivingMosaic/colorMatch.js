@@ -1,31 +1,51 @@
-// Photomosaic mapping: slice the portrait into a cols x rows grid, sample
-// each cell's average color, and match every cell to the product photo
-// whose own average color is closest — so the assembled tile grid still
-// reads as the portrait from a distance, and each tile is a real piece.
+// Photomosaic mapping: sample the target portrait into a grid and match each
+// cell to the real product photo whose average color is closest. Portrait
+// sampling uses a cover crop so the source image is never stretched to fit the
+// mosaic's aspect ratio.
 
 function loadImage(src) {
   return new Promise((resolve) => {
     const img = new Image();
     img.decoding = 'async';
     img.onload = () => resolve(img);
-    // Resolve with null rather than rejecting: the product catalog's real
-    // photos are still being finalized, so a handful of missing files
-    // shouldn't take down the whole mosaic. Cells just skip that product.
     img.onerror = () => resolve(null);
     img.src = src;
   });
 }
 
-// Drawing a full-resolution image onto a tiny canvas makes the browser's
-// own downscaling do the color-averaging for us: one destination pixel
-// (via drawImage's resampling) is an approximation of that region's
-// average color.
-function sampleColorGrid(img, cols, rows) {
+function drawCover(ctx, img, destWidth, destHeight, focalY = 0.34) {
+  const targetAspect = destWidth / destHeight;
+  const sourceAspect = img.width / img.height;
+
+  let sx = 0;
+  let sy = 0;
+  let sw = img.width;
+  let sh = img.height;
+
+  if (sourceAspect > targetAspect) {
+    sw = img.height * targetAspect;
+    sx = (img.width - sw) / 2;
+  } else if (sourceAspect < targetAspect) {
+    sh = img.width / targetAspect;
+    const maxSy = img.height - sh;
+    sy = Math.max(0, Math.min(maxSy, maxSy * focalY));
+  }
+
+  ctx.drawImage(img, sx, sy, sw, sh, 0, 0, destWidth, destHeight);
+}
+
+function sampleColorGrid(img, cols, rows, options = {}) {
   const canvas = document.createElement('canvas');
   canvas.width = cols;
   canvas.height = rows;
   const ctx = canvas.getContext('2d', { willReadFrequently: true });
-  ctx.drawImage(img, 0, 0, cols, rows);
+
+  if (options.cover) {
+    drawCover(ctx, img, cols, rows, options.focalY);
+  } else {
+    ctx.drawImage(img, 0, 0, cols, rows);
+  }
+
   const { data } = ctx.getImageData(0, 0, cols, rows);
   const cells = [];
   for (let i = 0; i < cols * rows; i++) {
@@ -59,9 +79,6 @@ export async function buildMosaicGrid({ portraitSrc, products, cols, rows }) {
 
   if (!portraitImg) throw new Error(`Failed to load portrait image: ${portraitSrc}`);
 
-  // Only products whose photo actually loaded can be sampled and shown.
-  // `available` still points back at indexes in the original `products`
-  // array so downstream product lookups (name, sku, price…) stay correct.
   const available = productImgs
     .map((img, productIndex) => ({ img, productIndex }))
     .filter((entry) => entry.img);
@@ -73,7 +90,9 @@ export async function buildMosaicGrid({ portraitSrc, products, cols, rows }) {
   }
   if (!available.length) return [];
 
-  const cellColors = sampleColorGrid(portraitImg, cols, rows);
+  // The target portrait is cover-cropped, never distorted. A slightly upper
+  // focal point keeps the face where the hero composition needs it.
+  const cellColors = sampleColorGrid(portraitImg, cols, rows, { cover: true, focalY: 0.34 });
   const productColors = available.map((entry) => sampleColorGrid(entry.img, 1, 1)[0]);
 
   const grid = [];
@@ -91,11 +110,6 @@ export async function buildMosaicGrid({ portraitSrc, products, cols, rows }) {
         .map((color, i) => ({ productIndex: available[i].productIndex, d: distanceSq(cellColor, color) }))
         .sort((a, b) => a.d - b.d);
 
-      // With a small catalog, the literal nearest match repeats constantly
-      // right next to itself. Prefer the runner-up when it's not a
-      // meaningfully worse match, so the mosaic doesn't tile in obvious
-      // 2x2 blocks. This gap closes naturally once the real catalog (100s
-      // of SKUs) is wired in and neighboring cells rarely share a best match.
       let chosen = ranked[0];
       const above = aboveRowChoices[col];
       if (available.length > 3 && ranked[1]) {
