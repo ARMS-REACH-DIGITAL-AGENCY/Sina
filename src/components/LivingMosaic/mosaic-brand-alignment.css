@@ -57,6 +57,12 @@
   color: var(--off-white);
 }
 
+/* Gate 1A: keep the real portrait above the mosaic as a stronger optical guide. */
+.living-mosaic__frame.is-mosaic-ready .living-mosaic__portrait-reveal {
+  opacity: .42;
+  filter: saturate(.78) contrast(1.12) brightness(1.02);
+}
+
 @media (min-width: 960px) {
   .living-mosaic__eyebrow {
     margin-bottom: 16px;
@@ -83,5 +89,9 @@
 
   .living-mosaic__hero-actions {
     grid-template-columns: 1fr;
+  }
+
+  .living-mosaic__frame.is-mosaic-ready .living-mosaic__portrait-reveal {
+    opacity: .45;
   }
 }
