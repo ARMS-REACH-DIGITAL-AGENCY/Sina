@@ -9,7 +9,7 @@ import './living-mosaic.css';
 import './mosaic-experiment-overrides.css';
 
 // Keep Claude's working mosaic runtime exactly as-is; only swap the portrait source.
-const PORTRAIT_SRC = '/images/hero/thomasina-hero-full.jpg';
+const PORTRAIT_SRC = '/images/hero/PLQ-FG-LG-45.JPG';
 const GRID_COLS = 29;
 const GRID_ROWS = 51;
 
