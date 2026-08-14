@@ -7,6 +7,7 @@ import ProductModal from './ProductModal.jsx';
 import MeetSinaPanel from './MeetSinaPanel.jsx';
 import './living-mosaic.css';
 import './mosaic-experiment-overrides.css';
+import './mosaic-brand-alignment.css';
 
 // Claude's working matcher and 29x51 grid stay unchanged for Gate 1.
 const PORTRAIT_SRC = '/images/hero/PLQ-FG-LG-45.JPG';
