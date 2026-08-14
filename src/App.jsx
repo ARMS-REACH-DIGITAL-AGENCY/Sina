@@ -10,6 +10,7 @@ import {
   Schedule,
   NotFound,
 } from './pages/SinaPages.jsx';
+import './styles/meet-sina.css';
 
 function ScrollToTop() {
   const { pathname } = useLocation();
