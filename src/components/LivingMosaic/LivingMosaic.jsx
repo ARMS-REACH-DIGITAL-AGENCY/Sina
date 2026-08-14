@@ -1,19 +1,14 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
+import { Link } from 'react-router-dom';
 import useMosaicProducts from '../../hooks/useMosaicProducts.js';
 import { buildMosaicGrid } from './colorMatch.js';
 import MosaicTile from './MosaicTile.jsx';
 import ProductModal from './ProductModal.jsx';
 import MeetSinaPanel from './MeetSinaPanel.jsx';
 import './living-mosaic.css';
+import './mosaic-experiment-overrides.css';
 
-// Portrait is 768x1360 (roughly 9:16). This grid shape keeps tiles square
-// while the overall mosaic reads as the same portrait proportions.
-//
-// 29x51 (~1,479 cells, ~5x the 302-piece catalog) trades unique-image
-// variety for resolution: with only ~300 real photos, a coarser grid
-// forces obvious repeats right next to each other, while denser tiling
-// gives buildMosaicGrid's neighbor-avoidance more room to work and lets
-// the portrait read as a photomosaic instead of a 300-tile checkerboard.
+// Keep Claude's working mosaic runtime exactly as-is.
 const PORTRAIT_SRC = '/images/thomasina.jpg';
 const GRID_COLS = 29;
 const GRID_ROWS = 51;
@@ -109,68 +104,57 @@ export default function LivingMosaic() {
   }
 
   return (
-    <section className="living-mosaic" id="collection" ref={sectionRef}>
-      <div className="living-mosaic__header">
-        <span className="living-mosaic__eyebrow">Her Story &amp; Her Collection</span>
-        <h2>A portrait built from the collection.</h2>
-        <p>
-          Every tile below is a real, one-of-one piece. Tap one to reveal its name. Tap it again to see the
-          piece up close and adopt it. Together, they become her.
-        </p>
-        <div className="living-mosaic__actions">
-          <button type="button" className="button primary" onClick={() => setMeetSinaOpen(true)}>
-            Meet Sina
-          </button>
-          <button type="button" className="button ghost" onClick={revealAll}>
-            Reveal All
-          </button>
-          <button type="button" className="button ghost" onClick={resetAll}>
-            Reset Mosaic
-          </button>
+    <section className="living-mosaic living-mosaic--hero" id="collection" ref={sectionRef}>
+      <div className="living-mosaic__hero-shell">
+        <div className="living-mosaic__story">
+          <span className="living-mosaic__eyebrow">1 of 1 fused glass art</span>
+          <h1>She sees what others miss.</h1>
+          <p className="living-mosaic__lead">Each piece is handcrafted by Thomasina Schnepf. Once it&rsquo;s gone, it&rsquo;s gone.</p>
+          <p className="living-mosaic__story-copy">These are Sina&rsquo;s creations, arranged to become part of her portrait. Step back to see the artist. Get closer to see the details she sees.</p>
+          <div className="living-mosaic__hero-actions">
+            <Link className="button primary" to="/shop">Adopt a Piece</Link>
+            <button type="button" className="living-mosaic__story-link" onClick={() => setMeetSinaOpen(true)}>Meet the Artist &rarr;</button>
+          </div>
+        </div>
+
+        <div className="living-mosaic__visual">
+          <div className="living-mosaic__frame">
+            {(gridLoading || productsLoading) && (
+              <div className="living-mosaic__loading" role="status">Assembling the mosaic&hellip;</div>
+            )}
+            {gridError && (
+              <div className="living-mosaic__loading" role="status">The mosaic couldn&rsquo;t load right now. Please refresh to try again.</div>
+            )}
+            {!gridLoading && !gridError && !grid.length && (
+              <div className="living-mosaic__loading" role="status">No product photos are available yet to build the mosaic.</div>
+            )}
+            {!gridLoading && !gridError && grid.length > 0 && (
+              <div className="living-mosaic__grid" style={{ '--mosaic-cols': GRID_COLS, '--mosaic-rows': GRID_ROWS }}>
+                {grid.map((cell) => {
+                  const key = `${cell.col}-${cell.row}`;
+                  return (
+                    <MosaicTile
+                      key={key}
+                      cell={cell}
+                      product={cellProduct(cell)}
+                      flipped={flipped.has(key)}
+                      active={active}
+                      reducedMotion={reducedMotion}
+                      onTap={handleTap}
+                    />
+                  );
+                })}
+              </div>
+            )}
+          </div>
+          <p className="living-mosaic__caption">Step back to see Sina. Get closer to discover what she sees.</p>
         </div>
       </div>
 
-      <div className="living-mosaic__frame">
-        {(gridLoading || productsLoading) && (
-          <div className="living-mosaic__loading" role="status">
-            Assembling the mosaic&hellip;
-          </div>
-        )}
-        {gridError && (
-          <div className="living-mosaic__loading" role="status">
-            The mosaic couldn&rsquo;t load right now. Please refresh to try again.
-          </div>
-        )}
-        {!gridLoading && !gridError && !grid.length && (
-          <div className="living-mosaic__loading" role="status">
-            No product photos are available yet to build the mosaic.
-          </div>
-        )}
-        {!gridLoading && !gridError && grid.length > 0 && (
-          <div
-            className="living-mosaic__grid"
-            style={{ '--mosaic-cols': GRID_COLS, '--mosaic-rows': GRID_ROWS }}
-          >
-            {grid.map((cell) => {
-              const key = `${cell.col}-${cell.row}`;
-              return (
-                <MosaicTile
-                  key={key}
-                  cell={cell}
-                  product={cellProduct(cell)}
-                  flipped={flipped.has(key)}
-                  active={active}
-                  reducedMotion={reducedMotion}
-                  onTap={handleTap}
-                />
-              );
-            })}
-          </div>
-        )}
+      <div className="living-mosaic__secondary-actions">
+        <button type="button" className="button ghost" onClick={revealAll}>Reveal All Names</button>
+        <button type="button" className="button ghost" onClick={resetAll}>Reset Tiles</button>
       </div>
-      <p className="living-mosaic__caption">
-        Tap a tile once to flip it &middot; tap the flipped tile again to view &amp; adopt the piece
-      </p>
 
       {modalProduct && <ProductModal product={modalProduct} onClose={() => setModalProduct(null)} />}
       {meetSinaOpen && <MeetSinaPanel onClose={() => setMeetSinaOpen(false)} />}
