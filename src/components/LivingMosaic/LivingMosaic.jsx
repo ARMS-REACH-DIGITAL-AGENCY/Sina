@@ -8,7 +8,7 @@ import MeetSinaPanel from './MeetSinaPanel.jsx';
 import './living-mosaic.css';
 import './mosaic-experiment-overrides.css';
 
-const PORTRAIT_SRC = '/images/hero/thomasina-hero-full.jpg';
+const PORTRAIT_SRC = '/images/hero/PLQ-FG-LG-45.JPG';
 const GRID_COLS = 35;
 const GRID_ROWS = 43;
 const MIN_ZOOM = 1;
@@ -66,7 +66,8 @@ export default function LivingMosaic() {
           setGridLoading(false);
         }
       })
-      .catch(() => {
+      .catch((error) => {
+        console.error('Living Mosaic failed to build:', error);
         if (!cancelled) {
           setGridError(true);
           setGridLoading(false);
@@ -78,9 +79,9 @@ export default function LivingMosaic() {
   const cellProduct = useMemo(() => (cell) => (cell ? products[cell.productIndex] : null), [products]);
 
   const zoomProgress = (zoom - MIN_ZOOM) / (MAX_ZOOM - MIN_ZOOM);
-  const portraitAssist = Math.max(0, 0.42 * (1 - zoomProgress));
-  const tileImageOpacity = Math.min(1, 0.76 + zoomProgress * 0.24);
-  const tileTintOpacity = Math.max(0.05, 0.28 * (1 - zoomProgress));
+  const portraitAssist = Math.max(0, 0.38 * (1 - zoomProgress));
+  const tileImageOpacity = Math.min(1, 0.82 + zoomProgress * 0.18);
+  const tileTintOpacity = Math.max(0.03, 0.24 * (1 - zoomProgress));
 
   function handleTap(cell) {
     const key = `${cell.col}-${cell.row}`;

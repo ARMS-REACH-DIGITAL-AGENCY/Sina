@@ -1,7 +1,7 @@
-// Photomosaic mapping: sample the target portrait into a grid and match each
-// cell to the real product photo whose average color is closest. Portrait
-// sampling uses a cover crop so the source image is never stretched to fit the
-// mosaic's aspect ratio.
+// Photomosaic mapping for the living portrait.
+// The target portrait is cover-cropped without distortion. Product images are
+// sampled one at a time so a phone never has to decode the entire catalog at
+// once just to build the color map.
 
 function loadImage(src) {
   return new Promise((resolve) => {
@@ -13,10 +13,9 @@ function loadImage(src) {
   });
 }
 
-function drawCover(ctx, img, destWidth, destHeight, focalY = 0.34) {
+function drawCover(ctx, img, destWidth, destHeight, focalY = 0.42) {
   const targetAspect = destWidth / destHeight;
   const sourceAspect = img.width / img.height;
-
   let sx = 0;
   let sy = 0;
   let sw = img.width;
@@ -40,11 +39,8 @@ function sampleColorGrid(img, cols, rows, options = {}) {
   canvas.height = rows;
   const ctx = canvas.getContext('2d', { willReadFrequently: true });
 
-  if (options.cover) {
-    drawCover(ctx, img, cols, rows, options.focalY);
-  } else {
-    ctx.drawImage(img, 0, 0, cols, rows);
-  }
+  if (options.cover) drawCover(ctx, img, cols, rows, options.focalY);
+  else ctx.drawImage(img, 0, 0, cols, rows);
 
   const { data } = ctx.getImageData(0, 0, cols, rows);
   const cells = [];
@@ -52,7 +48,22 @@ function sampleColorGrid(img, cols, rows, options = {}) {
     const o = i * 4;
     cells.push([data[o], data[o + 1], data[o + 2]]);
   }
+  canvas.width = 1;
+  canvas.height = 1;
   return cells;
+}
+
+async function sampleProductColors(products) {
+  const available = [];
+  for (let productIndex = 0; productIndex < products.length; productIndex++) {
+    const img = await loadImage(products[productIndex].image);
+    if (!img) continue;
+    const color = sampleColorGrid(img, 1, 1)[0];
+    available.push({ productIndex, color });
+    // Give the browser a chance to release decoded image memory between files.
+    if (productIndex % 8 === 7) await new Promise((resolve) => setTimeout(resolve, 0));
+  }
+  return available;
 }
 
 function distanceSq(a, b) {
@@ -62,38 +73,19 @@ function distanceSq(a, b) {
   return dr * dr + dg * dg + db * db;
 }
 
-/**
- * @param {string} portraitSrc
- * @param {Array<{image: string}>} products
- * @param {number} cols
- * @param {number} rows
- * @returns {Promise<Array<{col:number, row:number, productIndex:number, color:[number,number,number]}>>}
- */
 export async function buildMosaicGrid({ portraitSrc, products, cols, rows }) {
   if (!products.length) return [];
 
-  const [portraitImg, ...productImgs] = await Promise.all([
-    loadImage(portraitSrc),
-    ...products.map((p) => loadImage(p.image)),
-  ]);
-
+  const portraitImg = await loadImage(portraitSrc);
   if (!portraitImg) throw new Error(`Failed to load portrait image: ${portraitSrc}`);
 
-  const available = productImgs
-    .map((img, productIndex) => ({ img, productIndex }))
-    .filter((entry) => entry.img);
+  const cellColors = sampleColorGrid(portraitImg, cols, rows, { cover: true, focalY: 0.42 });
+  const available = await sampleProductColors(products);
 
   if (available.length < products.length) {
-    console.warn(
-      `Living Mosaic: ${products.length - available.length} of ${products.length} product photos failed to load and were skipped.`
-    );
+    console.warn(`Living Mosaic: ${products.length - available.length} of ${products.length} product photos failed to load and were skipped.`);
   }
   if (!available.length) return [];
-
-  // The target portrait is cover-cropped, never distorted. A slightly upper
-  // focal point keeps the face where the hero composition needs it.
-  const cellColors = sampleColorGrid(portraitImg, cols, rows, { cover: true, focalY: 0.34 });
-  const productColors = available.map((entry) => sampleColorGrid(entry.img, 1, 1)[0]);
 
   const grid = [];
   let aboveRowChoices = new Array(cols).fill(-1);
@@ -103,11 +95,9 @@ export async function buildMosaicGrid({ portraitSrc, products, cols, rows }) {
     let leftChoice = -1;
 
     for (let col = 0; col < cols; col++) {
-      const idx = row * cols + col;
-      const cellColor = cellColors[idx];
-
-      const ranked = productColors
-        .map((color, i) => ({ productIndex: available[i].productIndex, d: distanceSq(cellColor, color) }))
+      const cellColor = cellColors[row * cols + col];
+      const ranked = available
+        .map((entry) => ({ productIndex: entry.productIndex, d: distanceSq(cellColor, entry.color) }))
         .sort((a, b) => a.d - b.d);
 
       let chosen = ranked[0];

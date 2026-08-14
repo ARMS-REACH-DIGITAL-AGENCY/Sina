@@ -1,0 +1,54 @@
+/* Experiment-only finishing layer: dark sticky navigation and macro-style mosaic crops. */
+.site-header {
+  position: sticky !important;
+  top: 0;
+  z-index: 1000;
+  background: rgba(15, 15, 14, .98) !important;
+  border-bottom: 1px solid rgba(217, 161, 91, .72) !important;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, .22) !important;
+  backdrop-filter: blur(12px);
+}
+
+.site-header .brand-logo {
+  content: url('/assets/brand/sinas-creations-white-logo.png');
+}
+
+.site-header .desktop-nav a {
+  color: rgba(247, 244, 236, .76) !important;
+}
+
+.site-header .desktop-nav a.active,
+.site-header .desktop-nav a:hover {
+  color: #d9a15b !important;
+}
+
+.site-header .menu-button span {
+  background: #f7f4ec !important;
+}
+
+.site-header .nav-cta {
+  background: #d9a15b !important;
+  border-color: #d9a15b !important;
+  color: #171816 !important;
+}
+
+/* Simulate the tight macro derivatives we ultimately want without changing
+   the commerce photos. Each repeated placement gets a deterministic close crop. */
+.mosaic-tile__face--front {
+  overflow: hidden;
+}
+
+.mosaic-tile__face--front img {
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: cover !important;
+  object-position: var(--crop-x, 50%) var(--crop-y, 50%) !important;
+  transform: scale(var(--crop-scale, 1.65)) !important;
+  transform-origin: var(--crop-x, 50%) var(--crop-y, 50%) !important;
+  filter: saturate(1.14) contrast(1.07) !important;
+}
+
+.living-mosaic__portrait-assist {
+  object-fit: cover !important;
+  object-position: center 40% !important;
+}
