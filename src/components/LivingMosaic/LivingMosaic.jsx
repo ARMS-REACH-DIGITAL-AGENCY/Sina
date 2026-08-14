@@ -7,12 +7,11 @@ import ProductModal from './ProductModal.jsx';
 import MeetSinaPanel from './MeetSinaPanel.jsx';
 import './living-mosaic.css';
 
-// 29 x 51 = 1,479 placements. Keep the current real portrait asset while we
-// test the interaction and visual treatment. Swapping portrait assets later is
-// intentionally a one-line change once the chosen source image is in /public.
-const PORTRAIT_SRC = '/images/thomasina.jpg';
-const GRID_COLS = 29;
-const GRID_ROWS = 51;
+// Real image asset already in the Sina repo history. This wider portrait gives
+// the face more horizontal resolution than the previous 9:16 source.
+const PORTRAIT_SRC = '/images/hero/thomasina-hero-full.jpg';
+const GRID_COLS = 35;
+const GRID_ROWS = 43; // 1,505 placements
 const MIN_ZOOM = 1;
 const MAX_ZOOM = 3;
 const ZOOM_STEP = 0.5;
@@ -88,12 +87,13 @@ export default function LivingMosaic() {
     return (cell) => (cell ? products[cell.productIndex] : null);
   }, [products]);
 
-  // Wide view: lightly assist the eye with the target portrait and let the
-  // sampled cell color show through each product photo. As the visitor zooms
-  // in, both aids fade away so the individual creations become the experience.
+  // At 1x we deliberately let the actual portrait help the human eye resolve
+  // the larger image. As the shopper zooms in, the assist disappears and the
+  // creations become fully opaque. This is an intentional optical transition,
+  // not a permanent filter over the products.
   const zoomProgress = (zoom - MIN_ZOOM) / (MAX_ZOOM - MIN_ZOOM);
-  const portraitAssist = Math.max(0, 0.2 * (1 - zoomProgress));
-  const tileImageOpacity = Math.min(1, 0.86 + zoomProgress * 0.14);
+  const portraitAssist = Math.max(0, 0.34 * (1 - zoomProgress));
+  const tileImageOpacity = Math.min(1, 0.72 + zoomProgress * 0.28);
 
   function handleTap(cell) {
     const key = `${cell.col}-${cell.row}`;
@@ -205,28 +205,10 @@ export default function LivingMosaic() {
           </div>
 
           <div className="living-mosaic__zoom-controls" aria-label="Mosaic zoom controls">
-            <button
-              type="button"
-              onClick={() => changeZoom(zoom - ZOOM_STEP)}
-              disabled={zoom <= MIN_ZOOM}
-              aria-label="Zoom out of mosaic"
-              title="Step back"
-            >
-              &minus;
-            </button>
+            <button type="button" onClick={() => changeZoom(zoom - ZOOM_STEP)} disabled={zoom <= MIN_ZOOM} aria-label="Zoom out of mosaic" title="Step back">&minus;</button>
             <span>{zoom.toFixed(1)}&times;</span>
-            <button
-              type="button"
-              onClick={() => changeZoom(zoom + ZOOM_STEP)}
-              disabled={zoom >= MAX_ZOOM}
-              aria-label="Zoom into mosaic"
-              title="Get closer"
-            >
-              +
-            </button>
-            <button type="button" className="living-mosaic__zoom-reset" onClick={() => changeZoom(1)}>
-              Reset
-            </button>
+            <button type="button" onClick={() => changeZoom(zoom + ZOOM_STEP)} disabled={zoom >= MAX_ZOOM} aria-label="Zoom into mosaic" title="Get closer">+</button>
+            <button type="button" className="living-mosaic__zoom-reset" onClick={() => changeZoom(1)}>Reset</button>
           </div>
           <p className="living-mosaic__microcopy">Step back to see Sina. Get closer to discover what she sees.</p>
         </div>
@@ -241,13 +223,9 @@ export default function LivingMosaic() {
             Thomasina experiences her work up close&mdash;finding color, texture, edges, and details most of us pass by. Try seeing it her way. Move closer. Explore the mosaic. You may be surprised by what you find.
           </p>
           <div className="living-mosaic__hero-actions">
-            <button type="button" className="button primary" onClick={getCloser}>
-              Get Closer
-            </button>
+            <button type="button" className="button primary" onClick={getCloser}>Get Closer</button>
             <Link className="button ghost" to="/shop">Adopt a Creation</Link>
-            <button type="button" className="living-mosaic__story-link" onClick={() => setMeetSinaOpen(true)}>
-              Meet Sina &rarr;
-            </button>
+            <button type="button" className="living-mosaic__story-link" onClick={() => setMeetSinaOpen(true)}>Meet Sina &rarr;</button>
           </div>
           <div className="living-mosaic__discovery-note">
             <strong>Look closely.</strong>
