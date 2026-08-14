@@ -4,6 +4,7 @@ import App from './App'
 import './styles/global.css'
 import './styles/logo-layout-fixes.css'
 import './styles/home-hero-mosaic-preview.css'
+import './styles/living-mosaic-composition-overrides.css'
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>

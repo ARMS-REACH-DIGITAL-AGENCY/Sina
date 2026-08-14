@@ -70,15 +70,15 @@ function HomeHero() {
   return (
     <section className="mockup-hero target-home-hero">
       <div className="mockup-hero-copy">
-        <span className="mockup-eyebrow">1-of-1 fused glass art</span>
-        <h1>1-of-1 fused glass art.</h1>
-        <em>She sees what others miss.</em>
+        <span className="mockup-eyebrow">1-of-1 named glass creations</span>
+        <h1>Named glass creations.</h1>
+        <em>The closer you get, the more you see.</em>
         <div className="gold-rule"><span></span></div>
-        <p>Every piece begins with a spark of inspiration — and becomes a story only glass can tell.</p>
-        <Link className="mockup-adopt-button" to="/shop">Adopt a Piece <span>♡</span></Link>
+        <p>Thomasina “Sina” Schnepf creates through a different kind of vision — one shaped by closeness, light, color, texture, and touch.</p>
+        <Link className="mockup-adopt-button" to="/shop">Adopt a Named Creation <span>♡</span></Link>
       </div>
-      <div className="mockup-hero-photo" aria-label="Thomasina Schnepf holding a fused glass creation">
-        <img src={heroImagePath} alt="Thomasina Schnepf holding one of her fused glass creations" />
+      <div className="mockup-hero-photo" aria-label="Thomasina Schnepf holding a glass creation">
+        <img src={heroImagePath} alt="Thomasina Schnepf holding one of her glass creations" />
       </div>
     </section>
   );
@@ -118,7 +118,7 @@ function JaneFeature() {
           <img src={jane.image} alt="Jane pendant detail thumbnail" />
         </div>
         <div className="jane-main-image">
-          <img src={jane.image} alt="Jane, PND-SM-183 fused glass pendant" />
+          <img src={jane.image} alt="Jane, PND-SM-183 glass pendant" />
         </div>
       </div>
       <div className="jane-copy">
@@ -130,7 +130,7 @@ function JaneFeature() {
         <p>{jane.description} She is 1-of-1, named, numbered, and released once.</p>
         <ul>
           <li>1-of-1 original</li>
-          <li>Fused glass, handcrafted</li>
+          <li>Glass creation, handcrafted</li>
           <li>Pendant size: small</li>
           <li>Shipping included unless noted otherwise</li>
         </ul>
@@ -145,8 +145,8 @@ function FeaturedProducts() {
     <section className="featured-products">
       <div className="section-header">
         <span>The First Release</span>
-        <h2>Available pieces from the local fallback catalog.</h2>
-        <p>These cards are temporary until the Shopify catalog becomes the source of truth.</p>
+        <h2>Named creations available for adoption.</h2>
+        <p>These cards use the local fallback catalog until Shopify becomes the source of truth.</p>
       </div>
       <div className="product-grid">
         {products.slice(0, 6).map((product) => <ProductCard key={product.sku} product={product} />)}
@@ -175,7 +175,7 @@ function CTA({ title, copy }) {
     <section className="join-strip">
       <h2>{title}</h2>
       <p>{copy}</p>
-      <Link to="/shop">Explore available pieces</Link>
+      <Link to="/shop">Explore available creations</Link>
     </section>
   );
 }
@@ -196,14 +196,15 @@ export function Home() {
 export function Story() {
   return (
     <Layout>
-      <PageHero eyebrow="The Artist" title="The artist who works closer than sight." copy="Thomasina's work is shaped by light, touch, form, color, and the way she has learned to see the world closely." button="View the collection" to="/collections" />
+      <PageHero eyebrow="The Artist" title="The artist who works closer than sight." copy="Thomasina's work is shaped by light, touch, form, color, and the way she has learned to see the world closely." button="View the creations" to="/collections" />
       <section className="story-section">
         <img src={heroImagePath} alt="Thomasina Schnepf" />
         <div>
           <span>About Thomasina Schnepf</span>
-          <h2>She sees what others miss.</h2>
-          <p>At age four, a tumor on her optic nerve changed how she sees the world. Her work now turns that closeness into fused glass pieces that can be held, worn, gifted, and remembered.</p>
-          <p>Every piece is created by hand and released once.</p>
+          <h2>She sees by coming closer.</h2>
+          <p>In Queen Creek, AZ, Thomasina “Sina” Schnepf creates glass pieces shaped by light, color, texture, and touch.</p>
+          <p>At age four, a tumor on her optic nerve changed how she sees the world. Her work now turns that closeness into named creations that can be held, worn, displayed, gifted, and remembered.</p>
+          <p>Every creation is made by hand and released once.</p>
         </div>
       </section>
     </Layout>
@@ -213,7 +214,7 @@ export function Story() {
 export function Collections() {
   return (
     <Layout>
-      <PageHero eyebrow="The Collections" title="One body of work. Many ways to adopt." copy="Browse the first MVP categories and pieces while the Shopify catalog connection is prepared." button="Shop pieces" to="/shop" />
+      <PageHero eyebrow="The Creations" title="One body of work. Many ways to adopt." copy="Browse the first MVP categories and pieces while the Shopify catalog connection is prepared." button="Shop creations" to="/shop" />
       <section className="collection-grid">
         {collections.filter((item) => item !== 'All').map((collection) => (
           <Link className="collection-card" key={collection} to={`/shop?collection=${encodeURIComponent(collection)}`}>
@@ -238,7 +239,7 @@ export function Collaborate() {
 export function Wholesale() {
   return (
     <Layout>
-      <PageHero eyebrow="Wholesale" title="Carry Sina's Creations in your store." copy="Retailers, galleries, boutiques, and event partners can inquire about carrying selected 1-of-1 creations." button="Apply for wholesale" to="/schedule" />
+      <PageHero eyebrow="Wholesale" title="Carry Sina's Creations in your store." copy="Retailers, galleries, boutiques, and event partners can inquire about carrying selected 1-of-1 named creations." button="Apply for wholesale" to="/schedule" />
       <FormPage title="Wholesale inquiry" />
     </Layout>
   );
@@ -295,11 +296,11 @@ function Footer() {
     <footer className="site-footer">
       <div>
         <strong>Sina's Creations</strong>
-        <p>1-of-1 fused glass art. Made with heart.</p>
+        <p>1-of-1 named glass creations. Handmade in Queen Creek, AZ.</p>
       </div>
       <nav>
         <Link to="/story">The Artist</Link>
-        <Link to="/collections">Collections</Link>
+        <Link to="/collections">Creations</Link>
         <Link to="/shop">Adopt</Link>
         <Link to="/schedule">Contact</Link>
       </nav>
@@ -310,7 +311,7 @@ function Footer() {
 export function NotFound() {
   return (
     <Layout>
-      <PageHero eyebrow="404" title="That page is not available." copy="Return to the collection or the home page." button="Return home" to="/" />
+      <PageHero eyebrow="404" title="That page is not available." copy="Return to the creations or the home page." button="Return home" to="/" />
     </Layout>
   );
 }
