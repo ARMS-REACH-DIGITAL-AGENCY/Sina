@@ -8,32 +8,18 @@ import MeetSinaPanel from './MeetSinaPanel.jsx';
 import './living-mosaic.css';
 import './mosaic-experiment-overrides.css';
 
-// Claude's working matcher and 29x51 grid stay unchanged.
+// Claude's working matcher and 29x51 grid stay unchanged for Gate 1.
 const PORTRAIT_SRC = '/images/hero/PLQ-FG-LG-45.JPG';
 const GRID_COLS = 29;
 const GRID_ROWS = 51;
 
-function usePrefersReducedMotion() {
-  const [reduced, setReduced] = useState(false);
-  useEffect(() => {
-    const mq = window.matchMedia('(prefers-reduced-motion: reduce)');
-    setReduced(mq.matches);
-    const onChange = (e) => setReduced(e.matches);
-    mq.addEventListener('change', onChange);
-    return () => mq.removeEventListener('change', onChange);
-  }, []);
-  return reduced;
-}
-
 export default function LivingMosaic() {
   const { products, loading: productsLoading } = useMosaicProducts();
-  const reducedMotion = usePrefersReducedMotion();
 
   const [grid, setGrid] = useState([]);
   const [gridLoading, setGridLoading] = useState(true);
   const [gridError, setGridError] = useState(false);
   const [portraitLoaded, setPortraitLoaded] = useState(false);
-  const [flipped, setFlipped] = useState(() => new Set());
   const [modalProduct, setModalProduct] = useState(null);
   const [meetSinaOpen, setMeetSinaOpen] = useState(false);
   const [active, setActive] = useState(false);
@@ -65,8 +51,6 @@ export default function LivingMosaic() {
       .then((result) => {
         if (!cancelled) {
           setGrid(result);
-          // Start in the named-creations view. A tap now opens the piece directly.
-          setFlipped(new Set(result.map((cell) => `${cell.col}-${cell.row}`)));
           setGridLoading(false);
         }
       })
@@ -88,25 +72,7 @@ export default function LivingMosaic() {
   const mosaicReady = portraitLoaded && !productsLoading && !gridLoading && !gridError && grid.length > 0;
 
   function handleTap(cell) {
-    const key = `${cell.col}-${cell.row}`;
-    if (flipped.has(key)) {
-      setModalProduct(cellProduct(cell));
-      return;
-    }
-
-    setFlipped((prev) => {
-      const next = new Set(prev);
-      next.add(key);
-      return next;
-    });
-  }
-
-  function revealAll() {
-    setFlipped(new Set(grid.map((cell) => `${cell.col}-${cell.row}`)));
-  }
-
-  function resetAll() {
-    setFlipped(new Set());
+    setModalProduct(cellProduct(cell));
   }
 
   return (
@@ -137,9 +103,7 @@ export default function LivingMosaic() {
                         key={key}
                         cell={cell}
                         product={cellProduct(cell)}
-                        flipped={flipped.has(key)}
                         active={active}
-                        reducedMotion={reducedMotion}
                         onTap={handleTap}
                       />
                     );
@@ -159,17 +123,13 @@ export default function LivingMosaic() {
               {gridError
                 ? 'The portrait is visible. The mosaic could not be assembled right now.'
                 : mosaicReady
-                  ? 'The named mosaic is ready. Tap a name to meet the creation.'
+                  ? 'The mosaic is ready. Tap a creation to view its details.'
                   : 'The portrait is visible while the mosaic is being assembled.'}
             </div>
           </div>
 
           <div className="living-mosaic__visual-footer">
             <p className="living-mosaic__caption">Step back to see the artist. Come closer to meet the creations.</p>
-            <div className="living-mosaic__secondary-actions">
-              <button type="button" className="button ghost" onClick={revealAll}>Reveal All Names</button>
-              <button type="button" className="button ghost" onClick={resetAll}>Reset Tiles</button>
-            </div>
           </div>
         </div>
       </div>
