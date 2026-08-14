@@ -107,10 +107,11 @@ export default function LivingMosaic() {
     <section className="living-mosaic living-mosaic--hero" id="collection" ref={sectionRef}>
       <div className="living-mosaic__hero-shell">
         <div className="living-mosaic__story">
-          <span className="living-mosaic__eyebrow">1 of 1 fused glass art</span>
-          <h1>She sees what others miss.</h1>
-          <p className="living-mosaic__lead">Every image in this portrait is one of Sina&rsquo;s creations. From a distance, they become the artist. Up close, each one becomes itself.</p>
-          <p className="living-mosaic__story-copy">Thomasina works close to her glass, finding color, texture, and detail others might pass by. Come closer. See the collection the way she does.</p>
+          <span className="living-mosaic__eyebrow">Her Story &amp; Her Collection</span>
+          <h1>A portrait built from the creations only she could see.</h1>
+          <p className="living-mosaic__lead">From a distance, you see Sina.</p>
+          <p className="living-mosaic__story-copy">Up close, you meet her creations &mdash; each one shaped from glass, light, color, and touch. Every tile represents a named piece: wearable art, display art, gifts, keepsakes, and 1 of 1 creations waiting for the right person to find them.</p>
+          <p className="living-mosaic__story-copy">Touch a tile to reveal its name. Open the creation to read its story. Adopt the one that speaks to you.</p>
           <div className="living-mosaic__hero-actions">
             <Link className="button primary" to="/shop">Adopt a Piece</Link>
             <button type="button" className="living-mosaic__story-link" onClick={() => setMeetSinaOpen(true)}>Meet Sina &rarr;</button>
