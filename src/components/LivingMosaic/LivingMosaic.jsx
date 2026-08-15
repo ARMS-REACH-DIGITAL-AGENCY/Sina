@@ -279,11 +279,6 @@ export default function LivingMosaic() {
             <p className="living-mosaic__lead">Step back to see this amazing legally blind artist.</p>
             <p className="living-mosaic__lead">Come closer to meet her 1-of-1 creations.</p>
           </div>
-
-          <div className="living-mosaic__hero-actions">
-            <Link className="button primary" to="/shop">Adopt the one that finds you.</Link>
-            <Link className="button ghost" to="/meet-sina">A Message From The Designer</Link>
-          </div>
         </div>
 
         <div className="living-mosaic__visual">
@@ -337,20 +332,21 @@ export default function LivingMosaic() {
                   : 'The portrait is visible while the mosaic is being assembled.'}
             </div>
           </div>
+        </div>
 
-          <div className="living-mosaic__visual-footer">
-            <p className="living-mosaic__caption">Step back to see Sina. Come closer to meet the creations. Pinch and drag inside the frame to explore.</p>
-            <div className="living-mosaic__secondary-actions">
-              <button
-                type="button"
-                className={`button ghost${showNames ? ' is-active' : ''}`}
-                onClick={handleToggleNames}
-              >
-                {showNames ? 'Hide Names' : 'Show Names'}
-              </button>
-              <button type="button" className="button ghost" onClick={handleResetTiles}>Reset Tiles</button>
-            </div>
-          </div>
+        <p className="living-mosaic__baseline-hint">Pinch and drag inside the portrait to explore the creations up close.</p>
+
+        <div className="living-mosaic__cta-row">
+          <Link className="button primary" to="/shop">Adopt A Creation</Link>
+          <Link className="button ghost" to="/meet-sina">A Message From The Designer</Link>
+          <button
+            type="button"
+            className={`button ghost${showNames ? ' is-active' : ''}`}
+            onClick={handleToggleNames}
+          >
+            {showNames ? 'Hide Names' : 'Show Names'}
+          </button>
+          <button type="button" className="button ghost" onClick={handleResetTiles}>Reset Tiles</button>
         </div>
       </div>
 
