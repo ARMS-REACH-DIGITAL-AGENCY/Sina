@@ -30,7 +30,8 @@
 }
 
 .meet-sina-pullquote {
-  max-width: 24ch;
+  max-width: none;
+  width: 100%;
   margin: 6px 0;
   color: var(--earth-brown);
   font-family: var(--font-display);
@@ -169,7 +170,6 @@
   }
 
   .meet-sina-pullquote {
-    max-width: none;
     margin: 0;
     font-size: clamp(18px, 4vw, 24px);
     line-height: 1.5;
