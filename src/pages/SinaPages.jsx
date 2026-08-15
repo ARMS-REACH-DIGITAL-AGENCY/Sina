@@ -28,6 +28,15 @@ const footerConnect = [
   { to: '/schedule', label: 'Schedule' },
 ];
 
+const pageHeroImages = {
+  artist: '/images/thomasina.jpg',
+  creations: '/images/hero/PLQ-FG-LG-45.JPG',
+  commission: '/images/products/111.JPG',
+  wholesale: '/images/products/67.JPG',
+  shop: '/images/products/103.JPG',
+  schedule: '/images/products/100.JPG',
+};
+
 function Layout({ children }) {
   const [open, setOpen] = useState(false);
   const close = () => setOpen(false);
@@ -136,7 +145,7 @@ export function Story() {
         copy="Thomasina Schnepf creates by touch, light, color, and close attention. Her work is personal, tactile, and made to be worn, displayed, gifted, and remembered one original at a time."
         primary="See the Creations"
         primaryTo="/creations"
-        backgroundImage="/images/thomasina.jpg"
+        backgroundImage={pageHeroImages.artist}
         backgroundPosition="78% 32%"
       />
       <section className="cream-section meet-sina-page">
@@ -186,7 +195,7 @@ export function Collections() {
         copy="Pendants, wire-wrapped pieces, necklaces, plaques, plates, wall art, lanyards, and sets &mdash; each one made by hand and released as its own original creation."
         primary="Shop Available Pieces"
         primaryTo="/shop"
-        backgroundImage="/images/hero/PLQ-FG-LG-45.JPG"
+        backgroundImage={pageHeroImages.creations}
         backgroundPosition="78% center"
       />
       <section className="cream-section collection-grid">
@@ -210,8 +219,8 @@ export function Collaborate() {
         copy="If you want a piece shaped around a person, memory, color story, or meaning, start the conversation here and we will guide the next step together."
         primary="Start a Commission"
         primaryTo="/schedule"
-        backgroundImage="/images/thomasina.jpg"
-        backgroundPosition="74% 36%"
+        backgroundImage={pageHeroImages.commission}
+        backgroundPosition="76% 36%"
       />
       <FormPage title="Commission inquiry" intro="Tell us about the person, palette, occasion, symbolism, or feeling you want the piece to carry." />
     </Layout>
@@ -227,8 +236,8 @@ export function Wholesale() {
         copy="Retailers, galleries, boutiques, and community partners can apply to carry selected 1 of 1 creations, adoption cards, and story-based displays."
         primary="Apply for Wholesale"
         primaryTo="/schedule"
-        backgroundImage="/images/hero/PLQ-FG-LG-45.JPG"
-        backgroundPosition="72% center"
+        backgroundImage={pageHeroImages.wholesale}
+        backgroundPosition="74% center"
       />
       <FormPage title="Wholesale application" intro="Tell us about your store, gallery, boutique, or event space and the type of pieces you would like to carry." wholesale />
     </Layout>
@@ -257,8 +266,8 @@ export function Shop() {
         copy="Each piece shown here is handmade, named, priced, and available as a 1 of 1 creation."
         primary="Ask About a Piece"
         primaryTo="/schedule"
-        backgroundImage="/images/hero/PLQ-FG-LG-45.JPG"
-        backgroundPosition="80% 42%"
+        backgroundImage={pageHeroImages.shop}
+        backgroundPosition="78% 42%"
       />
       <section className="shop-section">
         <div className="tabs" role="tablist" aria-label="Filter products by collection">
@@ -309,8 +318,8 @@ export function Schedule() {
         copy="Ask about an available piece, request a commission, explore wholesale, or reach out after reading Sina's message."
         primary="View Available Pieces"
         primaryTo="/shop"
-        backgroundImage="/images/thomasina.jpg"
-        backgroundPosition="76% 28%"
+        backgroundImage={pageHeroImages.schedule}
+        backgroundPosition="74% 34%"
       />
       <FormPage title="Book your conversation" intro="Send the details and we will follow up with the right next step." />
     </Layout>
