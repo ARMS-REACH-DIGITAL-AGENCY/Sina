@@ -37,6 +37,20 @@ const pageHeroImages = {
   schedule: '/images/products/100.JPG',
 };
 
+const inquiryOptions = ['Adoption', 'Commission', 'Wholesale', 'Meet Sina', 'Gift Question', 'General Question'];
+
+function createInitialFormState(lockedInterest = '') {
+  return {
+    firstName: '',
+    lastName: '',
+    email: '',
+    phone: '',
+    businessName: '',
+    interest: lockedInterest,
+    message: '',
+  };
+}
+
 function Layout({ children }) {
   const [open, setOpen] = useState(false);
   const close = () => setOpen(false);
@@ -222,7 +236,11 @@ export function Collaborate() {
         backgroundImage={pageHeroImages.commission}
         backgroundPosition="76% 36%"
       />
-      <FormPage title="Commission inquiry" intro="Tell us about the person, palette, occasion, symbolism, or feeling you want the piece to carry." />
+      <FormPage
+        title="Commission inquiry"
+        intro="Tell us about the person, palette, occasion, symbolism, or feeling you want the piece to carry."
+        lockedInterest="Commission"
+      />
     </Layout>
   );
 }
@@ -239,7 +257,12 @@ export function Wholesale() {
         backgroundImage={pageHeroImages.wholesale}
         backgroundPosition="74% center"
       />
-      <FormPage title="Wholesale application" intro="Tell us about your store, gallery, boutique, or event space and the type of pieces you would like to carry." wholesale />
+      <FormPage
+        title="Wholesale application"
+        intro="Tell us about your store, gallery, boutique, or event space and the type of pieces you would like to carry."
+        wholesale
+        lockedInterest="Wholesale"
+      />
     </Layout>
   );
 }
@@ -326,7 +349,59 @@ export function Schedule() {
   );
 }
 
-function FormPage({ title, intro, wholesale = false }) {
+function FormPage({ title, intro, wholesale = false, lockedInterest = '' }) {
+  const [formState, setFormState] = useState(() => createInitialFormState(lockedInterest));
+  const [status, setStatus] = useState({ tone: 'idle', message: '' });
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const handleChange = (event) => {
+    const { name, value } = event.target;
+    setFormState((current) => ({ ...current, [name]: value }));
+  };
+
+  const handleSubmit = async (event) => {
+    event.preventDefault();
+
+    if (!formState.email.trim() && !formState.phone.trim()) {
+      setStatus({ tone: 'error', message: 'Please include either an email address or a phone number so we can follow up.' });
+      return;
+    }
+
+    setIsSubmitting(true);
+    setStatus({ tone: 'idle', message: '' });
+
+    try {
+      const response = await fetch('/api/highlevel/contact', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          formType: formState.interest || lockedInterest || 'General Question',
+          firstName: formState.firstName,
+          lastName: formState.lastName,
+          email: formState.email,
+          phone: formState.phone,
+          businessName: wholesale ? formState.businessName : '',
+          message: formState.message,
+        }),
+      });
+
+      const result = await response.json().catch(() => ({}));
+
+      if (!response.ok) {
+        throw new Error(result.error || 'We could not save your information just yet. Please try again.');
+      }
+
+      setFormState(createInitialFormState(lockedInterest));
+      setStatus({ tone: 'success', message: result.message || 'Thanks. Your information has been sent and we will follow up soon.' });
+    } catch (error) {
+      setStatus({ tone: 'error', message: error.message || 'Something went wrong while sending your form. Please try again.' });
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
   return (
     <section className="cream-section form-layout">
       <div>
@@ -335,15 +410,29 @@ function FormPage({ title, intro, wholesale = false }) {
           {['Adoption inquiry', 'Commission', 'Wholesale', 'Meet Sina', 'Gift question', 'General question'].map((item) => <div key={item}>{item}</div>)}
         </div>
       </div>
-      <form className="lead-form">
-        <label>First name<input placeholder="First name" /></label>
-        <label>Last name<input placeholder="Last name" /></label>
-        <label>Email<input placeholder="you@email.com" /></label>
-        <label>Phone<input placeholder="(555) 000-0000" /></label>
-        {wholesale && <label>Business name<input placeholder="Business or gallery" /></label>}
-        <label>Interest<select defaultValue=""><option value="" disabled>Select one...</option><option>Adoption</option><option>Commission</option><option>Wholesale</option><option>Meet Sina</option></select></label>
-        <label className="full">Message<textarea placeholder="Tell us what you have in mind..." /></label>
-        <button type="button" className="button primary form-button">Submit</button>
+      <form className="lead-form" onSubmit={handleSubmit}>
+        <label>First name<input name="firstName" value={formState.firstName} onChange={handleChange} placeholder="First name" required /></label>
+        <label>Last name<input name="lastName" value={formState.lastName} onChange={handleChange} placeholder="Last name" required /></label>
+        <label>Email<input name="email" type="email" value={formState.email} onChange={handleChange} placeholder="you@email.com" /></label>
+        <label>Phone<input name="phone" value={formState.phone} onChange={handleChange} placeholder="(555) 000-0000" /></label>
+        {wholesale && <label>Business name<input name="businessName" value={formState.businessName} onChange={handleChange} placeholder="Business or gallery" /></label>}
+        {lockedInterest ? (
+          <label>
+            Inquiry type
+            <input name="interest" value={lockedInterest} readOnly />
+          </label>
+        ) : (
+          <label>
+            Interest
+            <select name="interest" value={formState.interest} onChange={handleChange} required>
+              <option value="" disabled>Select one...</option>
+              {inquiryOptions.map((option) => <option key={option} value={option}>{option}</option>)}
+            </select>
+          </label>
+        )}
+        <label className="full">Message<textarea name="message" value={formState.message} onChange={handleChange} placeholder="Tell us what you have in mind..." required /></label>
+        <button type="submit" className="button primary form-button" disabled={isSubmitting}>{isSubmitting ? 'Submitting...' : 'Submit'}</button>
+        {status.message && <p className={`form-status form-status-${status.tone}`} role="status">{status.message}</p>}
       </form>
     </section>
   );
