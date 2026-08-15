@@ -357,10 +357,26 @@ function ProductCardDescription({ product }) {
 function ProductCard({ product }) {
   const [showBack, setShowBack] = React.useState(false);
 
+  const toggleCard = () => setShowBack((current) => !current);
+  const handleKeyDown = (event) => {
+    if (event.key === 'Enter' || event.key === ' ') {
+      event.preventDefault();
+      toggleCard();
+    }
+  };
+
   return (
-    <article className={`product-card product-card--detail${showBack ? ' is-back' : ''}`}>
-      {!showBack ? (
-        <>
+    <article
+      className={`product-card product-card--detail${showBack ? ' is-back' : ''}`}
+      role="button"
+      tabIndex={0}
+      aria-pressed={showBack}
+      aria-label={`${product.name} product card. ${showBack ? 'Showing full details.' : 'Showing front of card.'} Activate to flip.`}
+      onClick={toggleCard}
+      onKeyDown={handleKeyDown}
+    >
+      <div className="product-card__inner">
+        <div className="product-card__face product-card__face--front">
           <div className="product-image"><img src={product.image} alt={`${product.name}, ${product.category} by Sina's Creations`} /></div>
           <div className="product-body">
             <div className="sku-row"><span>{product.category}</span><strong>SKU {product.sku}</strong></div>
@@ -368,26 +384,22 @@ function ProductCard({ product }) {
             <h3>{product.name}</h3>
             <p>{product.line}</p>
             <div className="price-row"><span>Adoption price</span><strong>${product.price}</strong></div>
-            <div className="product-card__actions">
-              <Link className="small-link" to="/schedule">Ask about this piece &rarr;</Link>
-              <button type="button" className="small-link product-card__flip-toggle" onClick={() => setShowBack(true)}>Flip for full details &rarr;</button>
-            </div>
-          </div>
-        </>
-      ) : (
-        <div className="product-body product-body--back">
-          <div className="sku-row"><span>{product.category}</span><strong>SKU {product.sku}</strong></div>
-          <h3>{product.name}</h3>
-          <ProductCardDescription product={product} />
-          <div className="price-row"><span>Adoption price</span><strong>${product.price}</strong></div>
-          <button type="button" className="button primary product-card__disabled-cta" disabled aria-disabled="true">Adoption Coming Soon</button>
-          <p className="product-card__disabled-note">Inventory is being updated, so adoption checkout is temporarily paused.</p>
-          <div className="product-card__actions product-card__actions--back">
-            <Link className="small-link" to="/schedule">Ask about this piece &rarr;</Link>
-            <button type="button" className="small-link product-card__flip-toggle" onClick={() => setShowBack(false)}>&larr; Back to front</button>
+            <p className="product-card__flip-hint">Tap anywhere to flip for full details.</p>
           </div>
         </div>
-      )}
+
+        <div className="product-card__face product-card__face--back">
+          <div className="product-body product-body--back">
+            <div className="sku-row"><span>{product.category}</span><strong>SKU {product.sku}</strong></div>
+            <h3>{product.name}</h3>
+            <ProductCardDescription product={product} />
+            <div className="price-row"><span>Adoption price</span><strong>${product.price}</strong></div>
+            <button type="button" className="button primary product-card__disabled-cta" disabled aria-disabled="true">Adoption Coming Soon</button>
+            <p className="product-card__disabled-note">Inventory is being updated, so adoption checkout is temporarily paused.</p>
+            <p className="product-card__flip-hint">Tap anywhere to flip back.</p>
+          </div>
+        </div>
+      </div>
     </article>
   );
 }
