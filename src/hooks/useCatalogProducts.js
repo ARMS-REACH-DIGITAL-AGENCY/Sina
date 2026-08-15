@@ -1,13 +1,24 @@
 import { useEffect, useState } from 'react';
-import { collections as localCollections, products as localProducts } from '../data/products.js';
+import { products as localProducts } from '../data/products.js';
 
-const preferredCollectionOrder = localCollections;
+const preferredCollectionOrder = [
+  'Pendants',
+  'Wire Wrapped',
+  'Necklaces',
+  'Ocean Necklaces',
+  'Lanyards',
+  'Plates',
+  'Wall Art',
+  'Charms',
+  'Sets',
+];
 
 function deriveCollections(products) {
   const discovered = [...new Set(products.map((product) => product.category).filter(Boolean))];
   const ordered = preferredCollectionOrder.filter((name) => discovered.includes(name));
-  const extras = discovered.filter((name) => !ordered.includes(name)).sort((left, right) => left.localeCompare(right));
-  return [...ordered, ...extras];
+  const missingPreferred = preferredCollectionOrder.filter((name) => !ordered.includes(name));
+  const extras = discovered.filter((name) => !preferredCollectionOrder.includes(name)).sort((left, right) => left.localeCompare(right));
+  return [...ordered, ...missingPreferred, ...extras];
 }
 
 const fallbackCollections = deriveCollections(localProducts);
