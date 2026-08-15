@@ -119,30 +119,39 @@
 
   .meet-sina-mobile-headline {
     display: grid;
-    grid-template-columns: minmax(0, 1fr) 132px;
+    grid-template-columns: minmax(0, 1fr) 158px;
     align-items: start;
-    gap: 16px;
+    gap: 18px;
   }
 
   .meet-sina-headline {
     min-width: 0;
   }
 
+  .meet-sina-headline span {
+    max-width: 12ch;
+    margin-bottom: 14px;
+  }
+
   .meet-sina-headline h2 {
+    max-width: 5.4ch;
     margin-bottom: 0;
+    font-size: clamp(44px, 9.4vw, 62px);
+    line-height: .95;
+    letter-spacing: -.04em;
   }
 
   .meet-sina-photo-card--mobile-headline {
     display: block;
     align-self: start;
-    margin-top: 46px;
+    margin-top: 68px;
   }
 
   .meet-sina-photo-card--mobile-headline img {
-    aspect-ratio: 1 / 1.08;
+    aspect-ratio: 0.72 / 1;
     min-height: 0;
     max-height: none;
-    object-position: center 18%;
+    object-position: center 22%;
   }
 
   .meet-sina-media {
@@ -165,8 +174,9 @@
   }
 
   .meet-sina-pullquote {
-    max-width: none;
-    font-size: clamp(24px, 7vw, 34px);
+    max-width: 13ch;
+    font-size: clamp(24px, 6.2vw, 36px);
+    line-height: 1.28;
   }
 
   .meet-sina-photo-card img,
@@ -184,11 +194,20 @@
 
 @media (max-width: 420px) {
   .meet-sina-mobile-headline {
-    grid-template-columns: minmax(0, 1fr) 116px;
-    gap: 14px;
+    grid-template-columns: minmax(0, 1fr) 142px;
+    gap: 16px;
+  }
+
+  .meet-sina-headline h2 {
+    max-width: 5.1ch;
+    font-size: clamp(40px, 9.8vw, 54px);
   }
 
   .meet-sina-photo-card--mobile-headline {
-    margin-top: 42px;
+    margin-top: 62px;
+  }
+
+  .meet-sina-pullquote {
+    max-width: none;
   }
 }
