@@ -40,6 +40,18 @@ const pageHeroImages = {
 
 const inquiryOptions = ['Adoption', 'Commission', 'Wholesale', 'Meet Sina', 'Gift Question', 'General Question'];
 
+const collectionIcons = {
+  All: 'all',
+  Pendants: 'pendants',
+  'Wire Wrapped': 'wire-wrapped',
+  Necklaces: 'necklaces',
+  'Ocean Necklaces': 'ocean-necklaces',
+  Plates: 'plates',
+  'Wall Art': 'wall-art',
+  Charms: 'charms',
+  Sets: 'sets',
+};
+
 function createInitialFormState(lockedInterest = '') {
   return {
     firstName: '',
@@ -127,6 +139,77 @@ function SectionHeader({ eyebrow, title, copy, className = '' }) {
       {copy && <p>{copy}</p>}
     </div>
   );
+}
+
+function CategoryIcon({ type }) {
+  switch (type) {
+    case 'pendants':
+      return (
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M12 3.5a2.5 2.5 0 1 1 0 5a2.5 2.5 0 0 1 0-5Zm0 5v2.5" />
+          <path d="M12 11l4.5 5.5L12 21l-4.5-4.5L12 11Z" />
+        </svg>
+      );
+    case 'wire-wrapped':
+      return (
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M6 17c0-2.8 2.2-5 5-5h2c2.2 0 4-1.8 4-4s-1.8-4-4-4-4 1.8-4 4" />
+          <path d="M18 7c0 2.8-2.2 5-5 5h-2c-2.2 0-4 1.8-4 4s1.8 4 4 4 4-1.8 4-4" />
+        </svg>
+      );
+    case 'necklaces':
+      return (
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M7 4c0 3 2.2 5.5 5 7c2.8-1.5 5-4 5-7" />
+          <path d="M9 15c0-1.7 1.3-3 3-3s3 1.3 3 3-1.3 3-3 3-3-1.3-3-3Z" />
+        </svg>
+      );
+    case 'ocean-necklaces':
+      return (
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M3 14c1.4 0 1.4-1 2.8-1s1.4 1 2.8 1s1.4-1 2.8-1s1.4 1 2.8 1s1.4-1 2.8-1s1.4 1 2.8 1" />
+          <path d="M5 10c1.4 0 1.4-1 2.8-1s1.4 1 2.8 1s1.4-1 2.8-1s1.4 1 2.8 1" />
+        </svg>
+      );
+    case 'plates':
+      return (
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <circle cx="12" cy="12" r="7.5" />
+          <circle cx="12" cy="12" r="3.5" />
+        </svg>
+      );
+    case 'wall-art':
+      return (
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <rect x="4.5" y="5" width="15" height="14" rx="1.5" />
+          <path d="M8 14l2.5-2.5 2.2 2.2 3.3-4.2 2 2.5" />
+        </svg>
+      );
+    case 'charms':
+      return (
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <path d="m12 4 1.9 4 4.4.6-3.2 3.1.8 4.4L12 14l-3.9 2.1.8-4.4-3.2-3.1 4.4-.6L12 4Z" />
+        </svg>
+      );
+    case 'sets':
+      return (
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <rect x="4" y="6" width="7" height="7" rx="1.2" />
+          <rect x="13" y="6" width="7" height="7" rx="1.2" />
+          <rect x="8.5" y="13" width="7" height="7" rx="1.2" />
+        </svg>
+      );
+    case 'all':
+    default:
+      return (
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <rect x="4" y="4" width="6" height="6" rx="1.2" />
+          <rect x="14" y="4" width="6" height="6" rx="1.2" />
+          <rect x="4" y="14" width="6" height="6" rx="1.2" />
+          <rect x="14" y="14" width="6" height="6" rx="1.2" />
+        </svg>
+      );
+  }
 }
 
 export function Home() {
@@ -304,34 +387,57 @@ export function Shop() {
 
   return (
     <Layout>
-      <Hero
-        eyebrow="Available for Adoption"
-        title="The first release is ready to meet you."
-        copy="Each piece shown here is handmade, named, priced, and available as a 1 of 1 creation."
-        primary="Ask About a Piece"
-        primaryTo="/schedule"
-        backgroundImage={pageHeroImages.shop}
-        backgroundPosition="78% 42%"
-      />
-      <section className="shop-section">
-        <div className="shop-search-bar">
-          <label className="shop-search-label" htmlFor="shop-search">Search by SKU or piece name</label>
-          <div className="shop-search-input-wrap">
-            <input
-              id="shop-search"
-              className="shop-search-input"
-              type="search"
-              value={search}
-              onChange={(event) => setSearch(event.target.value)}
-              placeholder="Try a SKU or product name"
-            />
+      <section
+        className="hero hero-dark hero-with-image shop-hero"
+        style={{
+          '--hero-background-image': `url(${pageHeroImages.shop})`,
+          '--hero-background-position': '78% 42%',
+        }}
+      >
+        <div className="hero-inner shop-hero-inner">
+          <div className="pill-eyebrow">Available for Adoption</div>
+          <h1>The first release is ready to meet you.</h1>
+          <p>Each piece shown here is handmade, named, priced, and available as a 1 of 1 creation.</p>
+        </div>
+      </section>
+      <section className="shop-hero-controls" aria-label="Shop search and filters">
+        <div className="shop-hero-controls__inner">
+          <div className="shop-search-bar shop-search-bar--hero">
+            <label className="shop-search-label shop-search-label--hero" htmlFor="shop-search">Search by SKU or piece name</label>
+            <div className="shop-search-input-wrap">
+              <input
+                id="shop-search"
+                className="shop-search-input shop-search-input--hero"
+                type="search"
+                value={search}
+                onChange={(event) => setSearch(event.target.value)}
+                placeholder="Try a SKU or product name"
+              />
+            </div>
+          </div>
+          <div className="shop-icon-tabs" role="tablist" aria-label="Filter products by collection">
+            {collections.map((tab) => {
+              const iconType = collectionIcons[tab] || 'all';
+              const isActive = filter === tab;
+              return (
+                <button
+                  key={tab}
+                  type="button"
+                  role="tab"
+                  aria-selected={isActive}
+                  aria-label={tab}
+                  className={`shop-icon-tab${isActive ? ' active' : ''}`}
+                  onClick={() => setFilter(tab)}
+                >
+                  <span className="shop-icon-tab__glyph"><CategoryIcon type={iconType} /></span>
+                  <span className="shop-icon-tab__label">{tab}</span>
+                </button>
+              );
+            })}
           </div>
         </div>
-        <div className="tabs" role="tablist" aria-label="Filter products by collection">
-          {collections.map((tab) => (
-            <button key={tab} type="button" className={filter === tab ? 'active' : ''} onClick={() => setFilter(tab)}>{tab}</button>
-          ))}
-        </div>
+      </section>
+      <section className="shop-section shop-section--floating-controls">
         <div className="product-grid">
           {visible.map((product) => <ProductCard product={product} key={product.sku} />)}
         </div>
