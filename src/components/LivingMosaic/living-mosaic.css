@@ -50,6 +50,27 @@
   box-shadow: 3px 3px 0 var(--charcoal);
 }
 
+.living-mosaic__viewport {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  touch-action: pan-y;
+  overscroll-behavior: contain;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.living-mosaic__viewport.is-zoomed {
+  touch-action: none;
+}
+
+.living-mosaic__zoom-stage {
+  position: absolute;
+  inset: 0;
+  transform-origin: center center;
+  will-change: transform;
+}
+
 .living-mosaic__loading {
   aspect-ratio: 13 / 23;
   max-height: 78vh;
@@ -130,6 +151,7 @@
   height: 100%;
   object-fit: cover;
   display: block;
+  -webkit-user-drag: none;
 }
 
 .mosaic-tile__face--back {
