@@ -3,7 +3,6 @@ import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-route
 import {
   Home,
   Story,
-  Collections,
   Collaborate,
   Wholesale,
   Shop,
@@ -28,8 +27,8 @@ export default function App() {
         <Route path="/" element={<Home />} />
         <Route path="/meet-sina" element={<Story />} />
         <Route path="/story" element={<Navigate to="/meet-sina" replace />} />
-        <Route path="/creations" element={<Collections />} />
-        <Route path="/collections" element={<Navigate to="/creations" replace />} />
+        <Route path="/creations" element={<Navigate to="/shop" replace />} />
+        <Route path="/collections" element={<Navigate to="/shop" replace />} />
         <Route path="/commission" element={<Collaborate />} />
         <Route path="/collaborate" element={<Navigate to="/commission" replace />} />
         <Route path="/wholesale" element={<Wholesale />} />
