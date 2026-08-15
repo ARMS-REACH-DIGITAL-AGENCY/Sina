@@ -305,13 +305,13 @@ export function Collections() {
         eyebrow="1-of-1 Creations"
         title="One body of work. Many ways to adopt."
         copy="Pendants, wire-wrapped pieces, necklaces, plaques, plates, wall art, lanyards, and sets &mdash; each one made by hand and released as its own original creation."
-        primary="Adopt Sina's Creations"
+        primary="Shop Available Pieces"
         primaryTo="/shop"
         backgroundImage={pageHeroImages.creations}
         backgroundPosition="78% center"
       />
       <section className="cream-section collection-grid">
-        {collections.map((name) => (
+        {collections.filter((name) => name !== 'All').map((name) => (
           <Link className="collection-card" to={`/shop?collection=${encodeURIComponent(name)}`} key={name}>
             <span>{name}</span>
             <strong>View pieces &rarr;</strong>
@@ -369,10 +369,17 @@ export function Shop() {
   }, [location.search, collections]);
   const [filter, setFilter] = useState(queryFilter);
   const [search, setSearch] = useState('');
+  const [searchOpen, setSearchOpen] = useState(false);
 
   React.useEffect(() => {
     setFilter(queryFilter);
   }, [queryFilter]);
+
+  React.useEffect(() => {
+    if (search.trim()) {
+      setSearchOpen(true);
+    }
+  }, [search]);
 
   const visible = React.useMemo(() => {
     const term = search.trim().toLowerCase();
@@ -405,18 +412,53 @@ export function Shop() {
       </section>
       <section className="shop-hero-controls" aria-label="Shop search and filters">
         <div className="shop-hero-controls__inner">
-          <div className="shop-search-bar shop-search-bar--hero">
-            <label className="shop-search-label shop-search-label--hero" htmlFor="shop-search">Search by SKU or piece name</label>
-            <div className="shop-search-input-wrap">
-              <input
-                id="shop-search"
-                className="shop-search-input shop-search-input--hero"
-                type="search"
-                value={search}
-                onChange={(event) => setSearch(event.target.value)}
-                placeholder="Try a SKU or product name"
-              />
-            </div>
+          <div className={`shop-search-compact${searchOpen ? ' is-open' : ''}`}>
+            <button
+              type="button"
+              className="shop-search-toggle"
+              aria-expanded={searchOpen}
+              aria-controls="shop-search-panel"
+              onClick={() => {
+                if (searchOpen && !search.trim()) {
+                  setSearchOpen(false);
+                  return;
+                }
+                setSearchOpen(true);
+              }}
+            >
+              <span className="shop-search-toggle__icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24">
+                  <circle cx="11" cy="11" r="6.5" />
+                  <path d="M16 16l4.5 4.5" />
+                </svg>
+              </span>
+              <span className="shop-search-toggle__text">{search.trim() ? 'Search catalog' : 'Search by SKU or piece name'}</span>
+            </button>
+            {searchOpen && (
+              <div className="shop-search-panel" id="shop-search-panel">
+                <div className="shop-search-input-wrap shop-search-input-wrap--hero">
+                  <input
+                    id="shop-search"
+                    className="shop-search-input shop-search-input--hero"
+                    type="search"
+                    value={search}
+                    onChange={(event) => setSearch(event.target.value)}
+                    placeholder="Search by SKU or piece name"
+                  />
+                  <button
+                    type="button"
+                    className="shop-search-close"
+                    onClick={() => {
+                      setSearch('');
+                      setSearchOpen(false);
+                    }}
+                    aria-label="Close search"
+                  >
+                    Close
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
           <div className="shop-icon-tabs" role="tablist" aria-label="Filter products by collection">
             {collections.map((tab) => {
@@ -472,6 +514,15 @@ function ProductCardDescription({ product }) {
 
 function ProductCard({ product }) {
   const [showBack, setShowBack] = React.useState(false);
+  const [activeImage, setActiveImage] = React.useState(product.image);
+  const galleryImages = React.useMemo(
+    () => [product.image, meetSinaCloseup, meetSinaStudio, meetSinaTray].filter(Boolean),
+    [product.image],
+  );
+
+  React.useEffect(() => {
+    setActiveImage(product.image);
+  }, [product.image]);
 
   const toggleCard = () => setShowBack((current) => !current);
   const handleKeyDown = (event) => {
@@ -479,6 +530,11 @@ function ProductCard({ product }) {
       event.preventDefault();
       toggleCard();
     }
+  };
+
+  const handleThumbClick = (event, image) => {
+    event.stopPropagation();
+    setActiveImage(image);
   };
 
   return (
@@ -493,11 +549,13 @@ function ProductCard({ product }) {
     >
       <div className="product-card__inner">
         <div className="product-card__face product-card__face--front">
-          <div className="product-image">
-            <img src={product.image} alt={`${product.name}, ${product.category} by Sina's Creations`} />
-            <span className="product-card__one-of-one"><span className="nowrap">1-of-1</span></span>
+          <div className="product-card__media product-card__media--front">
+            <div className="product-image">
+              <img src={product.image} alt={`${product.name}, ${product.category} by Sina's Creations`} />
+              <span className="product-card__one-of-one"><span className="nowrap">1-of-1</span></span>
+            </div>
           </div>
-          <div className="product-body">
+          <div className="product-body product-body--front">
             <div className="sku-row"><span>{product.category}</span><strong>SKU {product.sku}</strong></div>
             <h3>{product.name}</h3>
             <p>{product.line}</p>
@@ -517,6 +575,24 @@ function ProductCard({ product }) {
             <button type="button" className="button primary product-card__disabled-cta" disabled aria-disabled="true">Adoption Coming Soon</button>
             <p className="product-card__disabled-note">Inventory is being updated, so adoption checkout is temporarily paused.</p>
             <p className="product-card__flip-hint">Tap anywhere to flip back.</p>
+          </div>
+          <div className="product-card__gallery-panel" onClick={(event) => event.stopPropagation()}>
+            <div className="product-card__viewer">
+              <img src={activeImage} alt={`${product.name} detail view`} />
+            </div>
+            <div className="product-card__thumbs" aria-label={`${product.name} image gallery`}>
+              {galleryImages.map((image, index) => (
+                <button
+                  key={`${product.sku}-${index}`}
+                  type="button"
+                  className={`product-card__thumb${activeImage === image ? ' active' : ''}`}
+                  onClick={(event) => handleThumbClick(event, image)}
+                  aria-label={`View image ${index + 1} for ${product.name}`}
+                >
+                  <img src={image} alt="" />
+                </button>
+              ))}
+            </div>
           </div>
         </div>
       </div>
@@ -665,7 +741,7 @@ function Footer() {
         <h4>Connect</h4>
         {footerConnect.map((item) => <Link key={item.to} to={item.to}>{item.label}</Link>)}
       </div>
-      <div><h4>Adopt</h4><p>Choose a piece, ask a question, or start a custom conversation.</p><Link className="button primary footer-button" to="/shop">Adopt Sina's Creations</Link></div>
+      <div><h4>Adopt</h4><p>Choose a piece, ask a question, or start a custom conversation.</p><Link className="button primary footer-button" to="/shop">Adopt</Link></div>
     </footer>
   );
 }
