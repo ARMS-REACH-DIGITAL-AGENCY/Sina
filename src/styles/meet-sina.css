@@ -19,12 +19,18 @@
   display: block;
 }
 
+.meet-sina-mobile-inset-row::after {
+  content: '';
+  display: block;
+  clear: both;
+}
+
 .meet-sina-photo-card--mobile-headline {
   display: none;
 }
 
 .meet-sina-pullquote {
-  max-width: 16ch;
+  max-width: 24ch;
   margin: 6px 0;
   color: var(--earth-brown);
   font-family: var(--font-display);
@@ -141,43 +147,32 @@
   }
 
   .meet-sina-mobile-inset-row {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) 132px;
-    align-items: start;
-    gap: 18px;
-    max-width: 440px;
-  }
-
-  .meet-sina-pullquote {
-    max-width: 8.8ch;
-    margin: 0;
-    font-size: clamp(17px, 3.9vw, 23px);
-    line-height: 1.48;
+    display: block;
+    max-width: 100%;
   }
 
   .meet-sina-photo-card--mobile-headline {
     display: block;
-    width: 132px;
-    height: 132px;
-    min-width: 132px;
-    min-height: 132px;
-    max-width: 132px;
-    max-height: 132px;
-    align-self: start;
-    justify-self: end;
+    float: right;
+    width: 176px;
+    height: 176px;
+    margin: 4px 0 10px 18px;
   }
 
   .meet-sina-photo-card--mobile-headline img {
     display: block;
-    width: 132px;
-    height: 132px;
-    min-width: 132px;
-    min-height: 132px;
-    max-width: 132px;
-    max-height: 132px;
+    width: 176px;
+    height: 176px;
     aspect-ratio: 1 / 1;
     object-fit: cover;
     object-position: center center;
+  }
+
+  .meet-sina-pullquote {
+    max-width: none;
+    margin: 0;
+    font-size: clamp(18px, 4vw, 24px);
+    line-height: 1.5;
   }
 
   .meet-sina-message > p:first-of-type {
@@ -221,25 +216,19 @@
     font-size: clamp(32px, 8vw, 40px);
   }
 
-  .meet-sina-mobile-inset-row {
-    grid-template-columns: minmax(0, 1fr) 124px;
-    gap: 14px;
-    max-width: 380px;
+  .meet-sina-photo-card--mobile-headline {
+    width: 156px;
+    height: 156px;
+    margin: 4px 0 10px 16px;
+  }
+
+  .meet-sina-photo-card--mobile-headline img {
+    width: 156px;
+    height: 156px;
   }
 
   .meet-sina-pullquote {
-    max-width: 8.2ch;
-    font-size: clamp(16px, 4.3vw, 20px);
-    line-height: 1.42;
-  }
-
-  .meet-sina-photo-card--mobile-headline,
-  .meet-sina-photo-card--mobile-headline img {
-    width: 124px;
-    height: 124px;
-    min-width: 124px;
-    min-height: 124px;
-    max-width: 124px;
-    max-height: 124px;
+    font-size: clamp(17px, 4.4vw, 21px);
+    line-height: 1.44;
   }
 }
