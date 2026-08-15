@@ -1,14 +1,14 @@
 import React, { useState } from 'react';
 import { Link, NavLink, useLocation } from 'react-router-dom';
 import { products, collections } from '../data/products.js';
-import meetSinaCloseup from '../data/meetSinaCloseup.js';
-import meetSinaSmile from '../data/meetSinaSmile.js';
-import meetSinaStudio from '../data/meetSinaStudio.js';
-import meetSinaTray from '../data/meetSinaTray.js';
 import LivingMosaic from '../components/LivingMosaic/LivingMosaic.jsx';
 import WholesaleApplicationForm from '../components/WholesaleApplicationForm.jsx';
 
 const logoWhitePath = '/assets/brand/sinas-creations-white-logo.png';
+const meetSinaSmile = '/images/meet-sina/meet-sina-smile.jpg';
+const meetSinaCloseup = '/images/meet-sina/meet-sina-closeup.jpg';
+const meetSinaStudio = '/images/meet-sina/meet-sina-studio.jpg';
+const meetSinaTray = '/images/meet-sina/meet-sina-tray.jpg';
 
 const primaryNav = [
   { to: '/meet-sina', label: 'Meet Sina' },
