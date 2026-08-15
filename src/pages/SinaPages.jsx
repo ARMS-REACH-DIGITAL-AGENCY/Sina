@@ -363,6 +363,7 @@ export function Wholesale() {
 export function Shop() {
   const { products, collections } = useCatalogProducts();
   const location = useLocation();
+  const productGridRef = React.useRef(null);
   const queryFilter = React.useMemo(() => {
     const requested = new URLSearchParams(location.search).get('collection');
     return collections.includes(requested) ? requested : '';
@@ -370,6 +371,25 @@ export function Shop() {
   const [filter, setFilter] = useState(queryFilter);
   const [search, setSearch] = useState('');
   const [searchOpen, setSearchOpen] = useState(false);
+
+  const scrollProductsToTop = React.useCallback(() => {
+    if (typeof window === 'undefined') {
+      return;
+    }
+
+    const stickyControls = document.querySelector('.shop-hero-controls');
+    const stickyOffset = stickyControls ? stickyControls.getBoundingClientRect().height : 0;
+    const headerOffset = 16;
+    const target = productGridRef.current;
+
+    if (!target) {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      return;
+    }
+
+    const top = window.scrollY + target.getBoundingClientRect().top - stickyOffset - headerOffset;
+    window.scrollTo({ top: Math.max(0, top), behavior: 'smooth' });
+  }, []);
 
   React.useEffect(() => {
     setFilter(queryFilter);
@@ -397,19 +417,6 @@ export function Shop() {
 
   return (
     <Layout>
-      <section
-        className="hero hero-dark hero-with-image shop-hero"
-        style={{
-          '--hero-background-image': `url(${pageHeroImages.shop})`,
-          '--hero-background-position': '78% 42%',
-        }}
-      >
-        <div className="hero-inner shop-hero-inner">
-          <div className="pill-eyebrow">Available for Adoption</div>
-          <h1>The first release is ready to meet you.</h1>
-          <p>Each piece shown here is handmade, named, priced, and available as a 1 of 1 creation.</p>
-        </div>
-      </section>
       <section className="shop-hero-controls" aria-label="Shop search and filters">
         <div className="shop-hero-controls__inner">
           <div className={`shop-search-compact${searchOpen ? ' is-open' : ''}`}>
@@ -472,7 +479,11 @@ export function Shop() {
                   aria-selected={isActive}
                   aria-label={tab}
                   className={`shop-icon-tab${isActive ? ' active' : ''}`}
-                  onClick={() => setFilter(tab)}
+                  onClick={() => {
+                    setFilter(tab);
+                    setSearch('');
+                    scrollProductsToTop();
+                  }}
                 >
                   <span className="shop-icon-tab__glyph"><CategoryIcon type={iconType} /></span>
                   <span className="shop-icon-tab__label">{tab}</span>
@@ -483,7 +494,7 @@ export function Shop() {
         </div>
       </section>
       <section className="shop-section shop-section--floating-controls">
-        <div className="product-grid">
+        <div className="product-grid" ref={productGridRef}>
           {visible.map((product) => <ProductCard product={product} key={product.sku} />)}
         </div>
         {!visible.length && (
