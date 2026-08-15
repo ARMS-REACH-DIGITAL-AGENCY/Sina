@@ -38,6 +38,7 @@ button,input,select,textarea{font:inherit}
 .button{display:inline-flex;align-items:center;justify-content:center;border-radius:var(--radius);text-transform:uppercase;letter-spacing:.06em;font-family:var(--font-body);font-size:13px;font-weight:700;padding:13px 24px;min-height:48px;border:2px solid transparent;white-space:normal;text-align:center}
 .button.primary{background:#EEBF68;color:var(--black);border-color:#EEBF68}
 .button.ghost{border-color:rgba(247,244,236,.5);color:var(--off-white);background:transparent}
+.button:disabled{opacity:.65;cursor:wait}
 .cream-section{max-width:1200px;margin:0 auto;padding:88px var(--page-gutter)}
 .split-section{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(280px,.8fr);gap:42px;align-items:center}
 .section-header span{display:block;color:var(--burnt-orange);text-transform:uppercase;letter-spacing:.22em;font-weight:700;font-size:10px;margin-bottom:10px}
@@ -84,6 +85,9 @@ button,input,select,textarea{font:inherit}
 .lead-form .full{grid-column:1/-1}
 .lead-form textarea{min-height:96px}
 .form-button{grid-column:1/-1;border:0;width:100%}
+.form-status{grid-column:1/-1;font-size:14px;line-height:1.5;border-radius:var(--radius);padding:14px 16px}
+.form-status-success{background:rgba(98,101,82,.12);border:1px solid rgba(98,101,82,.35);color:var(--charcoal)}
+.form-status-error{background:rgba(199,106,50,.12);border:1px solid rgba(199,106,50,.35);color:var(--charcoal)}
 .dark-cta{background:var(--charcoal);color:var(--off-white);text-align:center;padding:74px 24px;border-top:2px solid var(--burnt-orange)}
 .dark-cta h2{font-size:38px;margin:0 0 12px}
 .dark-cta p{font-size:17px;color:rgba(247,244,236,.72);margin:0 auto 28px;max-width:620px}
