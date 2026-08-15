@@ -165,13 +165,15 @@ export function Story() {
       />
       <section className="cream-section meet-sina-page">
         <div className="meet-sina-message">
-          <div className="meet-sina-mobile-headline">
+          <div className="meet-sina-mobile-intro">
             <SectionHeader eyebrow="A Message From the Designer" title="My name is Thomasina Schnepf." className="meet-sina-headline" />
-            <article className="meet-sina-photo-card meet-sina-photo-card--mobile-headline">
-              <img src={meetSinaSmile} alt="Thomasina Schnepf smiling while working with fused glass pieces." />
-            </article>
+            <div className="meet-sina-mobile-inset-row">
+              <p className="meet-sina-pullquote">I am legally blind, and because of this, I create and &ldquo;view&rdquo; the world &mdash; and my work &mdash; very closely.</p>
+              <article className="meet-sina-photo-card meet-sina-photo-card--mobile-headline">
+                <img src={meetSinaSmile} alt="Thomasina Schnepf smiling while working with fused glass pieces." />
+              </article>
+            </div>
           </div>
-          <p className="meet-sina-pullquote">I am legally blind, and because of this, I create and &ldquo;view&rdquo; the world &mdash; and my work &mdash; very closely.</p>
           <p>My disability is the result of a tumor on my optic nerve when I was four years old. For most people, vision shapes the way they see the world. For me, the loss of my sight has distorted my view of the world, but it has also caused me to examine everything much more closely in order to &ldquo;see&rdquo; what is truly there.</p>
           <p>It is from this kind of &ldquo;vision&rdquo; that I create my pieces. My artwork is shaped by my experiences, and each piece is intended to convey a part of the way I see and feel the world.</p>
           <p>Forms help me understand and create. They allow me to lay out my designs and guide my hands as I create individual, one-of-a-kind pieces. I need excellent lighting in order to see at all, so light plays an important role in my work.</p>
