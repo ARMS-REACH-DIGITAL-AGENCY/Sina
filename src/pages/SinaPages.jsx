@@ -112,15 +112,33 @@ function Hero({
   backgroundImage,
   backgroundPosition = 'center center',
 }) {
-  const style = backgroundImage
-    ? {
-        '--hero-background-image': `url(${backgroundImage})`,
-        '--hero-background-position': backgroundPosition,
-      }
-    : undefined;
-
   return (
-    <section className={`hero hero-dark${backgroundImage ? ' hero-with-image' : ''}`} style={style}>
+    <section className="hero hero-dark">
+      {backgroundImage && (
+        <>
+          <div
+            aria-hidden="true"
+            style={{
+              position: 'absolute',
+              inset: 0,
+              backgroundImage: `url(${backgroundImage})`,
+              backgroundPosition,
+              backgroundRepeat: 'no-repeat',
+              backgroundSize: 'cover',
+              opacity: 0.6,
+              transform: 'scale(1.03)',
+            }}
+          />
+          <div
+            aria-hidden="true"
+            style={{
+              position: 'absolute',
+              inset: 0,
+              background: 'linear-gradient(90deg, rgba(23,24,22,.97) 0%, rgba(23,24,22,.9) 28%, rgba(23,24,22,.62) 52%, rgba(23,24,22,.28) 76%, rgba(23,24,22,.18) 100%)',
+            }}
+          />
+        </>
+      )}
       <div className="hero-inner">
         {eyebrow && <div className="pill-eyebrow">{eyebrow}</div>}
         <h1>{title}</h1>
@@ -249,7 +267,7 @@ export function Story() {
         primary="Adopt Sina's Creations"
         primaryTo="/shop"
         backgroundImage={pageHeroImages.artist}
-        backgroundPosition="78% 32%"
+        backgroundPosition="94% center"
       />
       <section className="cream-section meet-sina-page">
         <div className="meet-sina-message">
@@ -308,7 +326,7 @@ export function Collections() {
         primary="Shop Available Pieces"
         primaryTo="/shop"
         backgroundImage={pageHeroImages.creations}
-        backgroundPosition="78% center"
+        backgroundPosition="88% center"
       />
       <section className="cream-section collection-grid">
         {collections.filter((name) => name !== 'All').map((name) => (
@@ -332,7 +350,7 @@ export function Collaborate() {
         primary="Start a Commission"
         primaryTo="/schedule"
         backgroundImage={pageHeroImages.commission}
-        backgroundPosition="76% 36%"
+        backgroundPosition="88% 42%"
       />
       <FormPage
         title="Commission inquiry"
@@ -353,7 +371,7 @@ export function Wholesale() {
         primary="Start the Application"
         primaryTo="/wholesale#application"
         backgroundImage={pageHeroImages.wholesale}
-        backgroundPosition="74% center"
+        backgroundPosition="88% 42%"
       />
       <WholesaleApplicationForm />
     </Layout>
@@ -654,7 +672,7 @@ export function Schedule() {
         primary="View Available Pieces"
         primaryTo="/shop"
         backgroundImage={pageHeroImages.schedule}
-        backgroundPosition="74% 34%"
+        backgroundPosition="88% 38%"
       />
       <FormPage title="Book your conversation" intro="Send the details and we will follow up with the right next step." />
     </Layout>
