@@ -97,13 +97,55 @@
 }
 
 @media (max-width: 959px) {
-  .meet-sina-page,
+  .meet-sina-page {
+    display: flex;
+    flex-direction: column;
+    gap: 34px;
+  }
+
+  .meet-sina-message,
+  .meet-sina-media,
   .meet-sina-media-grid {
+    width: 100%;
+  }
+
+  .meet-sina-media {
+    order: 2;
+    gap: 16px;
+  }
+
+  .meet-sina-photo-card--portrait {
+    order: 1;
+  }
+
+  .meet-sina-note {
+    order: 2;
+    padding: 22px;
+  }
+
+  .meet-sina-media-grid {
+    order: 3;
     grid-template-columns: 1fr;
   }
 
   .meet-sina-pullquote {
     max-width: none;
     font-size: clamp(24px, 7vw, 34px);
+  }
+
+  .meet-sina-photo-card img,
+  .meet-sina-photo-card--wide img,
+  .meet-sina-photo-card--portrait img {
+    aspect-ratio: auto;
+    min-height: 260px;
+    max-height: 520px;
+  }
+
+  .meet-sina-photo-card--portrait img {
+    object-position: center 18%;
+  }
+
+  .meet-sina-note h3 {
+    font-size: clamp(30px, 7vw, 36px);
   }
 }
