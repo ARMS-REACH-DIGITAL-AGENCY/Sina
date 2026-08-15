@@ -542,7 +542,9 @@ function ProductCardDescription({ product }) {
 }
 
 function ProductCard({ product }) {
-  const [showBack, setShowBack] = React.useState(false);
+  const [showBack, setShowBack] = React.useState(() => (
+    typeof window !== 'undefined' && window.matchMedia('(min-width: 768px)').matches
+  ));
   const [activeImage, setActiveImage] = React.useState(product.image);
   const galleryImages = React.useMemo(
     () => [product.image, meetSinaCloseup, meetSinaStudio, meetSinaTray].filter(Boolean),
@@ -561,8 +563,7 @@ function ProductCard({ product }) {
     }
   };
 
-  const handleThumbClick = (event, image) => {
-    event.stopPropagation();
+  const handleThumbClick = (image) => {
     setActiveImage(image);
   };
 
@@ -627,7 +628,7 @@ function ProductCard({ product }) {
             <p className="product-card__disabled-note">Inventory is being updated, so adoption checkout is temporarily paused.</p>
             <p className="product-card__flip-hint">Tap anywhere to flip back.</p>
           </div>
-          <div className="product-card__gallery-panel" onClick={(event) => event.stopPropagation()}>
+          <div className="product-card__gallery-panel">
             <div className="product-card__viewer">
               <img src={activeImage} alt={`${product.name} detail view`} />
             </div>
@@ -637,7 +638,7 @@ function ProductCard({ product }) {
                   key={`${product.sku}-${index}`}
                   type="button"
                   className={`product-card__thumb${activeImage === image ? ' active' : ''}`}
-                  onClick={(event) => handleThumbClick(event, image)}
+                  onClick={() => handleThumbClick(image)}
                   aria-label={`View image ${index + 1} for ${product.name}`}
                 >
                   <img src={image} alt="" />
