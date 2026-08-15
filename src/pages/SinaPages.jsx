@@ -377,13 +377,15 @@ function ProductCard({ product }) {
     >
       <div className="product-card__inner">
         <div className="product-card__face product-card__face--front">
-          <div className="product-image"><img src={product.image} alt={`${product.name}, ${product.category} by Sina's Creations`} /></div>
+          <div className="product-image">
+            <img src={product.image} alt={`${product.name}, ${product.category} by Sina's Creations`} />
+            <span className="product-card__one-of-one"><span className="nowrap">1-of-1</span></span>
+          </div>
           <div className="product-body">
             <div className="sku-row"><span>{product.category}</span><strong>SKU {product.sku}</strong></div>
-            <p className="product-card__badge"><span className="nowrap">1-of-1</span> creation</p>
             <h3>{product.name}</h3>
             <p>{product.line}</p>
-            <div className="price-row"><span>Adoption price</span><strong>${product.price}</strong></div>
+            <div className="price-row"><span><span className="nowrap">1-of-1</span> Cost of Adoption</span><strong>${product.price}</strong></div>
             <p className="product-card__flip-hint">Tap anywhere to flip for full details.</p>
           </div>
         </div>
@@ -392,8 +394,10 @@ function ProductCard({ product }) {
           <div className="product-body product-body--back">
             <div className="sku-row"><span>{product.category}</span><strong>SKU {product.sku}</strong></div>
             <h3>{product.name}</h3>
-            <ProductCardDescription product={product} />
-            <div className="price-row"><span>Adoption price</span><strong>${product.price}</strong></div>
+            <div className="product-card__description-shell">
+              <ProductCardDescription product={product} />
+            </div>
+            <div className="price-row"><span><span className="nowrap">1-of-1</span> Cost of Adoption</span><strong>${product.price}</strong></div>
             <button type="button" className="button primary product-card__disabled-cta" disabled aria-disabled="true">Adoption Coming Soon</button>
             <p className="product-card__disabled-note">Inventory is being updated, so adoption checkout is temporarily paused.</p>
             <p className="product-card__flip-hint">Tap anywhere to flip back.</p>
