@@ -166,7 +166,7 @@ export function Story() {
       <section className="cream-section meet-sina-page">
         <div className="meet-sina-message">
           <div className="meet-sina-mobile-intro">
-            <SectionHeader eyebrow="A Message From the Designer" title={<>My name is<br />Thomasina&nbsp;Schnepf.</>} className="meet-sina-headline" />
+            <SectionHeader eyebrow="A Message From the Designer" title={<>My&nbsp;name&nbsp;is<br />Thomasina&nbsp;Schnepf.</>} className="meet-sina-headline" />
             <div className="meet-sina-mobile-inset-row">
               <p className="meet-sina-pullquote">I am legally blind, and because of this, I create and &ldquo;view&rdquo; the world &mdash; and my work &mdash; very closely.</p>
               <article className="meet-sina-photo-card meet-sina-photo-card--mobile-headline">
