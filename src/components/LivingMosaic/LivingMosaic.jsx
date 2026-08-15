@@ -29,6 +29,7 @@ export default function LivingMosaic() {
   const [modalProduct, setModalProduct] = useState(null);
   const [active, setActive] = useState(false);
   const [showNames, setShowNames] = useState(false);
+  const [isFullscreen, setIsFullscreen] = useState(false);
   const [zoomState, setZoomState] = useState({ scale: 1, x: 0, y: 0 });
 
   const sectionRef = useRef(null);
@@ -235,6 +236,20 @@ export default function LivingMosaic() {
     };
   }, []);
 
+  useEffect(() => {
+    if (typeof document === 'undefined') {
+      return undefined;
+    }
+
+    function handleFullscreenChange() {
+      const viewport = viewportRef.current;
+      setIsFullscreen(Boolean(viewport && document.fullscreenElement === viewport));
+    }
+
+    document.addEventListener('fullscreenchange', handleFullscreenChange);
+    return () => document.removeEventListener('fullscreenchange', handleFullscreenChange);
+  }, []);
+
   const cellProduct = useMemo(() => {
     return (cell) => (cell ? products[cell.productIndex] : null);
   }, [products]);
@@ -249,11 +264,24 @@ export default function LivingMosaic() {
     setShowNames((value) => !value);
   }
 
-  function handleResetTiles() {
-    setShowNames(false);
-    setZoomState({ scale: 1, x: 0, y: 0 });
-    gestureRef.current = { type: 'idle' };
-    suppressTapRef.current = false;
+  async function handleToggleFullscreen() {
+    const viewport = viewportRef.current;
+    if (!viewport || typeof document === 'undefined') {
+      return;
+    }
+
+    try {
+      if (document.fullscreenElement === viewport) {
+        await document.exitFullscreen?.();
+        return;
+      }
+
+      if (!document.fullscreenElement) {
+        await viewport.requestFullscreen?.();
+      }
+    } catch {
+      setIsFullscreen(false);
+    }
   }
 
   function handleViewportClickCapture(event) {
@@ -334,7 +362,7 @@ export default function LivingMosaic() {
           </div>
         </div>
 
-        <p className="living-mosaic__baseline-hint">Pinch and drag inside the portrait to explore the creations up close.</p>
+        <p className="living-mosaic__baseline-hint">Pinch and drag inside the portrait to explore the creations up close. Tap Full Screen for a larger view.</p>
 
         <div className="living-mosaic__cta-row">
           <Link className="button primary" to="/shop">Adopt A Creation</Link>
@@ -346,7 +374,9 @@ export default function LivingMosaic() {
           >
             {showNames ? 'Hide Names' : 'Show Names'}
           </button>
-          <button type="button" className="button ghost" onClick={handleResetTiles}>Reset Tiles</button>
+          <button type="button" className="button ghost" onClick={handleToggleFullscreen}>
+            {isFullscreen ? 'Exit Full Screen' : 'Full Screen'}
+          </button>
         </div>
       </div>
 
