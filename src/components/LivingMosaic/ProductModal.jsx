@@ -1,5 +1,27 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { Link } from 'react-router-dom';
+
+function ProductStory({ product }) {
+  if (product.descriptionHtml) {
+    return <div className="mosaic-modal__story-copy mosaic-modal__story-copy--rich" dangerouslySetInnerHTML={{ __html: product.descriptionHtml }} />;
+  }
+
+  return <p className="mosaic-modal__story-copy">{product.story || product.description || product.line}</p>;
+}
+
+function AdoptionState({ adopted }) {
+  if (adopted) {
+    return <div className="mosaic-modal__status mosaic-modal__status--adopted">Adopted — 1 of 1, already loved</div>;
+  }
+
+  return (
+    <>
+      <button type="button" className="button primary mosaic-modal__cta" disabled aria-disabled="true">
+        Adoption Coming Soon
+      </button>
+      <p className="mosaic-modal__footnote">Inventory is being updated, so adoption checkout is temporarily paused.</p>
+    </>
+  );
+}
 
 export default function ProductModal({ product, onClose }) {
   const closeRef = useRef(null);
@@ -28,8 +50,6 @@ export default function ProductModal({ product, onClose }) {
   if (!product) return null;
 
   const adopted = product.status === 'adopted';
-  const story = product.story || product.description || product.line;
-  const shopifyUrl = product.shopifyUrl || product.shopifyProductUrl || null;
 
   return (
     <div
@@ -46,7 +66,7 @@ export default function ProductModal({ product, onClose }) {
         <div className="mosaic-modal__card">
           <section className="mosaic-modal__side mosaic-modal__side--details" aria-hidden={showStory}>
             <div className="mosaic-modal__image">
-              <img src={gallery[activeImage] || product.image} alt={`${product.name}, ${product.category}, a 1 of 1 fused glass creation`} />
+              <img src={gallery[activeImage] || product.image} alt={`${product.name}, ${product.category}, a 1-of-1 fused glass creation`} />
             </div>
 
             {gallery.length > 1 && (
@@ -66,9 +86,9 @@ export default function ProductModal({ product, onClose }) {
             )}
 
             <div className="mosaic-modal__body">
-              <p className="mosaic-modal__eyebrow">{product.category} &middot; 1 of 1</p>
+              <p className="mosaic-modal__eyebrow">{product.category} · <span className="nowrap">1-of-1</span></p>
               <h3 id="mosaic-modal-name">{product.name}</h3>
-              <p className="mosaic-modal__sku">{product.sku}</p>
+              <p className="mosaic-modal__sku">SKU {product.sku}</p>
               <p className="mosaic-modal__line">{product.line}</p>
 
               <div className="mosaic-modal__price-row">
@@ -77,45 +97,25 @@ export default function ProductModal({ product, onClose }) {
               </div>
 
               <button type="button" className="button ghost mosaic-modal__flip" onClick={() => setShowStory(true)}>
-                Read {product.name}&rsquo;s Story &rarr;
+                Flip for Full Details →
               </button>
 
-              {adopted ? (
-                <div className="mosaic-modal__status mosaic-modal__status--adopted">Adopted &mdash; 1 of 1, already loved</div>
-              ) : shopifyUrl ? (
-                <a className="button primary mosaic-modal__cta" href={shopifyUrl} target="_blank" rel="noreferrer">
-                  Adopt {product.name}
-                </a>
-              ) : (
-                <Link className="button primary mosaic-modal__cta" to={`/shop?piece=${encodeURIComponent(product.sku)}`} onClick={onClose}>
-                  Adopt {product.name}
-                </Link>
-              )}
+              <AdoptionState adopted={adopted} />
             </div>
           </section>
 
           <section className="mosaic-modal__side mosaic-modal__side--story" aria-hidden={!showStory}>
             <div className="mosaic-modal__story-panel">
-              <p className="mosaic-modal__eyebrow">The Story of {product.name}</p>
-              <h3>{product.name}</h3>
-              <p className="mosaic-modal__story-copy">{story}</p>
+              <p className="mosaic-modal__eyebrow">{product.name} · SKU {product.sku}</p>
+              <h3>Full Description</h3>
+              <ProductStory product={product} />
               <p className="mosaic-modal__story-note">Made by hand. Named once. Released only once.</p>
 
               <button type="button" className="button ghost mosaic-modal__flip" onClick={() => setShowStory(false)}>
-                &larr; Back to the Creation
+                ← Back to the Creation
               </button>
 
-              {!adopted && (
-                shopifyUrl ? (
-                  <a className="button primary mosaic-modal__cta" href={shopifyUrl} target="_blank" rel="noreferrer">
-                    Adopt {product.name}
-                  </a>
-                ) : (
-                  <Link className="button primary mosaic-modal__cta" to={`/shop?piece=${encodeURIComponent(product.sku)}`} onClick={onClose}>
-                    Adopt {product.name}
-                  </Link>
-                )
-              )}
+              <AdoptionState adopted={adopted} />
             </div>
           </section>
         </div>
