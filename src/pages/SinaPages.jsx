@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { Link, NavLink, useLocation } from 'react-router-dom';
-import { products, collections } from '../data/products.js';
 import LivingMosaic from '../components/LivingMosaic/LivingMosaic.jsx';
 import WholesaleApplicationForm from '../components/WholesaleApplicationForm.jsx';
+import useCatalogProducts from '../hooks/useCatalogProducts.js';
 
 const logoWhitePath = '/assets/brand/sinas-creations-white-logo.png';
 const meetSinaSmile = '/images/meet-sina/meet-sina-smile-square.jpg';
@@ -130,6 +130,8 @@ function SectionHeader({ eyebrow, title, copy, className = '' }) {
 }
 
 export function Home() {
+  const { products } = useCatalogProducts();
+
   return (
     <Layout>
       <LivingMosaic />
@@ -145,7 +147,7 @@ export function Home() {
           <p>When a piece is adopted, it leaves Thomasina's hands and begins its next story in a new home.</p>
         </div>
       </section>
-      <FeaturedProducts />
+      <FeaturedProducts products={products} />
       <CTA title="Ready to meet the collection?" copy="Explore the first available pieces and choose the creation that speaks to you." />
     </Layout>
   );
@@ -209,6 +211,8 @@ export function Story() {
 }
 
 export function Collections() {
+  const { collections } = useCatalogProducts();
+
   return (
     <Layout>
       <Hero
@@ -271,11 +275,12 @@ export function Wholesale() {
 }
 
 export function Shop() {
+  const { products, collections } = useCatalogProducts();
   const location = useLocation();
   const queryFilter = React.useMemo(() => {
     const requested = new URLSearchParams(location.search).get('collection');
     return collections.includes(requested) ? requested : 'All';
-  }, [location.search]);
+  }, [location.search, collections]);
   const [filter, setFilter] = useState(queryFilter);
   const [search, setSearch] = useState('');
 
@@ -295,7 +300,7 @@ export function Shop() {
     }
 
     return filter === 'All' ? products : products.filter((product) => product.category === filter);
-  }, [filter, search]);
+  }, [filter, search, products]);
 
   return (
     <Layout>
@@ -356,7 +361,7 @@ function ProductCard({ product }) {
   );
 }
 
-function FeaturedProducts() {
+function FeaturedProducts({ products }) {
   return (
     <section className="cream-section">
       <SectionHeader eyebrow="Available Now" title="Featured pieces ready for adoption" copy="Begin with a few of the creations currently available from Thomasina's first release." />
