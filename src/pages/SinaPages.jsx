@@ -284,16 +284,17 @@ export function Shop() {
   }, [queryFilter]);
 
   const visible = React.useMemo(() => {
-    const scoped = filter === 'All' ? products : products.filter((product) => product.category === filter);
     const term = search.trim().toLowerCase();
 
-    if (!term) return scoped;
+    if (term) {
+      return products.filter((product) => {
+        const sku = String(product.sku ?? '').toLowerCase();
+        const name = String(product.name ?? '').toLowerCase();
+        return sku.includes(term) || name.includes(term);
+      });
+    }
 
-    return scoped.filter((product) => {
-      const sku = String(product.sku ?? '').toLowerCase();
-      const name = String(product.name ?? '').toLowerCase();
-      return sku.includes(term) || name.includes(term);
-    });
+    return filter === 'All' ? products : products.filter((product) => product.category === filter);
   }, [filter, search]);
 
   return (
@@ -332,7 +333,7 @@ export function Shop() {
         {!visible.length && (
           <div className="shop-empty-state">
             <h3>No matching pieces yet.</h3>
-            <p>Try a different SKU, a shorter product name, or switch collections to widen the search.</p>
+            <p>Try a different SKU or product name to keep searching the full catalog.</p>
           </div>
         )}
       </section>
