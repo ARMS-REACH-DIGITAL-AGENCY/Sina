@@ -346,9 +346,16 @@ export function Shop() {
   );
 }
 
+function cleanProductHtml(value = '') {
+  return String(value)
+    .replace(/\[\[SIZE_TBD\]\]/gi, '')
+    .replace(/<p>\s*<\/p>/gi, '')
+    .trim();
+}
+
 function ProductCardDescription({ product }) {
   if (product.descriptionHtml) {
-    return <div className="product-card__description" dangerouslySetInnerHTML={{ __html: product.descriptionHtml }} />;
+    return <div className="product-card__description" dangerouslySetInnerHTML={{ __html: cleanProductHtml(product.descriptionHtml) }} />;
   }
 
   return <p className="product-card__description">{product.description || product.line}</p>;
