@@ -123,7 +123,7 @@
   }
 
   .meet-sina-mobile-intro {
-    gap: 16px;
+    gap: 18px;
   }
 
   .meet-sina-headline span {
@@ -134,24 +134,24 @@
 
   .meet-sina-headline h2 {
     margin-bottom: 0;
-    max-width: 9.6ch;
-    font-size: clamp(40px, 8.6vw, 56px);
-    line-height: .96;
+    max-width: 10.5ch;
+    font-size: clamp(38px, 8.2vw, 52px);
+    line-height: .98;
     letter-spacing: -.04em;
   }
 
   .meet-sina-mobile-inset-row {
     display: grid;
-    grid-template-columns: minmax(0, .86fr) 166px;
+    grid-template-columns: minmax(0, 1fr) 124px;
     align-items: start;
-    gap: 18px;
+    gap: 16px;
   }
 
   .meet-sina-pullquote {
-    max-width: 7.4ch;
+    max-width: 8.2ch;
     margin: 0;
-    font-size: clamp(22px, 5.8vw, 34px);
-    line-height: 1.24;
+    font-size: clamp(19px, 4.7vw, 28px);
+    line-height: 1.36;
   }
 
   .meet-sina-photo-card--mobile-headline {
@@ -160,10 +160,10 @@
   }
 
   .meet-sina-photo-card--mobile-headline img {
-    aspect-ratio: .72 / 1;
+    aspect-ratio: 1 / 1;
     min-height: 0;
     max-height: none;
-    object-position: center 18%;
+    object-position: center 22%;
   }
 
   .meet-sina-media {
@@ -200,17 +200,17 @@
 
 @media (max-width: 420px) {
   .meet-sina-headline h2 {
-    max-width: 8.8ch;
-    font-size: clamp(36px, 9.2vw, 48px);
+    max-width: 9.6ch;
+    font-size: clamp(34px, 8.8vw, 46px);
   }
 
   .meet-sina-mobile-inset-row {
-    grid-template-columns: minmax(0, .82fr) 146px;
-    gap: 16px;
+    grid-template-columns: minmax(0, 1fr) 112px;
+    gap: 14px;
   }
 
   .meet-sina-pullquote {
-    max-width: 7.1ch;
-    font-size: clamp(20px, 5.7vw, 28px);
+    max-width: 8.4ch;
+    font-size: clamp(18px, 4.9vw, 24px);
   }
 }
