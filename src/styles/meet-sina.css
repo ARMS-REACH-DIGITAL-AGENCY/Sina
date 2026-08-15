@@ -10,7 +10,12 @@
   gap: 18px;
 }
 
-.meet-sina-mobile-headline {
+.meet-sina-mobile-intro {
+  display: grid;
+  gap: 18px;
+}
+
+.meet-sina-mobile-inset-row {
   display: block;
 }
 
@@ -117,41 +122,48 @@
     width: 100%;
   }
 
-  .meet-sina-mobile-headline {
+  .meet-sina-mobile-intro {
+    gap: 16px;
+  }
+
+  .meet-sina-headline span {
+    margin-bottom: 12px;
+    font-size: 10px;
+    letter-spacing: .2em;
+  }
+
+  .meet-sina-headline h2 {
+    margin-bottom: 0;
+    max-width: 9.6ch;
+    font-size: clamp(40px, 8.6vw, 56px);
+    line-height: .96;
+    letter-spacing: -.04em;
+  }
+
+  .meet-sina-mobile-inset-row {
     display: grid;
-    grid-template-columns: minmax(0, 1fr) 158px;
+    grid-template-columns: minmax(0, .86fr) 166px;
     align-items: start;
     gap: 18px;
   }
 
-  .meet-sina-headline {
-    min-width: 0;
-  }
-
-  .meet-sina-headline span {
-    max-width: 12ch;
-    margin-bottom: 14px;
-  }
-
-  .meet-sina-headline h2 {
-    max-width: 5.4ch;
-    margin-bottom: 0;
-    font-size: clamp(44px, 9.4vw, 62px);
-    line-height: .95;
-    letter-spacing: -.04em;
+  .meet-sina-pullquote {
+    max-width: 7.4ch;
+    margin: 0;
+    font-size: clamp(22px, 5.8vw, 34px);
+    line-height: 1.24;
   }
 
   .meet-sina-photo-card--mobile-headline {
     display: block;
     align-self: start;
-    margin-top: 68px;
   }
 
   .meet-sina-photo-card--mobile-headline img {
-    aspect-ratio: 0.72 / 1;
+    aspect-ratio: .72 / 1;
     min-height: 0;
     max-height: none;
-    object-position: center 22%;
+    object-position: center 18%;
   }
 
   .meet-sina-media {
@@ -173,12 +185,6 @@
     grid-template-columns: 1fr;
   }
 
-  .meet-sina-pullquote {
-    max-width: 13ch;
-    font-size: clamp(24px, 6.2vw, 36px);
-    line-height: 1.28;
-  }
-
   .meet-sina-photo-card img,
   .meet-sina-photo-card--wide img,
   .meet-sina-photo-card--portrait img {
@@ -193,21 +199,18 @@
 }
 
 @media (max-width: 420px) {
-  .meet-sina-mobile-headline {
-    grid-template-columns: minmax(0, 1fr) 142px;
+  .meet-sina-headline h2 {
+    max-width: 8.8ch;
+    font-size: clamp(36px, 9.2vw, 48px);
+  }
+
+  .meet-sina-mobile-inset-row {
+    grid-template-columns: minmax(0, .82fr) 146px;
     gap: 16px;
   }
 
-  .meet-sina-headline h2 {
-    max-width: 5.1ch;
-    font-size: clamp(40px, 9.8vw, 54px);
-  }
-
-  .meet-sina-photo-card--mobile-headline {
-    margin-top: 62px;
-  }
-
   .meet-sina-pullquote {
-    max-width: none;
+    max-width: 7.1ch;
+    font-size: clamp(20px, 5.7vw, 28px);
   }
 }
