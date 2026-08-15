@@ -132,9 +132,11 @@ function buildImagePath(row) {
 }
 
 function normalizeSku(row) {
-  return normalizeText(row['Final SKU'])
+  const resolvedSku = normalizeText(row['Final SKU'])
     || normalizeText(row['Variant SKU'])
-    || normalizeText(row.SKU).toUpperCase();
+    || normalizeText(row.SKU);
+
+  return resolvedSku.toUpperCase();
 }
 
 function normalizePrice(value) {
