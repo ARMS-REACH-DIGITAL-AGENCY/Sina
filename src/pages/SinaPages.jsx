@@ -5,7 +5,7 @@ import LivingMosaic from '../components/LivingMosaic/LivingMosaic.jsx';
 import WholesaleApplicationForm from '../components/WholesaleApplicationForm.jsx';
 
 const logoWhitePath = '/assets/brand/sinas-creations-white-logo.png';
-const meetSinaSmile = '/images/meet-sina/meet-sina-smile.jpg';
+const meetSinaSmile = '/images/meet-sina/meet-sina-smile-square.jpg';
 const meetSinaCloseup = '/images/meet-sina/meet-sina-closeup.jpg';
 const meetSinaStudio = '/images/meet-sina/meet-sina-studio.jpg';
 const meetSinaTray = '/images/meet-sina/meet-sina-tray.jpg';
