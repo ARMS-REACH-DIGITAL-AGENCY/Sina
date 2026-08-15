@@ -12,15 +12,15 @@ const meetSinaTray = '/images/meet-sina/meet-sina-tray.jpg';
 
 const primaryNav = [
   { to: '/meet-sina', label: 'Meet Sina' },
-  { to: '/creations', label: 'Creations' },
-  { to: '/commission', label: 'Commission' },
-  { to: '/wholesale', label: 'Wholesale' },
+  { to: '/commission', label: 'Commission Sina' },
+  { to: '/wholesale', label: 'Wholesale Partners' },
 ];
 
 const footerNav = [
   { to: '/meet-sina', label: 'Meet Sina' },
-  { to: '/creations', label: 'Creations' },
-  { to: '/shop', label: 'Adopt' },
+  { to: '/commission', label: 'Commission Sina' },
+  { to: '/wholesale', label: 'Wholesale Partners' },
+  { to: '/shop', label: 'Adopt Sina\'s Creations' },
 ];
 
 const footerConnect = [
@@ -41,11 +41,11 @@ const pageHeroImages = {
 const inquiryOptions = ['Adoption', 'Commission', 'Wholesale', 'Meet Sina', 'Gift Question', 'General Question'];
 
 const collectionIcons = {
-  All: 'all',
   Pendants: 'pendants',
   'Wire Wrapped': 'wire-wrapped',
   Necklaces: 'necklaces',
   'Ocean Necklaces': 'ocean-necklaces',
+  Lanyards: 'lanyards',
   Plates: 'plates',
   'Wall Art': 'wall-art',
   Charms: 'charms',
@@ -78,7 +78,10 @@ function Layout({ children }) {
         <nav className="desktop-nav" aria-label="Main navigation">
           {primaryNav.map((item) => <NavLink key={item.to} to={item.to}>{item.label}</NavLink>)}
         </nav>
-        <Link className="nav-cta" to="/shop">Adopt</Link>
+        <Link className="nav-cta" to="/shop">
+          <span className="nav-cta__desktop">Adopt Sina's Creations</span>
+          <span className="nav-cta__mobile">Adopt</span>
+        </Link>
         <button className="menu-button" onClick={() => setOpen(!open)} aria-label={open ? 'Close menu' : 'Open menu'}>
           <span className={open ? 'x' : ''}></span>
           <span className={open ? 'x' : ''}></span>
@@ -89,7 +92,7 @@ function Layout({ children }) {
         <div className="mobile-menu">
           {primaryNav.map((item) => <NavLink key={item.to} onClick={close} to={item.to}>{item.label}</NavLink>)}
           <NavLink onClick={close} to="/schedule">Schedule a Call</NavLink>
-          <Link onClick={close} className="mobile-adopt" to="/shop">Adopt a Creation</Link>
+          <Link onClick={close} className="mobile-adopt" to="/shop">Adopt Sina's Creations</Link>
         </div>
       )}
       {children}
@@ -171,6 +174,15 @@ function CategoryIcon({ type }) {
           <path d="M5 10c1.4 0 1.4-1 2.8-1s1.4 1 2.8 1s1.4-1 2.8-1s1.4 1 2.8 1" />
         </svg>
       );
+    case 'lanyards':
+      return (
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M8 4c0 3.2 1.7 5.8 4 7.5c2.3-1.7 4-4.3 4-7.5" />
+          <path d="M10 14h4" />
+          <path d="M11 14v5" />
+          <path d="M13 14v5" />
+        </svg>
+      );
     case 'plates':
       return (
         <svg viewBox="0 0 24 24" aria-hidden="true">
@@ -192,21 +204,12 @@ function CategoryIcon({ type }) {
         </svg>
       );
     case 'sets':
+    default:
       return (
         <svg viewBox="0 0 24 24" aria-hidden="true">
           <rect x="4" y="6" width="7" height="7" rx="1.2" />
           <rect x="13" y="6" width="7" height="7" rx="1.2" />
           <rect x="8.5" y="13" width="7" height="7" rx="1.2" />
-        </svg>
-      );
-    case 'all':
-    default:
-      return (
-        <svg viewBox="0 0 24 24" aria-hidden="true">
-          <rect x="4" y="4" width="6" height="6" rx="1.2" />
-          <rect x="14" y="4" width="6" height="6" rx="1.2" />
-          <rect x="4" y="14" width="6" height="6" rx="1.2" />
-          <rect x="14" y="14" width="6" height="6" rx="1.2" />
         </svg>
       );
   }
@@ -243,8 +246,8 @@ export function Story() {
         eyebrow="Meet Sina"
         title="The artist behind every 1-of-1 creation."
         copy="Thomasina Schnepf creates by touch, light, color, and close attention. Her work is personal, tactile, and made to be worn, displayed, gifted, and remembered one original at a time."
-        primary="See the Creations"
-        primaryTo="/creations"
+        primary="Adopt Sina's Creations"
+        primaryTo="/shop"
         backgroundImage={pageHeroImages.artist}
         backgroundPosition="78% 32%"
       />
@@ -302,13 +305,13 @@ export function Collections() {
         eyebrow="1-of-1 Creations"
         title="One body of work. Many ways to adopt."
         copy="Pendants, wire-wrapped pieces, necklaces, plaques, plates, wall art, lanyards, and sets &mdash; each one made by hand and released as its own original creation."
-        primary="Shop Available Pieces"
+        primary="Adopt Sina's Creations"
         primaryTo="/shop"
         backgroundImage={pageHeroImages.creations}
         backgroundPosition="78% center"
       />
       <section className="cream-section collection-grid">
-        {collections.filter((name) => name !== 'All').map((name) => (
+        {collections.map((name) => (
           <Link className="collection-card" to={`/shop?collection=${encodeURIComponent(name)}`} key={name}>
             <span>{name}</span>
             <strong>View pieces &rarr;</strong>
@@ -323,7 +326,7 @@ export function Collaborate() {
   return (
     <Layout>
       <Hero
-        eyebrow="Commission"
+        eyebrow="Commission Sina"
         title="Begin a custom piece with Sina."
         copy="If you want a piece shaped around a person, memory, color story, or meaning, start the conversation here and we will guide the next step together."
         primary="Start a Commission"
@@ -344,7 +347,7 @@ export function Wholesale() {
   return (
     <Layout>
       <Hero
-        eyebrow="Wholesale"
+        eyebrow="Wholesale Partners"
         title="Carry Sina's Creations in your store."
         copy="Sina's Creations is accepting wholesale applications from boutiques, galleries, gift shops, and community retailers who want one-of-one jewelry and glass art with a personal story behind every piece."
         primary="Start the Application"
@@ -362,7 +365,7 @@ export function Shop() {
   const location = useLocation();
   const queryFilter = React.useMemo(() => {
     const requested = new URLSearchParams(location.search).get('collection');
-    return collections.includes(requested) ? requested : 'All';
+    return collections.includes(requested) ? requested : '';
   }, [location.search, collections]);
   const [filter, setFilter] = useState(queryFilter);
   const [search, setSearch] = useState('');
@@ -382,7 +385,7 @@ export function Shop() {
       });
     }
 
-    return filter === 'All' ? products : products.filter((product) => product.category === filter);
+    return filter ? products.filter((product) => product.category === filter) : products;
   }, [filter, search, products]);
 
   return (
@@ -417,7 +420,7 @@ export function Shop() {
           </div>
           <div className="shop-icon-tabs" role="tablist" aria-label="Filter products by collection">
             {collections.map((tab) => {
-              const iconType = collectionIcons[tab] || 'all';
+              const iconType = collectionIcons[tab] || 'sets';
               const isActive = filter === tab;
               return (
                 <button
@@ -662,7 +665,7 @@ function Footer() {
         <h4>Connect</h4>
         {footerConnect.map((item) => <Link key={item.to} to={item.to}>{item.label}</Link>)}
       </div>
-      <div><h4>Adopt</h4><p>Choose a piece, ask a question, or start a custom conversation.</p><Link className="button primary footer-button" to="/shop">Adopt</Link></div>
+      <div><h4>Adopt</h4><p>Choose a piece, ask a question, or start a custom conversation.</p><Link className="button primary footer-button" to="/shop">Adopt Sina's Creations</Link></div>
     </footer>
   );
 }
