@@ -277,12 +277,24 @@ export function Shop() {
     return collections.includes(requested) ? requested : 'All';
   }, [location.search]);
   const [filter, setFilter] = useState(queryFilter);
+  const [search, setSearch] = useState('');
 
   React.useEffect(() => {
     setFilter(queryFilter);
   }, [queryFilter]);
 
-  const visible = filter === 'All' ? products : products.filter((product) => product.category === filter);
+  const visible = React.useMemo(() => {
+    const scoped = filter === 'All' ? products : products.filter((product) => product.category === filter);
+    const term = search.trim().toLowerCase();
+
+    if (!term) return scoped;
+
+    return scoped.filter((product) => {
+      const sku = String(product.sku ?? '').toLowerCase();
+      const name = String(product.name ?? '').toLowerCase();
+      return sku.includes(term) || name.includes(term);
+    });
+  }, [filter, search]);
 
   return (
     <Layout>
@@ -296,6 +308,19 @@ export function Shop() {
         backgroundPosition="78% 42%"
       />
       <section className="shop-section">
+        <div className="shop-search-bar">
+          <label className="shop-search-label" htmlFor="shop-search">Search by SKU or piece name</label>
+          <div className="shop-search-input-wrap">
+            <input
+              id="shop-search"
+              className="shop-search-input"
+              type="search"
+              value={search}
+              onChange={(event) => setSearch(event.target.value)}
+              placeholder="Try a SKU or product name"
+            />
+          </div>
+        </div>
         <div className="tabs" role="tablist" aria-label="Filter products by collection">
           {collections.map((tab) => (
             <button key={tab} type="button" className={filter === tab ? 'active' : ''} onClick={() => setFilter(tab)}>{tab}</button>
@@ -304,6 +329,12 @@ export function Shop() {
         <div className="product-grid">
           {visible.map((product) => <ProductCard product={product} key={product.sku} />)}
         </div>
+        {!visible.length && (
+          <div className="shop-empty-state">
+            <h3>No matching pieces yet.</h3>
+            <p>Try a different SKU, a shorter product name, or switch collections to widen the search.</p>
+          </div>
+        )}
       </section>
     </Layout>
   );
