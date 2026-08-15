@@ -346,17 +346,48 @@ export function Shop() {
   );
 }
 
+function ProductCardDescription({ product }) {
+  if (product.descriptionHtml) {
+    return <div className="product-card__description" dangerouslySetInnerHTML={{ __html: product.descriptionHtml }} />;
+  }
+
+  return <p className="product-card__description">{product.description || product.line}</p>;
+}
+
 function ProductCard({ product }) {
+  const [showBack, setShowBack] = React.useState(false);
+
   return (
-    <article className="product-card">
-      <div className="product-image"><img src={product.image} alt={`${product.name}, ${product.category} by Sina's Creations`} /></div>
-      <div className="product-body">
-        <div className="sku-row"><span>{product.category}</span><strong>1 of 1</strong></div>
-        <h3>{product.name}</h3>
-        <p>{product.line}</p>
-        <div className="price-row"><span>Adoption price</span><strong>${product.price}</strong></div>
-        <Link className="small-link" to="/schedule">Ask about this piece &rarr;</Link>
-      </div>
+    <article className={`product-card product-card--detail${showBack ? ' is-back' : ''}`}>
+      {!showBack ? (
+        <>
+          <div className="product-image"><img src={product.image} alt={`${product.name}, ${product.category} by Sina's Creations`} /></div>
+          <div className="product-body">
+            <div className="sku-row"><span>{product.category}</span><strong>SKU {product.sku}</strong></div>
+            <p className="product-card__badge"><span className="nowrap">1-of-1</span> creation</p>
+            <h3>{product.name}</h3>
+            <p>{product.line}</p>
+            <div className="price-row"><span>Adoption price</span><strong>${product.price}</strong></div>
+            <div className="product-card__actions">
+              <Link className="small-link" to="/schedule">Ask about this piece &rarr;</Link>
+              <button type="button" className="small-link product-card__flip-toggle" onClick={() => setShowBack(true)}>Flip for full details &rarr;</button>
+            </div>
+          </div>
+        </>
+      ) : (
+        <div className="product-body product-body--back">
+          <div className="sku-row"><span>{product.category}</span><strong>SKU {product.sku}</strong></div>
+          <h3>{product.name}</h3>
+          <ProductCardDescription product={product} />
+          <div className="price-row"><span>Adoption price</span><strong>${product.price}</strong></div>
+          <button type="button" className="button primary product-card__disabled-cta" disabled aria-disabled="true">Adoption Coming Soon</button>
+          <p className="product-card__disabled-note">Inventory is being updated, so adoption checkout is temporarily paused.</p>
+          <div className="product-card__actions product-card__actions--back">
+            <Link className="small-link" to="/schedule">Ask about this piece &rarr;</Link>
+            <button type="button" className="small-link product-card__flip-toggle" onClick={() => setShowBack(false)}>&larr; Back to front</button>
+          </div>
+        </div>
+      )}
     </article>
   );
 }
