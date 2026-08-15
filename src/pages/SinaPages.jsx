@@ -6,6 +6,7 @@ import meetSinaSmile from '../data/meetSinaSmile.js';
 import meetSinaStudio from '../data/meetSinaStudio.js';
 import meetSinaTray from '../data/meetSinaTray.js';
 import LivingMosaic from '../components/LivingMosaic/LivingMosaic.jsx';
+import WholesaleApplicationForm from '../components/WholesaleApplicationForm.jsx';
 
 const logoWhitePath = '/assets/brand/sinas-creations-white-logo.png';
 
@@ -251,18 +252,13 @@ export function Wholesale() {
       <Hero
         eyebrow="Wholesale"
         title="Carry Sina's Creations in your store."
-        copy="Retailers, galleries, boutiques, and community partners can apply to carry selected 1 of 1 creations, adoption cards, and story-based displays."
-        primary="Apply for Wholesale"
-        primaryTo="/schedule"
+        copy="Sina's Creations is accepting wholesale applications from boutiques, galleries, gift shops, and community retailers who want one-of-one jewelry and glass art with a personal story behind every piece."
+        primary="Start the Application"
+        primaryTo="/wholesale#application"
         backgroundImage={pageHeroImages.wholesale}
         backgroundPosition="74% center"
       />
-      <FormPage
-        title="Wholesale application"
-        intro="Tell us about your store, gallery, boutique, or event space and the type of pieces you would like to carry."
-        wholesale
-        lockedInterest="Wholesale"
-      />
+      <WholesaleApplicationForm />
     </Layout>
   );
 }
@@ -349,7 +345,7 @@ export function Schedule() {
   );
 }
 
-function FormPage({ title, intro, wholesale = false, lockedInterest = '' }) {
+function FormPage({ title, intro, lockedInterest = '' }) {
   const [formState, setFormState] = useState(() => createInitialFormState(lockedInterest));
   const [status, setStatus] = useState({ tone: 'idle', message: '' });
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -382,7 +378,7 @@ function FormPage({ title, intro, wholesale = false, lockedInterest = '' }) {
           lastName: formState.lastName,
           email: formState.email,
           phone: formState.phone,
-          businessName: wholesale ? formState.businessName : '',
+          businessName: formState.businessName,
           message: formState.message,
         }),
       });
@@ -415,7 +411,6 @@ function FormPage({ title, intro, wholesale = false, lockedInterest = '' }) {
         <label>Last name<input name="lastName" value={formState.lastName} onChange={handleChange} placeholder="Last name" required /></label>
         <label>Email<input name="email" type="email" value={formState.email} onChange={handleChange} placeholder="you@email.com" /></label>
         <label>Phone<input name="phone" value={formState.phone} onChange={handleChange} placeholder="(555) 000-0000" /></label>
-        {wholesale && <label>Business name<input name="businessName" value={formState.businessName} onChange={handleChange} placeholder="Business or gallery" /></label>}
         {lockedInterest ? (
           <label>
             Inquiry type
