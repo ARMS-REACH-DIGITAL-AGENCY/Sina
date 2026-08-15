@@ -1,13 +1,13 @@
 import { useEffect, useState } from 'react';
 import { collections as localCollections, products as localProducts } from '../data/products.js';
 
-const preferredCollectionOrder = localCollections.filter((name) => name !== 'All');
+const preferredCollectionOrder = localCollections;
 
 function deriveCollections(products) {
   const discovered = [...new Set(products.map((product) => product.category).filter(Boolean))];
   const ordered = preferredCollectionOrder.filter((name) => discovered.includes(name));
   const extras = discovered.filter((name) => !ordered.includes(name)).sort((left, right) => left.localeCompare(right));
-  return ['All', ...ordered, ...extras];
+  return [...ordered, ...extras];
 }
 
 const fallbackCollections = deriveCollections(localProducts);
