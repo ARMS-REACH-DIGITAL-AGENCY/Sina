@@ -561,8 +561,30 @@ function ProductCard({ product }) {
       <div className="product-card__inner">
         <div className="product-card__face product-card__face--front">
           <div className="product-card__media product-card__media--front">
-            <div className="product-image">
-              <img src={product.image} alt={`${product.name}, ${product.category} by Sina's Creations`} />
+            <div
+              className="product-image"
+              style={{
+                background: 'var(--warm-cream)',
+                padding: '12px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+              }}
+            >
+              <img
+                src={product.image}
+                alt={`${product.name}, ${product.category} by Sina's Creations`}
+                loading="lazy"
+                decoding="async"
+                style={{
+                  width: '100%',
+                  height: '100%',
+                  maxWidth: '100%',
+                  maxHeight: '100%',
+                  objectFit: 'contain',
+                  objectPosition: 'center center',
+                }}
+              />
               <span className="product-card__one-of-one"><span className="nowrap">1-of-1</span></span>
             </div>
           </div>
