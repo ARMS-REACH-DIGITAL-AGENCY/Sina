@@ -134,39 +134,44 @@
 
   .meet-sina-headline h2 {
     margin-bottom: 0;
-    max-width: 11ch;
-    font-size: clamp(38px, 8.2vw, 52px);
+    max-width: none;
+    font-size: clamp(38px, 8vw, 50px);
     line-height: .98;
     letter-spacing: -.04em;
   }
 
   .meet-sina-mobile-inset-row {
     display: grid;
-    grid-template-columns: minmax(0, 1fr) 112px;
+    grid-template-columns: minmax(0, 1fr) 104px;
     align-items: start;
     gap: 14px;
-    max-width: 360px;
+    max-width: 340px;
   }
 
   .meet-sina-pullquote {
-    max-width: 11ch;
+    max-width: 9.5ch;
     margin: 0;
-    font-size: clamp(17px, 4.2vw, 24px);
+    font-size: clamp(17px, 4vw, 23px);
     line-height: 1.42;
   }
 
   .meet-sina-photo-card--mobile-headline {
     display: block;
-    width: 112px;
+    width: 104px;
+    aspect-ratio: 1 / 1;
     align-self: start;
     justify-self: end;
   }
 
   .meet-sina-photo-card--mobile-headline img {
+    display: block;
+    width: 100%;
+    height: 100%;
     aspect-ratio: 1 / 1;
     min-height: 0;
     max-height: none;
-    object-position: center 24%;
+    object-fit: cover;
+    object-position: center center;
   }
 
   .meet-sina-media {
@@ -188,7 +193,7 @@
     grid-template-columns: 1fr;
   }
 
-  .meet-sina-photo-card img,
+  .meet-sina-photo-card:not(.meet-sina-photo-card--mobile-headline) img,
   .meet-sina-photo-card--wide img,
   .meet-sina-photo-card--portrait img {
     aspect-ratio: auto;
@@ -203,23 +208,22 @@
 
 @media (max-width: 420px) {
   .meet-sina-headline h2 {
-    max-width: 8.6ch;
-    font-size: clamp(34px, 8.6vw, 44px);
+    font-size: clamp(33px, 8.2vw, 42px);
   }
 
   .meet-sina-mobile-inset-row {
-    grid-template-columns: minmax(0, 1fr) 96px;
+    grid-template-columns: minmax(0, 1fr) 92px;
     gap: 12px;
-    max-width: 320px;
+    max-width: 308px;
   }
 
   .meet-sina-pullquote {
-    max-width: 10.5ch;
-    font-size: clamp(16px, 4.5vw, 21px);
-    line-height: 1.4;
+    max-width: 9.2ch;
+    font-size: clamp(16px, 4.4vw, 20px);
+    line-height: 1.38;
   }
 
   .meet-sina-photo-card--mobile-headline {
-    width: 96px;
+    width: 92px;
   }
 }
