@@ -10,7 +10,7 @@ const CATEGORY_MAP = {
   'Wall Art': 'Wall Art',
   Charms: 'Charms',
   Sets: 'Sets',
-  Lanyards: 'Charms',
+  Lanyards: 'Lanyards',
 };
 
 function sendJson(res, statusCode, body) {
