@@ -168,10 +168,10 @@ export function Story() {
           <div className="meet-sina-mobile-intro">
             <SectionHeader eyebrow="A Message From the Designer" title={<>My&nbsp;name&nbsp;is<br />Thomasina&nbsp;Schnepf.</>} className="meet-sina-headline" />
             <div className="meet-sina-mobile-inset-row">
-              <p className="meet-sina-pullquote">I am legally blind, and because of this, I create and &ldquo;view&rdquo; the world &mdash; and my work &mdash; very closely.</p>
               <article className="meet-sina-photo-card meet-sina-photo-card--mobile-headline">
                 <img src={meetSinaSmile} alt="Thomasina Schnepf smiling while working with fused glass pieces." />
               </article>
+              <p className="meet-sina-pullquote">I am legally blind, and because of this, I create and &ldquo;view&rdquo; the world &mdash; and my work &mdash; very closely.</p>
             </div>
           </div>
           <p>My disability is the result of a tumor on my optic nerve when I was four years old. For most people, vision shapes the way they see the world. For me, the loss of my sight has distorted my view of the world, but it has also caused me to examine everything much more closely in order to &ldquo;see&rdquo; what is truly there.</p>
