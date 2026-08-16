@@ -178,8 +178,9 @@
   display: inline-flex;
   align-items: center;
   gap: 10px;
-  min-width: min(100%, 340px);
-  max-width: 340px;
+  flex: 0 1 460px;
+  width: min(100%, 460px);
+  max-width: 460px;
   min-height: 42px;
   margin-left: auto;
   padding: 0 12px;
@@ -235,6 +236,14 @@
   padding: 0;
 }
 
+.mobile-menu {
+  top: var(--header-height) !important;
+  bottom: 0 !important;
+  min-height: calc(100dvh - var(--header-height)) !important;
+  padding-bottom: 40px !important;
+  overflow-y: auto !important;
+}
+
 @media (max-width: 959px) {
   .site-header {
     gap: 8px !important;
@@ -250,14 +259,6 @@
   .brand-logo {
     height: 42px !important;
     max-width: 132px !important;
-  }
-
-  .nav-cta {
-    padding: 5px 10px !important;
-    min-height: 34px !important;
-    font-size: 9px !important;
-    letter-spacing: .07em !important;
-    max-width: none !important;
   }
 
   .header-search-button {
@@ -305,9 +306,11 @@
   .header-catalog-search {
     min-width: 0;
     flex: 1 1 auto;
+    width: auto;
     max-width: none;
     margin-left: 0;
     order: 2;
+    min-height: 40px;
   }
 }
 
@@ -327,12 +330,6 @@
   .brand-logo {
     height: 38px !important;
     max-width: 118px !important;
-  }
-
-  .nav-cta {
-    padding: 4px 8px !important;
-    min-height: 32px !important;
-    font-size: 8px !important;
   }
 
   .header-search-button {
