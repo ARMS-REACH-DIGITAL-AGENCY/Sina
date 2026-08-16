@@ -1,5 +1,4 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { createPortal } from 'react-dom';
 import { Link } from 'react-router-dom';
 import useMosaicProducts from '../../hooks/useMosaicProducts.js';
 import { buildMosaicGrid } from './colorMatch.js';
@@ -35,7 +34,6 @@ export default function LivingMosaic() {
 
   const sectionRef = useRef(null);
   const viewportRef = useRef(null);
-  const fullscreenModalHostRef = useRef(null);
   const zoomRef = useRef({ scale: 1, x: 0, y: 0 });
   const gestureRef = useRef({ type: 'idle' });
   const suppressTapRef = useRef(false);
@@ -245,11 +243,7 @@ export default function LivingMosaic() {
 
     function handleFullscreenChange() {
       const viewport = viewportRef.current;
-      const fullscreenActive = Boolean(viewport && document.fullscreenElement === viewport);
-      setIsFullscreen(fullscreenActive);
-      if (!fullscreenActive) {
-        suppressTapRef.current = false;
-      }
+      setIsFullscreen(Boolean(viewport && document.fullscreenElement === viewport));
     }
 
     document.addEventListener('fullscreenchange', handleFullscreenChange);
@@ -296,8 +290,6 @@ export default function LivingMosaic() {
     event.stopPropagation();
     suppressTapRef.current = false;
   }
-
-  const modal = modalProduct ? <ProductModal product={modalProduct} onClose={() => setModalProduct(null)} /> : null;
 
   return (
     <section className="living-mosaic living-mosaic--hero" id="collection" ref={sectionRef}>
@@ -358,7 +350,6 @@ export default function LivingMosaic() {
                   onLoad={() => setPortraitLoaded(true)}
                 />
               </div>
-              <div ref={fullscreenModalHostRef} className="living-mosaic__fullscreen-modal-host" aria-hidden={!modalProduct} />
             </div>
 
             <div className="living-mosaic__sr-status" role="status" aria-live="polite">
@@ -374,23 +365,22 @@ export default function LivingMosaic() {
         <p className="living-mosaic__baseline-hint">Pinch and drag inside the portrait to explore the creations up close. Tap Full Screen for a larger view.</p>
 
         <div className="living-mosaic__cta-row">
-          <Link className="button ghost living-mosaic__cta-button living-mosaic__cta-button--designer" to="/meet-sina">A Message From The Designer</Link>
+          <Link className="button primary" to="/shop">Adopt A Creation</Link>
+          <Link className="button ghost" to="/meet-sina">A Message From The Designer</Link>
           <button
             type="button"
-            className={`button ghost living-mosaic__cta-button living-mosaic__cta-button--names${showNames ? ' is-active' : ''}`}
+            className={`button ghost${showNames ? ' is-active' : ''}`}
             onClick={handleToggleNames}
           >
             {showNames ? 'Hide Names' : 'Show Names'}
           </button>
-          <button type="button" className="button ghost living-mosaic__cta-button living-mosaic__cta-button--fullscreen" onClick={handleToggleFullscreen}>
+          <button type="button" className="button ghost" onClick={handleToggleFullscreen}>
             {isFullscreen ? 'Exit Full Screen' : 'Full Screen'}
           </button>
-          <Link className="button primary living-mosaic__cta-button living-mosaic__cta-button--adopt" to="/shop">Adopt A Creation</Link>
         </div>
       </div>
 
-      {isFullscreen && fullscreenModalHostRef.current && modal ? createPortal(modal, fullscreenModalHostRef.current) : null}
-      {!isFullscreen && modal}
+      {modalProduct && <ProductModal product={modalProduct} onClose={() => setModalProduct(null)} />}
     </section>
   );
 }
