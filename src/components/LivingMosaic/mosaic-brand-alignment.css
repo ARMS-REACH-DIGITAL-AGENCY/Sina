@@ -215,32 +215,29 @@
 
 @media (max-width: 959px) {
   .living-mosaic__hero-shell {
-    --mosaic-frame-height: clamp(320px, 56vw, 430px);
+    --mosaic-frame-height: clamp(360px, 74vw, 470px);
     width: calc(100% - 32px);
     padding: 20px 0 40px;
-    grid-template-columns: minmax(0, 1fr) minmax(170px, 43vw);
-    column-gap: 16px;
-    row-gap: 14px;
+    grid-template-columns: minmax(0, 1fr);
+    column-gap: 0;
+    row-gap: 18px;
   }
 
-  .living-mosaic__intro {
+  .living-mosaic__intro,
+  .living-mosaic__story,
+  .living-mosaic__visual {
     grid-column: 1 / -1;
   }
 
-  .living-mosaic__story {
-    grid-column: 1 / 2;
-  }
-
   .living-mosaic__visual {
-    grid-column: 2 / 3;
-    width: 100%;
-    height: var(--mosaic-frame-height);
-    max-width: none;
-    justify-self: end;
+    width: min(100%, 336px);
+    height: auto;
+    justify-self: center;
   }
 
   .living-mosaic__frame {
-    height: var(--mosaic-frame-height);
+    height: auto;
+    aspect-ratio: 5 / 7;
   }
 
   .living-mosaic__eyebrow {
@@ -253,6 +250,11 @@
   .living-mosaic__intro h1 {
     max-width: 520px;
     font-size: clamp(38px, 8.2vw, 58px);
+  }
+
+  .living-mosaic__copy-stack,
+  .living-mosaic__lead-stack {
+    max-width: none;
   }
 
   .living-mosaic__copy-stack {
@@ -277,8 +279,11 @@
 @media (max-width: 620px) {
   .living-mosaic__hero-shell {
     width: calc(100% - 24px);
-    grid-template-columns: minmax(0, 1fr) minmax(150px, 46vw);
-    column-gap: 14px;
+    row-gap: 16px;
+  }
+
+  .living-mosaic__visual {
+    width: min(100%, 318px);
   }
 
   .living-mosaic__intro h1 {
