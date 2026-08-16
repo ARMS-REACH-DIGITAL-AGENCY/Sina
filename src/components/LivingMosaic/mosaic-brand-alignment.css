@@ -31,7 +31,6 @@
   min-height: 0;
   margin: 0;
   padding: 0;
-  justify-content: flex-start;
   color: var(--off-white);
   background: transparent;
   pointer-events: auto;
@@ -113,6 +112,7 @@
 }
 
 .living-mosaic__frame {
+  position: relative;
   width: 100%;
   height: var(--mosaic-frame-height);
   min-height: 0;
@@ -123,6 +123,40 @@
   border-radius: 2px;
   box-shadow: 0 24px 56px rgba(0,0,0,.42);
   background: #090909;
+  overflow: hidden;
+}
+
+.living-mosaic__portrait-reveal,
+.living-mosaic__grid-reveal {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.living-mosaic__grid-reveal {
+  z-index: 1;
+  opacity: 0;
+  transition: opacity 1.15s ease;
+}
+
+.living-mosaic__portrait-reveal {
+  z-index: 3;
+  object-fit: cover;
+  object-position: center 35%;
+  opacity: 1;
+  filter: saturate(.96) contrast(1.02) brightness(.92);
+  transition: opacity 1.15s ease, filter 1.15s ease;
+  pointer-events: none;
+}
+
+.living-mosaic__grid {
+  width: 100%;
+  height: 100%;
+  max-height: none;
+  margin: 0;
+  gap: 0;
+  aspect-ratio: auto;
 }
 
 .living-mosaic__sr-status {
@@ -162,6 +196,10 @@
   opacity: 1;
 }
 
+.living-mosaic__frame.is-mosaic-ready .living-mosaic__grid-reveal {
+  opacity: 1;
+}
+
 .living-mosaic__frame.is-mosaic-ready .living-mosaic__portrait-reveal {
   opacity: .42;
   filter: saturate(.78) contrast(1.12) brightness(1.02);
@@ -183,12 +221,6 @@
     grid-template-columns: minmax(0, 1fr) minmax(170px, 43vw);
     column-gap: 16px;
     row-gap: 14px;
-  }
-
-  .living-mosaic__intro,
-  .living-mosaic__story,
-  .living-mosaic__visual {
-    grid-column: auto;
   }
 
   .living-mosaic__intro {
