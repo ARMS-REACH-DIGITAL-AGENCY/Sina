@@ -270,7 +270,7 @@ export function Home() {
       <LivingMosaic />
       <section className="cream-section split-section">
         <div>
-          <SectionHeader eyebrow="The Mission" title="More than jewelry. A story you can hold." />
+          <SectionHeader eyebrow="The Mission" title={<>More than jewelry.<br /><span className="nowrap">A story you can hold.</span></>} />
           <p>Every creation begins as glass, but it becomes something more personal once Thomasina names it. Each piece is made by hand, chosen with intention, and offered to one person who feels connected to its color, texture, and story.</p>
           <div className="tag-row"><span>Named once</span><span>Made by hand</span><span>Adopted once</span></div>
         </div>
@@ -291,7 +291,7 @@ export function Story() {
     <Layout>
       <Hero
         eyebrow="Meet Sina"
-        title="The artist behind every 1-of-1 creation."
+        title={<>The artist behind every <span className="nowrap">1-of-1</span> creation.</>}
         copy="Thomasina Schnepf creates by touch, light, color, and close attention. Her work is personal, tactile, and made to be worn, displayed, gifted, and remembered one original at a time."
         primary="Adopt Sina's Creations"
         primaryTo="/shop"
@@ -372,7 +372,7 @@ export function Collaborate() {
     <Layout>
       <Hero
         eyebrow="Commission Sina"
-        title="Begin a custom piece with Sina."
+        title={<>Begin a custom piece <span className="nowrap">with Sina.</span></>}
         copy="If you want a piece shaped around a person, memory, color story, or meaning, start the conversation here and we will guide the next step together."
         primary="Start a Commission"
         primaryTo="/schedule"
@@ -392,7 +392,7 @@ export function Wholesale() {
     <Layout>
       <Hero
         eyebrow="Wholesale Partners"
-        title="Carry Sina's Creations in your store."
+        title={<>Carry Sina's Creations <span className="nowrap">in your store.</span></>}
         copy="Sina's Creations is accepting wholesale applications from boutiques, galleries, gift shops, and community retailers who want one-of-one jewelry and glass art with a personal story behind every piece."
         primary="Start the Application"
         primaryTo="/wholesale#application"
