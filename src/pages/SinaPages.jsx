@@ -14,6 +14,7 @@ const meetSinaStudio = '/images/meet-sina/meet-sina-studio.jpg';
 const meetSinaTray = '/images/meet-sina/meet-sina-tray.jpg';
 
 const primaryNav = [
+  { to: '/', label: 'Home' },
   { to: '/meet-sina', label: 'Meet Sina' },
   { to: '/commission', label: 'Commission Sina' },
   { to: '/wholesale', label: 'Wholesale Partners' },
