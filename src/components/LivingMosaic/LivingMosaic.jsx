@@ -8,7 +8,7 @@ import './living-mosaic.css';
 import './mosaic-experiment-overrides.css';
 import './mosaic-brand-alignment.css';
 
-const PORTRAIT_SRC = '/images/hero/mosaic_portrait.jpg';
+const PORTRAIT_SRC = '/images/hero/mosaic_portrait .JPG';
 const DESKTOP_GRID = { cols: 45, rows: 60 };
 const MOBILE_GRID = { cols: 30, rows: 40 };
 const MOBILE_BREAKPOINT = 767;
