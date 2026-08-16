@@ -1,5 +1,4 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { Link } from 'react-router-dom';
 import useMosaicProducts from '../../hooks/useMosaicProducts.js';
 import { buildMosaicGrid } from './colorMatch.js';
 import MosaicTile from './MosaicTile.jsx';
@@ -9,7 +8,6 @@ import './living-mosaic.css';
 import './mosaic-experiment-overrides.css';
 import './mosaic-brand-alignment.css';
 
-// Claude's working matcher and 29x51 grid stay unchanged for Gate 1.
 const PORTRAIT_SRC = '/images/hero/PLQ-FG-LG-45.JPG';
 const GRID_COLS = 29;
 const GRID_ROWS = 51;
@@ -29,8 +27,6 @@ export default function LivingMosaic() {
   const [portraitLoaded, setPortraitLoaded] = useState(false);
   const [modalProduct, setModalProduct] = useState(null);
   const [active, setActive] = useState(false);
-  const [showNames, setShowNames] = useState(false);
-  const [isFullscreen, setIsFullscreen] = useState(false);
   const [zoomState, setZoomState] = useState({ scale: 1, x: 0, y: 0 });
 
   const sectionRef = useRef(null);
@@ -237,20 +233,6 @@ export default function LivingMosaic() {
     };
   }, []);
 
-  useEffect(() => {
-    if (typeof document === 'undefined') {
-      return undefined;
-    }
-
-    function handleFullscreenChange() {
-      const viewport = viewportRef.current;
-      setIsFullscreen(Boolean(viewport && document.fullscreenElement === viewport));
-    }
-
-    document.addEventListener('fullscreenchange', handleFullscreenChange);
-    return () => document.removeEventListener('fullscreenchange', handleFullscreenChange);
-  }, []);
-
   const cellProduct = useMemo(() => {
     return (cell) => (cell ? products[cell.productIndex] : null);
   }, [products]);
@@ -259,30 +241,6 @@ export default function LivingMosaic() {
 
   function handleTap(cell) {
     setModalProduct(cellProduct(cell));
-  }
-
-  function handleToggleNames() {
-    setShowNames((value) => !value);
-  }
-
-  async function handleToggleFullscreen() {
-    const viewport = viewportRef.current;
-    if (!viewport || typeof document === 'undefined') {
-      return;
-    }
-
-    try {
-      if (document.fullscreenElement === viewport) {
-        await document.exitFullscreen?.();
-        return;
-      }
-
-      if (!document.fullscreenElement) {
-        await viewport.requestFullscreen?.();
-      }
-    } catch {
-      setIsFullscreen(false);
-    }
   }
 
   function handleViewportClickCapture(event) {
@@ -298,8 +256,10 @@ export default function LivingMosaic() {
         <div className="living-mosaic__intro">
           <SearchEyebrow label="HER STORY & CREATIONS. YOUR CHOICE." className="living-mosaic__eyebrow" />
           <h1>The closer you get, the more you see.</h1>
+        </div>
 
-          <div className="living-mosaic__intro-copy">
+        <div className="living-mosaic__story">
+          <div className="living-mosaic__copy-stack">
             <div className="living-mosaic__lead-stack">
               <p className="living-mosaic__lead">Step back to see this amazing legally blind artist.</p>
               <p className="living-mosaic__lead">Come closer to meet her 1-of-1 creations.</p>
@@ -335,7 +295,7 @@ export default function LivingMosaic() {
                             product={cellProduct(cell)}
                             active={active}
                             onTap={handleTap}
-                            showNames={showNames}
+                            showNames={false}
                           />
                         );
                       })}
@@ -360,29 +320,6 @@ export default function LivingMosaic() {
                   : 'The portrait is visible while the mosaic is being assembled.'}
             </div>
           </div>
-        </div>
-
-        <p className="living-mosaic__baseline-hint">Pinch and drag inside the portrait to explore the creations up close. Tap Full Screen for a larger view.</p>
-
-        <div className="living-mosaic__story">
-          <div className="living-mosaic__copy-stack">
-            <p className="living-mosaic__story-copy">Some are worn. Some are displayed. Some are gifted. All are made by hand and released only once.</p>
-          </div>
-        </div>
-
-        <div className="living-mosaic__cta-row">
-          <Link className="button primary" to="/shop">Adopt A Creation</Link>
-          <Link className="button ghost" to="/meet-sina">A Message From The Designer</Link>
-          <button
-            type="button"
-            className={`button ghost${showNames ? ' is-active' : ''}`}
-            onClick={handleToggleNames}
-          >
-            {showNames ? 'Hide Names' : 'Show Names'}
-          </button>
-          <button type="button" className="button ghost" onClick={handleToggleFullscreen}>
-            {isFullscreen ? 'Exit Full Screen' : 'Full Screen'}
-          </button>
         </div>
       </div>
 
