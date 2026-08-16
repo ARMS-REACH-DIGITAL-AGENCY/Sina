@@ -7,43 +7,43 @@
 }
 
 .living-mosaic__hero-shell {
-  --mosaic-frame-width: clamp(184px, 20vw, 236px);
+  --mosaic-frame-width: clamp(164px, 17vw, 186px);
   display: grid;
   width: 100%;
   max-width: 1200px;
   margin: 0 auto;
-  padding: 56px var(--page-gutter) 72px;
-  grid-template-columns: var(--mosaic-frame-width) minmax(240px, 320px) minmax(0, 1fr);
-  column-gap: clamp(24px, 3vw, 40px);
-  row-gap: 24px;
+  padding: 56px var(--page-gutter) 56px;
+  grid-template-columns: var(--mosaic-frame-width) minmax(220px, 280px) minmax(0, 1fr);
+  column-gap: clamp(22px, 2.6vw, 36px);
+  row-gap: 22px;
   align-items: start;
   justify-content: start;
 }
 
 .living-mosaic__intro {
-  grid-column: 1 / 3;
+  grid-column: 1 / -1;
   grid-row: 1;
   display: grid;
   gap: 0;
   align-content: start;
-  max-width: 720px;
+  max-width: 760px;
 }
 
 .living-mosaic__details {
   grid-column: 2 / 3;
   grid-row: 2;
   display: grid;
-  gap: 18px;
+  gap: 16px;
   align-content: start;
-  max-width: 320px;
+  max-width: 280px;
 }
 
 .living-mosaic__story {
   margin: 0;
-  padding: 22px 24px;
+  padding: 20px 22px;
   width: 100%;
   color: var(--off-white);
-  background: rgba(23, 24, 22, 0.42);
+  background: rgba(23, 24, 22, 0.52);
   pointer-events: auto;
   overflow: visible;
 }
@@ -67,7 +67,7 @@
 }
 
 .living-mosaic__intro h1 {
-  max-width: 720px;
+  max-width: 760px;
   margin: 0;
   color: var(--off-white);
   font-family: var(--font-display);
@@ -81,7 +81,7 @@
 
 .living-mosaic__copy-stack {
   display: grid;
-  gap: 16px;
+  gap: 14px;
   max-width: none;
   margin-top: 0;
 }
@@ -95,8 +95,8 @@
 
 .living-mosaic__story-copy {
   color: rgba(247, 244, 236, .72);
-  font-size: clamp(15px, 1.05vw, 17px);
-  line-height: 1.68;
+  font-size: clamp(14px, .98vw, 16px);
+  line-height: 1.65;
   text-wrap: pretty;
 }
 
@@ -109,7 +109,7 @@
 
 .living-mosaic__lead {
   color: var(--off-white);
-  font-size: clamp(17px, 1.2vw, 19px);
+  font-size: clamp(16px, 1.08vw, 18px);
   line-height: 1.45;
   font-weight: 800;
   text-wrap: pretty;
@@ -118,8 +118,9 @@
 .living-mosaic__cta {
   align-self: start;
   justify-self: start;
-  width: 100%;
-  max-width: 240px;
+  width: max-content;
+  min-width: 186px;
+  max-width: 100%;
 }
 
 .living-mosaic__visual {
@@ -297,6 +298,8 @@
   }
 
   .living-mosaic__cta {
+    width: 100%;
+    min-width: 0;
     max-width: none;
   }
 }
