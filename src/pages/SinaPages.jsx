@@ -5,6 +5,7 @@ import WholesaleApplicationForm from '../components/WholesaleApplicationForm.jsx
 import useCatalogProducts from '../hooks/useCatalogProducts.js';
 
 const logoWhitePath = '/assets/brand/sinas-creations-white-logo.png';
+const logoBlackPath = '/assets/brand/sinas-creations-black-logo.png';
 const meetSinaSmile = '/images/meet-sina/meet-sina-smile-square.jpg';
 const meetSinaCloseup = '/images/meet-sina/meet-sina-closeup.jpg';
 const meetSinaStudio = '/images/meet-sina/meet-sina-studio.jpg';
@@ -110,7 +111,8 @@ function Layout({ children }) {
     <div className={`site-shell${searchOpen ? ' site-shell--search-open' : ''}`}>
       <header className="site-header">
         <Link className="brand logo-brand" to="/" onClick={() => { close(); closeSearch(); }} aria-label="Sina's Creations home">
-          <img className="brand-logo" src={logoWhitePath} alt="Sina's Creations" />
+          <img className="brand-logo brand-logo--desktop" src={logoWhitePath} alt="Sina's Creations" />
+          <img className="brand-logo brand-logo--mobile" src={logoBlackPath} alt="Sina's Creations" />
           <span className="brand-fallback" aria-hidden="true"><span>Sina</span><small>Creations</small></span>
         </Link>
         <nav className="desktop-nav" aria-label="Main navigation">
@@ -133,7 +135,7 @@ function Layout({ children }) {
         </div>
         <Link className="nav-cta" to="/shop" onClick={closeSearch}>
           <span className="nav-cta__desktop">Adopt Sina's Creations</span>
-          <span className="nav-cta__mobile">Adopt Sina's Creations</span>
+          <span className="nav-cta__mobile">Browse Catalog</span>
         </Link>
         <button className="menu-button" onClick={handleMenuToggle} aria-label={open ? 'Close menu' : 'Open menu'}>
           <span className={open ? 'x' : ''}></span>
@@ -460,7 +462,10 @@ export function Shop() {
   const productGridRef = React.useRef(null);
   const queryFilter = React.useMemo(() => {
     const requested = new URLSearchParams(location.search).get('collection');
-    return collections.includes(requested) ? requested : '';
+    if (collections.includes(requested)) {
+      return requested;
+    }
+    return 'Pendants';
   }, [location.search, collections]);
   const searchTerm = React.useMemo(() => readShopSearchTerm(location.search).toLowerCase(), [location.search]);
 
