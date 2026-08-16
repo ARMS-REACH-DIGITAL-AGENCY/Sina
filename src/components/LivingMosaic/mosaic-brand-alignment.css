@@ -1,147 +1,26 @@
-/* Align the homepage mosaic hero to the shared dark-site hero system
-   while keeping the contained mosaic box and modal flow. */
+/* Homepage mosaic hero now reuses the shared .hero / .hero-inner / .pill-eyebrow
+   / .hero h1 rules from global.css directly (same container width, overflow
+   clipping, eyebrow, and heading size as every other page's hero). This file
+   only covers what's unique to the mosaic hero: the two-up frame + story row
+   below the heading, the mosaic frame itself, and the tile grid dressing. */
 
-.living-mosaic--hero {
-  background: var(--black);
-  border-bottom: 2px solid var(--burnt-orange);
-}
-
-.living-mosaic__hero-shell {
-  --mosaic-frame-width: clamp(164px, 17vw, 186px);
+.living-mosaic__body {
   display: grid;
-  width: 100%;
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 56px var(--page-gutter) 56px;
-  grid-template-columns: var(--mosaic-frame-width) minmax(220px, 280px) minmax(0, 1fr);
-  column-gap: clamp(22px, 2.6vw, 36px);
-  row-gap: 22px;
+  grid-template-columns: clamp(240px, 24vw, 340px) minmax(0, 1fr);
+  column-gap: clamp(28px, 3.4vw, 48px);
+  row-gap: 24px;
   align-items: start;
-  justify-content: start;
-}
-
-.living-mosaic__intro {
-  grid-column: 1 / -1;
-  grid-row: 1;
-  display: grid;
-  gap: 0;
-  align-content: start;
-  max-width: 760px;
-}
-
-.living-mosaic__details {
-  grid-column: 2 / 3;
-  grid-row: 2;
-  display: grid;
-  gap: 16px;
-  align-content: start;
-  max-width: 280px;
-}
-
-.living-mosaic__story {
-  margin: 0;
-  padding: 20px 22px;
-  width: 100%;
-  color: var(--off-white);
-  background: rgba(23, 24, 22, 0.52);
-  pointer-events: auto;
-  overflow: visible;
-}
-
-.living-mosaic__eyebrow {
-  display: inline-flex;
-  align-items: center;
-  align-self: flex-start;
-  width: max-content;
-  max-width: 100%;
-  margin: 0 0 32px;
-  padding: 11px 20px;
-  color: var(--burnt-orange);
-  font-family: var(--font-body);
-  font-size: 11px;
-  line-height: 1.15;
-  font-weight: 700;
-  letter-spacing: .18em;
-  text-transform: uppercase;
-  white-space: nowrap;
-}
-
-.living-mosaic__intro h1 {
-  max-width: 760px;
-  margin: 0;
-  color: var(--off-white);
-  font-family: var(--font-display);
-  font-style: normal;
-  font-weight: 800;
-  font-size: clamp(44px, 7vw, 78px);
-  line-height: 1.02;
-  letter-spacing: -.035em;
-  text-wrap: balance;
-}
-
-.living-mosaic__copy-stack {
-  display: grid;
-  gap: 14px;
-  max-width: none;
-  margin-top: 0;
-}
-
-.living-mosaic__story-copy,
-.living-mosaic__lead {
-  max-width: none;
-  margin: 0;
-  font-family: var(--font-body);
-}
-
-.living-mosaic__story-copy {
-  color: rgba(247, 244, 236, .72);
-  font-size: clamp(14px, .98vw, 16px);
-  line-height: 1.65;
-  text-wrap: pretty;
-}
-
-.living-mosaic__lead-stack {
-  display: grid;
-  gap: 10px;
-  max-width: none;
-  margin-top: 0;
-}
-
-.living-mosaic__lead {
-  color: var(--off-white);
-  font-size: clamp(16px, 1.08vw, 18px);
-  line-height: 1.45;
-  font-weight: 800;
-  text-wrap: pretty;
-}
-
-.living-mosaic__cta {
-  align-self: start;
-  justify-self: start;
-  width: max-content;
-  min-width: 186px;
-  max-width: 100%;
+  margin-top: 40px;
 }
 
 .living-mosaic__visual {
-  grid-column: 1 / 2;
-  grid-row: 2;
   width: 100%;
-  max-width: var(--mosaic-frame-width);
   min-width: 0;
-  min-height: 0;
-  height: auto;
-  justify-self: start;
-  align-self: start;
-  background: transparent;
 }
 
 .living-mosaic__frame {
   position: relative;
   width: 100%;
-  height: auto;
-  min-height: 0;
-  flex: 0 0 auto;
   aspect-ratio: 3 / 4;
   padding: 0;
   border: 1px solid rgba(247, 244, 236, .14);
@@ -196,6 +75,15 @@
   border: 0;
 }
 
+.living-mosaic__frame.is-mosaic-ready .living-mosaic__grid-reveal {
+  opacity: 1;
+}
+
+.living-mosaic__frame.is-mosaic-ready .living-mosaic__portrait-reveal {
+  opacity: .42;
+  filter: saturate(.78) contrast(1.12) brightness(1.02);
+}
+
 .mosaic-tile__face--front {
   transition: opacity .24s ease;
 }
@@ -221,70 +109,49 @@
   opacity: 1;
 }
 
-.living-mosaic__frame.is-mosaic-ready .living-mosaic__grid-reveal {
-  opacity: 1;
+.living-mosaic__story {
+  min-width: 0;
 }
 
-.living-mosaic__frame.is-mosaic-ready .living-mosaic__portrait-reveal {
-  opacity: .42;
-  filter: saturate(.78) contrast(1.12) brightness(1.02);
+.living-mosaic__copy-stack {
+  display: grid;
+  gap: 14px;
+}
+
+.living-mosaic__lead-stack {
+  display: grid;
+  gap: 10px;
+}
+
+.living-mosaic__lead {
+  margin: 0;
+  color: var(--off-white);
+  font-family: var(--font-body);
+  font-size: clamp(16px, 1.08vw, 18px);
+  line-height: 1.45;
+  font-weight: 800;
+  text-wrap: pretty;
+}
+
+.living-mosaic__story-copy {
+  margin: 0;
+  color: rgba(247, 244, 236, .72);
+  font-family: var(--font-body);
+  font-size: clamp(14px, .98vw, 16px);
+  line-height: 1.65;
+  text-wrap: pretty;
 }
 
 @media (max-width: 959px) {
-  .living-mosaic__hero-shell {
-    --mosaic-frame-width: min(100%, 304px);
-    padding: 48px var(--page-gutter) 56px;
+  .living-mosaic__body {
     grid-template-columns: minmax(0, 1fr);
-    column-gap: 0;
     row-gap: 20px;
-  }
-
-  .living-mosaic__intro,
-  .living-mosaic__visual,
-  .living-mosaic__details {
-    grid-column: 1 / -1;
-  }
-
-  .living-mosaic__intro {
-    grid-row: 1;
-    max-width: none;
+    margin-top: 32px;
   }
 
   .living-mosaic__visual {
-    grid-row: 2;
-    width: var(--mosaic-frame-width);
-    justify-self: center;
-  }
-
-  .living-mosaic__details {
-    grid-row: 3;
-    max-width: none;
-    gap: 16px;
-  }
-
-  .living-mosaic__story {
-    padding: 0;
-    background: transparent;
-  }
-
-  .living-mosaic__eyebrow {
-    margin: 0 0 28px;
-    padding: 10px 14px;
-    font-size: 11px;
-    letter-spacing: .14em;
-  }
-
-  .living-mosaic__intro h1 {
-    max-width: 560px;
-    font-size: clamp(40px, 11vw, 54px);
-  }
-
-  .living-mosaic__copy-stack {
-    gap: 14px;
-  }
-
-  .living-mosaic__lead-stack {
-    gap: 8px;
+    width: min(100%, 304px);
+    margin: 0 auto;
   }
 
   .living-mosaic__lead {
@@ -296,35 +163,10 @@
     font-size: 14px;
     line-height: 1.65;
   }
-
-  .living-mosaic__cta {
-    width: 100%;
-    min-width: 0;
-    max-width: none;
-  }
 }
 
 @media (max-width: 620px) {
-  .living-mosaic__hero-shell {
-    --mosaic-frame-width: min(100%, 292px);
-    row-gap: 18px;
-  }
-
-  .living-mosaic__intro h1 {
-    font-size: clamp(40px, 11vw, 52px);
-  }
-
-  .living-mosaic__eyebrow {
-    font-size: 11px;
-    padding: 10px 14px;
-    letter-spacing: .14em;
-  }
-
-  .living-mosaic__lead {
-    font-size: 15px;
-  }
-
-  .living-mosaic__story-copy {
-    font-size: 14px;
+  .living-mosaic__visual {
+    width: min(100%, 292px);
   }
 }

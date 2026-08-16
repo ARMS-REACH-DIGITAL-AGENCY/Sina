@@ -281,71 +281,65 @@ export default function LivingMosaic() {
   }
 
   return (
-    <section className="living-mosaic living-mosaic--hero" id="collection" ref={sectionRef}>
-      <div className="living-mosaic__hero-shell">
-        <div className="living-mosaic__intro">
-          <SearchEyebrow label="HER STORY & CREATIONS. YOUR CHOICE." className="living-mosaic__eyebrow" />
-          <h1>
-            The closer you get,
-            <br />
-            <span className="nowrap">the more you see.</span>
-          </h1>
-        </div>
+    <section className="hero hero-dark living-mosaic living-mosaic--hero" id="collection" ref={sectionRef}>
+      <div className="hero-inner living-mosaic__hero-inner">
+        <SearchEyebrow label="HER STORY & CREATIONS. YOUR CHOICE." />
+        <h1>The closer you get, the more you see.</h1>
 
-        <div className="living-mosaic__visual">
-          <div className={`living-mosaic__frame${mosaicReady ? ' is-mosaic-ready' : ''}`}>
-            <div
-              ref={viewportRef}
-              className={`living-mosaic__viewport${zoomState.scale > 1 ? ' is-zoomed' : ''}`}
-              onClickCapture={handleViewportClickCapture}
-              aria-label="Interactive mosaic portrait"
-            >
+        <div className="living-mosaic__body">
+          <div className="living-mosaic__visual">
+            <div className={`living-mosaic__frame${mosaicReady ? ' is-mosaic-ready' : ''}`}>
               <div
-                className="living-mosaic__zoom-stage"
-                style={{
-                  transform: `translate3d(${zoomState.x}px, ${zoomState.y}px, 0) scale(${zoomState.scale})`,
-                }}
+                ref={viewportRef}
+                className={`living-mosaic__viewport${zoomState.scale > 1 ? ' is-zoomed' : ''}`}
+                onClickCapture={handleViewportClickCapture}
+                aria-label="Interactive mosaic portrait"
               >
-                <div className="living-mosaic__grid-reveal" aria-hidden={!mosaicReady}>
-                  {!gridError && grid.length > 0 && (
-                    <div className="living-mosaic__grid" style={{ '--mosaic-cols': gridCols, '--mosaic-rows': gridRows }}>
-                      {grid.map((cell) => {
-                        const key = `${cell.col}-${cell.row}`;
-                        return (
-                          <MosaicTile
-                            key={key}
-                            cell={cell}
-                            product={cellProduct(cell)}
-                            active={active}
-                            onTap={handleTap}
-                            showNames={false}
-                          />
-                        );
-                      })}
-                    </div>
-                  )}
-                </div>
+                <div
+                  className="living-mosaic__zoom-stage"
+                  style={{
+                    transform: `translate3d(${zoomState.x}px, ${zoomState.y}px, 0) scale(${zoomState.scale})`,
+                  }}
+                >
+                  <div className="living-mosaic__grid-reveal" aria-hidden={!mosaicReady}>
+                    {!gridError && grid.length > 0 && (
+                      <div className="living-mosaic__grid" style={{ '--mosaic-cols': gridCols, '--mosaic-rows': gridRows }}>
+                        {grid.map((cell) => {
+                          const key = `${cell.col}-${cell.row}`;
+                          return (
+                            <MosaicTile
+                              key={key}
+                              cell={cell}
+                              product={cellProduct(cell)}
+                              active={active}
+                              onTap={handleTap}
+                              showNames={false}
+                            />
+                          );
+                        })}
+                      </div>
+                    )}
+                  </div>
 
-                <img
-                  className="living-mosaic__portrait-reveal"
-                  src={PORTRAIT_SRC}
-                  alt="Thomasina Schnepf holding one of her fused-glass creations"
-                  onLoad={() => setPortraitLoaded(true)}
-                />
+                  <img
+                    className="living-mosaic__portrait-reveal"
+                    src={PORTRAIT_SRC}
+                    alt="Thomasina Schnepf holding one of her fused-glass creations"
+                    onLoad={() => setPortraitLoaded(true)}
+                  />
+                </div>
+              </div>
+
+              <div className="living-mosaic__sr-status" role="status" aria-live="polite">
+                {gridError
+                  ? 'The portrait is visible. The mosaic could not be assembled right now.'
+                  : mosaicReady
+                    ? 'The mosaic is ready. Pinch and drag inside the frame to explore, or tap a creation to view its details.'
+                    : 'The portrait is visible while the mosaic is being assembled.'}
               </div>
             </div>
-
-            <div className="living-mosaic__sr-status" role="status" aria-live="polite">
-              {gridError
-                ? 'The portrait is visible. The mosaic could not be assembled right now.'
-                : mosaicReady
-                  ? 'The mosaic is ready. Pinch and drag inside the frame to explore, or tap a creation to view its details.'
-                  : 'The portrait is visible while the mosaic is being assembled.'}
-            </div>
           </div>
-        </div>
 
-        <div className="living-mosaic__details">
           <div className="living-mosaic__story">
             <div className="living-mosaic__copy-stack">
               <div className="living-mosaic__lead-stack">
@@ -356,8 +350,10 @@ export default function LivingMosaic() {
               <p className="living-mosaic__story-copy">Every named creation carries a piece of Sina&rsquo;s vision &mdash; glass, light, color, texture, and touch shaped into something that will never exist again.</p>
             </div>
           </div>
+        </div>
 
-          <a className="button ghost living-mosaic__cta" href="/meet-sina">
+        <div className="hero-actions">
+          <a className="button ghost" href="/meet-sina">
             A Message From The Designer
           </a>
         </div>

@@ -58,7 +58,7 @@
   z-index: 0;
 }
 
-.living-mosaic__hero-shell {
+.living-mosaic__hero-inner {
   position: relative;
   z-index: 1;
 }
