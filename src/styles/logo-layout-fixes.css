@@ -72,6 +72,21 @@
   padding-top: var(--page-gutter) !important;
 }
 
+.shop-icon-tab__glyph {
+  width: 24px !important;
+  height: 24px !important;
+}
+
+.shop-icon-tab__glyph svg {
+  width: 22px !important;
+  height: 22px !important;
+}
+
+.shop-icon-tab__label {
+  font-size: 8px !important;
+  letter-spacing: .1em !important;
+}
+
 @media (max-width: 959px) {
   .site-header {
     background: var(--off-white) !important;
@@ -143,6 +158,21 @@
   .menu-button span {
     width: 20px !important;
     background: var(--charcoal) !important;
+  }
+
+  .shop-icon-tab__glyph {
+    width: 20px !important;
+    height: 20px !important;
+  }
+
+  .shop-icon-tab__glyph svg {
+    width: 18px !important;
+    height: 18px !important;
+  }
+
+  .shop-icon-tab.active .shop-icon-tab__label {
+    font-size: 7px !important;
+    letter-spacing: .1em !important;
   }
 }
 
