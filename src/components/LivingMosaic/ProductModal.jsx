@@ -23,6 +23,10 @@ function AdoptionState({ adopted }) {
   );
 }
 
+function stopEvent(event) {
+  event.stopPropagation();
+}
+
 export default function ProductModal({ product, onClose }) {
   const closeRef = useRef(null);
   const [showStory, setShowStory] = useState(false);
@@ -51,6 +55,27 @@ export default function ProductModal({ product, onClose }) {
 
   const adopted = product.status === 'adopted';
 
+  function handleFlip() {
+    setShowStory((value) => !value);
+  }
+
+  function handleCardKeyDown(event) {
+    if (event.key === 'Enter' || event.key === ' ') {
+      event.preventDefault();
+      handleFlip();
+    }
+  }
+
+  function handleThumbSelect(index, event) {
+    event.stopPropagation();
+    setActiveImage(index);
+  }
+
+  function handleCloseClick(event) {
+    event.stopPropagation();
+    onClose();
+  }
+
   return (
     <div
       className="mosaic-modal-bg"
@@ -58,12 +83,19 @@ export default function ProductModal({ product, onClose }) {
         if (e.target === e.currentTarget) onClose();
       }}
     >
-      <div className={`mosaic-modal${showStory ? ' is-story-side' : ''}`} role="dialog" aria-modal="true" aria-labelledby="mosaic-modal-name">
-        <button className="mosaic-modal__close" onClick={onClose} ref={closeRef} aria-label="Close creation details">
+      <div className="mosaic-modal" role="dialog" aria-modal="true" aria-labelledby="mosaic-modal-name">
+        <button className="mosaic-modal__close" onClick={handleCloseClick} ref={closeRef} aria-label="Close creation details">
           <span aria-hidden="true">&times;</span>
         </button>
 
-        <div className="mosaic-modal__card">
+        <div
+          className={`mosaic-modal__card${showStory ? ' is-story-side' : ''}`}
+          onClick={handleFlip}
+          onKeyDown={handleCardKeyDown}
+          role="button"
+          tabIndex={0}
+          aria-label={showStory ? `Flip ${product.name} back to the main view` : `Flip ${product.name} to the full details view`}
+        >
           <section className="mosaic-modal__side mosaic-modal__side--details" aria-hidden={showStory}>
             <div className="mosaic-modal__image">
               <img src={gallery[activeImage] || product.image} alt={`${product.name}, ${product.category}, a 1-of-1 fused glass creation`} />
@@ -76,7 +108,7 @@ export default function ProductModal({ product, onClose }) {
                     type="button"
                     key={`${src}-${index}`}
                     className={index === activeImage ? 'is-active' : ''}
-                    onClick={() => setActiveImage(index)}
+                    onClick={(event) => handleThumbSelect(index, event)}
                     aria-label={`View image ${index + 1}`}
                   >
                     <img src={src} alt="" />
@@ -96,11 +128,8 @@ export default function ProductModal({ product, onClose }) {
                 <strong>${product.price}</strong>
               </div>
 
-              <button type="button" className="button ghost mosaic-modal__flip" onClick={() => setShowStory(true)}>
-                Flip for Full Details →
-              </button>
-
               <AdoptionState adopted={adopted} />
+              <p className="mosaic-modal__flip-hint">Tap anywhere to flip for full details.</p>
             </div>
           </section>
 
@@ -110,12 +139,8 @@ export default function ProductModal({ product, onClose }) {
               <h3>Full Description</h3>
               <ProductStory product={product} />
               <p className="mosaic-modal__story-note">Made by hand. Named once. Released only once.</p>
-
-              <button type="button" className="button ghost mosaic-modal__flip" onClick={() => setShowStory(false)}>
-                ← Back to the Creation
-              </button>
-
               <AdoptionState adopted={adopted} />
+              <p className="mosaic-modal__flip-hint mosaic-modal__flip-hint--back">Tap anywhere to flip back.</p>
             </div>
           </section>
         </div>
