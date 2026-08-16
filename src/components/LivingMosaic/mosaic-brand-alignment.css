@@ -220,9 +220,9 @@
 @media (max-width: 959px) {
   .living-mosaic__hero-shell {
     --mosaic-frame-height: clamp(390px, 78vw, 500px);
-    width: calc(100% - 24px);
-    max-width: none;
-    padding: 24px 0 40px;
+    width: 100%;
+    max-width: 1200px;
+    padding: 48px var(--page-gutter) 56px;
     grid-template-columns: minmax(0, 1fr);
     column-gap: 0;
     row-gap: 20px;
@@ -259,10 +259,10 @@
   }
 
   .living-mosaic__eyebrow {
-    margin-bottom: 20px;
-    padding: 9px 12px;
-    font-size: 8px;
-    letter-spacing: .08em;
+    margin: 0 0 28px;
+    padding: 10px 14px;
+    font-size: 11px;
+    letter-spacing: .14em;
   }
 
   .living-mosaic__intro h1 {
@@ -296,7 +296,8 @@
 
 @media (max-width: 620px) {
   .living-mosaic__hero-shell {
-    width: calc(100% - 24px);
+    padding-left: 40px;
+    padding-right: 40px;
     row-gap: 18px;
   }
 
@@ -309,8 +310,9 @@
   }
 
   .living-mosaic__eyebrow {
-    font-size: 7.6px;
-    padding: 8px 10px;
+    font-size: 11px;
+    padding: 10px 14px;
+    letter-spacing: .14em;
   }
 
   .living-mosaic__lead {
