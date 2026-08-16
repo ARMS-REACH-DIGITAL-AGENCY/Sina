@@ -1,5 +1,5 @@
 /* Align the homepage mosaic hero to the shared dark-site hero system
-   while keeping the contained mosaic box and existing modal flow. */
+   while keeping the contained mosaic box and modal flow. */
 
 .living-mosaic--hero {
   background: var(--black);
@@ -7,13 +7,13 @@
 }
 
 .living-mosaic__hero-shell {
-  --mosaic-frame-height: clamp(500px, calc(100svh - var(--header-height) - 148px), 650px);
-  width: min(1200px, calc(100% - (var(--page-gutter) * 2)));
-  min-height: 0;
+  --mosaic-frame-height: clamp(420px, calc(100svh - var(--header-height) - 120px), 650px);
+  display: grid;
+  width: min(1200px, calc(100% - clamp(24px, 4vw, 48px)));
   margin: 0 auto;
-  padding: var(--page-gutter) 0 56px;
-  grid-template-columns: minmax(0, 1fr) minmax(360px, calc(var(--mosaic-frame-height) * 5 / 7));
-  column-gap: clamp(32px, 4.8vw, 56px);
+  padding: clamp(24px, 4vw, 36px) 0 56px;
+  grid-template-columns: minmax(0, 1fr) minmax(280px, calc(var(--mosaic-frame-height) * 5 / 7));
+  column-gap: clamp(24px, 4vw, 48px);
   row-gap: 18px;
   align-items: start;
 }
@@ -68,16 +68,9 @@
   letter-spacing: -.035em;
 }
 
-.living-mosaic__intro-copy {
-  display: grid;
-  gap: 18px;
-  max-width: 620px;
-  margin-top: 24px;
-}
-
 .living-mosaic__copy-stack {
   display: grid;
-  gap: 18px;
+  gap: 14px;
   max-width: 620px;
   margin-top: 0;
 }
@@ -91,21 +84,21 @@
 
 .living-mosaic__story-copy {
   color: rgba(247,244,236,.74);
-  font-size: clamp(17px, 1.45vw, 20px);
-  line-height: 1.6;
+  font-size: clamp(15px, 1.3vw, 18px);
+  line-height: 1.7;
 }
 
 .living-mosaic__lead-stack {
   display: grid;
-  gap: 10px;
+  gap: 8px;
   max-width: 620px;
   margin-top: 0;
 }
 
 .living-mosaic__lead {
   color: var(--off-white);
-  font-size: clamp(18px, 1.55vw, 22px);
-  line-height: 1.38;
+  font-size: clamp(18px, 1.45vw, 20px);
+  line-height: 1.42;
   font-weight: 800;
 }
 
@@ -132,54 +125,16 @@
   background: #090909;
 }
 
-.living-mosaic__baseline-hint {
-  grid-column: 2 / 3;
-  width: min(100%, calc(var(--mosaic-frame-height) * 5 / 7));
-  justify-self: end;
-  align-self: start;
-  margin: -4px 0 0;
-  color: rgba(247,244,236,.68);
-  text-align: right;
-  font-size: 12px;
-  line-height: 1.45;
-}
-
-.living-mosaic__cta-row {
-  grid-column: 1 / -1;
-  display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  grid-auto-rows: 1fr;
-  align-items: stretch;
-  gap: 12px;
-}
-
-.living-mosaic__cta-row .button {
-  width: 100%;
-  min-height: 60px;
-  margin: 0;
-  padding-inline: 18px;
-}
-
-.living-mosaic__cta-row .button.primary {
-  background: #EEBF68;
-  color: var(--black);
-  border: 2px solid #EEBF68;
-  box-shadow: none;
-  letter-spacing: .08em;
-}
-
-.living-mosaic__cta-row .button.ghost {
-  border: 2px solid rgba(247,244,236,.52);
-  background: transparent;
-  color: var(--off-white);
-}
-
-.living-mosaic__cta-row .button.ghost:hover,
-.living-mosaic__cta-row .button.ghost:focus-visible,
-.living-mosaic__cta-row .button.is-active {
-  background: rgba(247,244,236,.08);
-  border-color: var(--off-white);
-  color: var(--off-white);
+.living-mosaic__sr-status {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
 }
 
 .mosaic-tile__face--front {
@@ -207,7 +162,6 @@
   opacity: 1;
 }
 
-/* Gate 1A: keep the real portrait above the mosaic as a stronger optical guide. */
 .living-mosaic__frame.is-mosaic-ready .living-mosaic__portrait-reveal {
   opacity: .42;
   filter: saturate(.78) contrast(1.12) brightness(1.02);
@@ -223,108 +177,92 @@
 
 @media (max-width: 959px) {
   .living-mosaic__hero-shell {
-    width: auto;
-    padding: var(--page-gutter) var(--page-gutter) 56px;
-    grid-template-columns: 1fr;
-    column-gap: 0;
-    row-gap: 18px;
+    --mosaic-frame-height: clamp(320px, 56vw, 430px);
+    width: calc(100% - 32px);
+    padding: 20px 0 40px;
+    grid-template-columns: minmax(0, 1fr) minmax(170px, 43vw);
+    column-gap: 16px;
+    row-gap: 14px;
   }
 
   .living-mosaic__intro,
-  .living-mosaic__visual,
-  .living-mosaic__baseline-hint,
   .living-mosaic__story,
-  .living-mosaic__cta-row {
+  .living-mosaic__visual {
+    grid-column: auto;
+  }
+
+  .living-mosaic__intro {
     grid-column: 1 / -1;
   }
 
   .living-mosaic__story {
-    height: auto;
-    padding: 0;
-  }
-
-  .living-mosaic__eyebrow {
-    margin-bottom: 22px;
-  }
-
-  .living-mosaic__intro h1 {
-    max-width: 680px;
-    font-size: clamp(44px, 11vw, 58px);
-  }
-
-  .living-mosaic__intro-copy {
-    margin-top: 20px;
-    gap: 14px;
-  }
-
-  .living-mosaic__copy-stack {
-    margin-top: 0;
-    gap: 16px;
-  }
-
-  .living-mosaic__story-copy {
-    font-size: 16px;
-  }
-
-  .living-mosaic__lead-stack {
-    gap: 8px;
-  }
-
-  .living-mosaic__lead {
-    font-size: 18px;
+    grid-column: 1 / 2;
   }
 
   .living-mosaic__visual {
+    grid-column: 2 / 3;
     width: 100%;
-    max-width: min(520px, calc(100% - 32px));
-    height: auto;
-    justify-self: center;
+    height: var(--mosaic-frame-height);
+    max-width: none;
+    justify-self: end;
   }
 
   .living-mosaic__frame {
-    height: auto;
-    min-height: 0;
+    height: var(--mosaic-frame-height);
   }
 
-  .living-mosaic__baseline-hint {
-    width: min(520px, calc(100% - 32px));
-    justify-self: center;
-    margin-top: -2px;
-    text-align: right;
-    font-size: 11px;
+  .living-mosaic__eyebrow {
+    margin-bottom: 18px;
+    padding: 9px 12px;
+    font-size: 7.8px;
+    letter-spacing: .08em;
   }
 
-  .living-mosaic__cta-row {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 10px;
+  .living-mosaic__intro h1 {
+    max-width: 520px;
+    font-size: clamp(38px, 8.2vw, 58px);
   }
 
-  .living-mosaic__cta-row .button {
-    min-height: 56px;
-    padding-inline: 14px;
+  .living-mosaic__copy-stack {
+    gap: 12px;
   }
 
-  .living-mosaic__frame.is-mosaic-ready .living-mosaic__portrait-reveal {
-    opacity: .45;
+  .living-mosaic__lead-stack {
+    gap: 6px;
+  }
+
+  .living-mosaic__lead {
+    font-size: 15px;
+    line-height: 1.45;
+  }
+
+  .living-mosaic__story-copy {
+    font-size: 14px;
+    line-height: 1.65;
   }
 }
 
-@media (max-width: 540px) {
+@media (max-width: 620px) {
+  .living-mosaic__hero-shell {
+    width: calc(100% - 24px);
+    grid-template-columns: minmax(0, 1fr) minmax(150px, 46vw);
+    column-gap: 14px;
+  }
+
+  .living-mosaic__intro h1 {
+    font-size: clamp(34px, 7.9vw, 52px);
+  }
+
   .living-mosaic__eyebrow {
-    font-size: 8.25px;
-    letter-spacing: .08em;
-    padding-inline: 12px;
+    font-size: 7.2px;
+    padding: 8px 10px;
   }
 
-  .living-mosaic__visual {
-    max-width: min(500px, calc(100% - 28px));
+  .living-mosaic__lead {
+    font-size: 14px;
   }
 
-  .living-mosaic__baseline-hint {
-    width: min(500px, calc(100% - 28px));
-  }
-
-  .living-mosaic__cta-row {
-    grid-template-columns: 1fr;
+  .living-mosaic__story-copy {
+    font-size: 13px;
   }
 }
