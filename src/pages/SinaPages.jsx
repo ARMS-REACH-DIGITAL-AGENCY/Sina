@@ -263,13 +263,31 @@ function CategoryIcon({ type }) {
 }
 
 export function Home() {
+  const { products } = useCatalogProducts();
+
   return (
     <Layout>
       <LivingMosaic />
-      <FormPage
-        title="Commission inquiry"
-        intro="Tell us about the person, palette, occasion, symbolism, or feeling you want the piece to carry."
-      />
+      <section className="cream-section split-section home-story-section">
+        <div>
+          <SectionHeader
+            eyebrow="The Mission"
+            title="More than jewelry. A story you can hold."
+            copy="Every creation begins as glass, but it becomes something more personal once Thomasina names it. Each piece is made by hand, chosen with intention, and offered to one person who feels connected to its color, texture, and story."
+          />
+          <div className="tag-row">
+            <span>Named Once</span>
+            <span>Made by Hand</span>
+            <span>Adopted Once</span>
+          </div>
+        </div>
+        <div className="dark-card">
+          <span>1 of 1</span>
+          <h3>Each creation waits for the person it was meant to find.</h3>
+          <p>When a piece is adopted, it leaves Thomasina&apos;s hands and begins its next story in a new home.</p>
+        </div>
+      </section>
+      <FeaturedProducts products={products} />
     </Layout>
   );
 }
