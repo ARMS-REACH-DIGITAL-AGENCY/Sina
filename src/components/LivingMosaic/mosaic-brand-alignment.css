@@ -31,8 +31,8 @@
 
 .living-mosaic__body {
   display: grid;
-  grid-template-columns: clamp(110px, 26vw, 250px) minmax(0, 1fr);
-  column-gap: clamp(18px, 3.4vw, 48px);
+  grid-template-columns: 1.35fr minmax(240px, 1fr);
+  column-gap: clamp(28px, 3.4vw, 56px);
   row-gap: 24px;
   align-items: start;
   margin-top: 28px;
@@ -163,8 +163,9 @@
   margin-top: 6px;
 }
 
-@media (max-width: 959px) {
+@media (max-width: 767px) {
   .living-mosaic__body {
+    grid-template-columns: minmax(0, 1fr);
     margin-top: 24px;
   }
 
