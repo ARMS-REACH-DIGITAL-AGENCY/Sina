@@ -64,7 +64,7 @@ function createInitialFormState(lockedInterest = '') {
   };
 }
 
-function Layout({ children }) {
+function Layout({ children, headerSearchControl = null }) {
   const [open, setOpen] = useState(false);
   const close = () => setOpen(false);
 
@@ -78,6 +78,7 @@ function Layout({ children }) {
         <nav className="desktop-nav" aria-label="Main navigation">
           {primaryNav.map((item) => <NavLink key={item.to} to={item.to}>{item.label}</NavLink>)}
         </nav>
+        {headerSearchControl ? <div className="header-search-slot">{headerSearchControl}</div> : null}
         <Link className="nav-cta" to="/shop">
           <span className="nav-cta__desktop">Adopt Sina's Creations</span>
           <span className="nav-cta__mobile">Adopt</span>
@@ -91,7 +92,6 @@ function Layout({ children }) {
       {open && (
         <div className="mobile-menu">
           {primaryNav.map((item) => <NavLink key={item.to} onClick={close} to={item.to}>{item.label}</NavLink>)}
-          <NavLink onClick={close} to="/schedule">Schedule a Call</NavLink>
           <Link onClick={close} className="mobile-adopt" to="/shop">Adopt Sina's Creations</Link>
         </div>
       )}
@@ -395,9 +395,10 @@ export function Shop() {
       return;
     }
 
+    const siteHeader = document.querySelector('.site-header');
     const stickyControls = document.querySelector('.shop-hero-controls');
-    const stickyOffset = stickyControls ? stickyControls.getBoundingClientRect().height : 0;
-    const headerOffset = 16;
+    const siteHeaderHeight = siteHeader ? siteHeader.getBoundingClientRect().height : 0;
+    const stickyControlsHeight = stickyControls ? stickyControls.getBoundingClientRect().height : 0;
     const target = productGridRef.current;
 
     if (!target) {
@@ -405,19 +406,13 @@ export function Shop() {
       return;
     }
 
-    const top = window.scrollY + target.getBoundingClientRect().top - stickyOffset - headerOffset;
+    const top = window.scrollY + target.getBoundingClientRect().top - siteHeaderHeight - stickyControlsHeight - 8;
     window.scrollTo({ top: Math.max(0, top), behavior: 'smooth' });
   }, []);
 
   React.useEffect(() => {
     setFilter(queryFilter);
   }, [queryFilter]);
-
-  React.useEffect(() => {
-    if (search.trim()) {
-      setSearchOpen(true);
-    }
-  }, [search]);
 
   const visible = React.useMemo(() => {
     const term = search.trim().toLowerCase();
@@ -434,57 +429,57 @@ export function Shop() {
   }, [filter, search, products]);
 
   return (
-    <Layout>
+    <Layout
+      headerSearchControl={(
+        <button
+          type="button"
+          className={`header-search-button${searchOpen ? ' is-open' : ''}`}
+          aria-label={searchOpen ? 'Hide search' : 'Show search'}
+          aria-expanded={searchOpen}
+          aria-controls="shop-search-panel"
+          onClick={() => setSearchOpen((current) => !current)}
+        >
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <circle cx="11" cy="11" r="6.5" />
+            <path d="M16 16l4.5 4.5" />
+          </svg>
+        </button>
+      )}
+    >
       <section className="shop-hero-controls" aria-label="Shop search and filters">
         <div className="shop-hero-controls__inner">
-          <div className={`shop-search-compact${searchOpen ? ' is-open' : ''}`}>
-            <button
-              type="button"
-              className="shop-search-toggle"
-              aria-expanded={searchOpen}
-              aria-controls="shop-search-panel"
-              onClick={() => {
-                if (searchOpen && !search.trim()) {
-                  setSearchOpen(false);
-                  return;
-                }
-                setSearchOpen(true);
-              }}
-            >
-              <span className="shop-search-toggle__icon" aria-hidden="true">
-                <svg viewBox="0 0 24 24">
-                  <circle cx="11" cy="11" r="6.5" />
-                  <path d="M16 16l4.5 4.5" />
-                </svg>
-              </span>
-              <span className="shop-search-toggle__text">{search.trim() ? 'Search catalog' : 'Search by SKU or piece name'}</span>
-            </button>
-            {searchOpen && (
-              <div className="shop-search-panel" id="shop-search-panel">
-                <div className="shop-search-input-wrap shop-search-input-wrap--hero">
-                  <input
-                    id="shop-search"
-                    className="shop-search-input shop-search-input--hero"
-                    type="search"
-                    value={search}
-                    onChange={(event) => setSearch(event.target.value)}
-                    placeholder="Search by SKU or piece name"
-                  />
-                  <button
-                    type="button"
-                    className="shop-search-close"
-                    onClick={() => {
-                      setSearch('');
-                      setSearchOpen(false);
-                    }}
-                    aria-label="Close search"
-                  >
-                    Close
-                  </button>
-                </div>
+          {searchOpen && (
+            <div className="shop-search-panel" id="shop-search-panel">
+              <div className="shop-search-input-wrap shop-search-input-wrap--hero shop-search-input-wrap--inline">
+                <span className="shop-search-input-icon" aria-hidden="true">
+                  <svg viewBox="0 0 24 24">
+                    <circle cx="11" cy="11" r="6.5" />
+                    <path d="M16 16l4.5 4.5" />
+                  </svg>
+                </span>
+                <input
+                  id="shop-search"
+                  className="shop-search-input shop-search-input--hero"
+                  type="search"
+                  value={search}
+                  onChange={(event) => setSearch(event.target.value)}
+                  placeholder="Search by SKU or piece name"
+                  autoFocus
+                />
+                <button
+                  type="button"
+                  className="shop-search-inline-close"
+                  onClick={() => {
+                    setSearch('');
+                    setSearchOpen(false);
+                  }}
+                  aria-label="Close search"
+                >
+                  ×
+                </button>
               </div>
-            )}
-          </div>
+            </div>
+          )}
           <div className="shop-icon-tabs" role="tablist" aria-label="Filter products by collection">
             {collections.map((tab) => {
               const iconType = collectionIcons[tab] || 'sets';
