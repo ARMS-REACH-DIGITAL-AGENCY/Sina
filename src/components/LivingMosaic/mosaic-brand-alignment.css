@@ -105,12 +105,6 @@
   background: #090909;
 }
 
-.living-mosaic__fullscreen-modal-host {
-  position: absolute;
-  inset: 0;
-  z-index: 18;
-}
-
 .living-mosaic__baseline-hint {
   grid-column: 1 / 2;
   max-width: 460px;
@@ -274,60 +268,8 @@
   }
 }
 
-@media (max-width: 760px) {
-  .living-mosaic__hero-shell {
-    width: 100%;
-    padding: 0 0 40px;
-    row-gap: 16px;
-  }
-
-  .living-mosaic__visual {
-    order: 1;
-    width: 100%;
-    max-width: none;
-    justify-self: stretch;
-  }
-
-  .living-mosaic__frame {
-    min-height: 58svh;
-  }
-
-  .living-mosaic__baseline-hint {
-    order: 2;
-    padding: 0 24px;
-  }
-
+@media (max-width: 540px) {
   .living-mosaic__cta-row {
-    order: 3;
     grid-template-columns: 1fr;
-    gap: 10px;
-    padding: 0 24px;
-  }
-
-  .living-mosaic__cta-button--designer { order: 1; }
-  .living-mosaic__cta-button--names { order: 2; }
-  .living-mosaic__cta-button--fullscreen { order: 3; }
-  .living-mosaic__cta-button--adopt { order: 4; }
-
-  .living-mosaic__story {
-    order: 4;
-    height: auto;
-    padding: 12px 24px 0;
-  }
-
-  .living-mosaic__eyebrow {
-    margin-bottom: 18px;
-  }
-
-  .living-mosaic__story h1 {
-    font-size: clamp(38px, 11vw, 52px);
-  }
-
-  .living-mosaic__copy-stack {
-    margin-top: 20px;
-  }
-
-  .living-mosaic__lead-stack {
-    margin-top: 18px;
   }
 }
