@@ -10,9 +10,10 @@
   --mosaic-frame-height: clamp(420px, calc(100svh - var(--header-height) - 120px), 650px);
   --mosaic-frame-width: clamp(360px, 38vw, 470px);
   display: grid;
-  width: min(1200px, calc(100% - clamp(24px, 4vw, 48px)));
+  width: 100%;
+  max-width: 1200px;
   margin: 0 auto;
-  padding: clamp(28px, 4vw, 40px) 0 56px;
+  padding: 56px var(--page-gutter) 72px;
   grid-template-columns: var(--mosaic-frame-width) minmax(280px, 360px);
   column-gap: clamp(28px, 4vw, 56px);
   row-gap: 24px;
@@ -49,14 +50,14 @@
   align-self: flex-start;
   width: max-content;
   max-width: 100%;
-  margin: 0 0 24px;
-  padding: 10px 14px;
+  margin: 0 0 32px;
+  padding: 11px 20px;
   color: var(--burnt-orange);
   font-family: var(--font-body);
-  font-size: clamp(8.5px, 0.9vw, 11px);
+  font-size: 11px;
   line-height: 1.15;
   font-weight: 700;
-  letter-spacing: .1em;
+  letter-spacing: .18em;
   text-transform: uppercase;
   white-space: nowrap;
 }
@@ -216,18 +217,11 @@
   filter: saturate(.78) contrast(1.12) brightness(1.02);
 }
 
-@media (min-width: 960px) {
-  .living-mosaic__eyebrow {
-    margin-bottom: 24px;
-    padding-inline: 16px;
-    font-size: 10.5px;
-  }
-}
-
 @media (max-width: 959px) {
   .living-mosaic__hero-shell {
     --mosaic-frame-height: clamp(390px, 78vw, 500px);
     width: calc(100% - 24px);
+    max-width: none;
     padding: 24px 0 40px;
     grid-template-columns: minmax(0, 1fr);
     column-gap: 0;
