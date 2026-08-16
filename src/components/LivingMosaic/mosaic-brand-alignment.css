@@ -8,7 +8,7 @@
 
 .living-mosaic__hero-shell {
   --mosaic-frame-height: clamp(420px, calc(100svh - var(--header-height) - 120px), 650px);
-  --mosaic-frame-width: clamp(360px, 38vw, 470px);
+  --mosaic-frame-width: clamp(360px, 40vw, 488px);
   display: grid;
   width: 100%;
   max-width: 1200px;
@@ -129,7 +129,7 @@
   height: var(--mosaic-frame-height);
   min-height: 0;
   flex: 0 0 auto;
-  aspect-ratio: 5 / 7;
+  aspect-ratio: 3 / 4;
   padding: 0;
   border: 1px solid rgba(247,244,236,.14);
   border-radius: 2px;
@@ -155,7 +155,7 @@
 .living-mosaic__portrait-reveal {
   z-index: 3;
   object-fit: cover;
-  object-position: center 35%;
+  object-position: center center;
   opacity: 1;
   filter: saturate(.96) contrast(1.02) brightness(.92);
   transition: opacity 1.15s ease, filter 1.15s ease;
@@ -219,7 +219,8 @@
 
 @media (max-width: 959px) {
   .living-mosaic__hero-shell {
-    --mosaic-frame-height: clamp(390px, 78vw, 500px);
+    --mosaic-frame-height: clamp(396px, 86vw, 520px);
+    --mosaic-frame-width: min(100%, 360px);
     width: 100%;
     max-width: 1200px;
     padding: 48px var(--page-gutter) 56px;
@@ -248,14 +249,14 @@
 
   .living-mosaic__visual {
     grid-row: 3;
-    width: min(100%, 338px);
+    width: var(--mosaic-frame-width);
     height: auto;
     justify-self: center;
   }
 
   .living-mosaic__frame {
     height: auto;
-    aspect-ratio: 5 / 7;
+    aspect-ratio: 3 / 4;
   }
 
   .living-mosaic__eyebrow {
@@ -296,13 +297,14 @@
 
 @media (max-width: 620px) {
   .living-mosaic__hero-shell {
+    --mosaic-frame-width: min(100%, 304px);
     padding-left: 40px;
     padding-right: 40px;
     row-gap: 18px;
   }
 
   .living-mosaic__visual {
-    width: min(100%, 320px);
+    width: var(--mosaic-frame-width);
   }
 
   .living-mosaic__intro h1 {
