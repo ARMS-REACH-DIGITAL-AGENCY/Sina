@@ -1,15 +1,13 @@
-/* Logo and first-fold spacing fixes.
-   Desktop keeps the dark header treatment.
-   Mobile switches to the repo's black-and-gold logo on a white header. */
+/* Shared header, logo, and compact search treatments. */
 
 .site-header {
   position: sticky !important;
   top: 0 !important;
   z-index: 1000 !important;
-  overflow: hidden !important;
-  background: #11110f !important;
+  overflow: visible !important;
+  background: var(--off-white) !important;
   border-bottom: 2px solid var(--burnt-orange) !important;
-  box-shadow: 0 4px 18px rgba(0,0,0,.28) !important;
+  box-shadow: 0 1px 12px rgba(0,0,0,.10) !important;
 }
 
 .logo-brand {
@@ -31,29 +29,30 @@
   max-height: 52px !important;
   object-fit: contain !important;
   object-position: left center !important;
-}
-
-.brand-logo--desktop {
-  display: block !important;
-  filter: brightness(0) invert(1) !important;
-}
-
-.brand-logo--mobile {
-  display: none !important;
   filter: none !important;
 }
 
 .desktop-nav a {
-  color: rgba(247,244,236,.78) !important;
+  color: rgba(41,42,40,.76) !important;
 }
 
 .desktop-nav a.active,
 .desktop-nav a:hover {
-  color: var(--sand) !important;
+  color: var(--burnt-orange) !important;
+}
+
+.header-search-button {
+  color: rgba(41,42,40,.84) !important;
+}
+
+.header-search-button:hover,
+.header-search-button.is-open {
+  color: var(--burnt-orange) !important;
+  transform: none !important;
 }
 
 .menu-button span {
-  background: var(--off-white) !important;
+  background: var(--charcoal) !important;
 }
 
 .footer-logo {
@@ -72,14 +71,102 @@
   padding-top: var(--page-gutter) !important;
 }
 
+.pill-eyebrow--search {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 10px !important;
+  min-height: 46px !important;
+  width: min(100%, 460px) !important;
+  padding: 0 12px 0 14px !important;
+}
+
+.pill-eyebrow--search::before {
+  display: none !important;
+}
+
+.pill-eyebrow__search-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  color: currentColor;
+  flex: 0 0 auto;
+  opacity: .82;
+}
+
+.pill-eyebrow__search-icon svg {
+  width: 18px;
+  height: 18px;
+  stroke: currentColor;
+  fill: none;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.pill-eyebrow__search-input {
+  flex: 1 1 auto;
+  min-width: 0;
+  border: 0;
+  background: transparent;
+  color: currentColor;
+  font: inherit;
+  text-transform: none;
+  letter-spacing: .02em;
+}
+
+.pill-eyebrow__search-input::placeholder {
+  color: currentColor;
+  opacity: .62;
+  text-transform: none;
+  letter-spacing: .02em;
+}
+
+.pill-eyebrow__search-input:focus {
+  outline: none;
+}
+
+.pill-eyebrow__search-close {
+  border: 0;
+  background: transparent;
+  color: currentColor;
+  font-size: 24px;
+  line-height: 1;
+  cursor: pointer;
+  padding: 0;
+  opacity: .82;
+  flex: 0 0 auto;
+}
+
+.pill-eyebrow__search-close:hover {
+  opacity: 1;
+}
+
+.hero-search-eyebrow {
+  width: min(100%, 480px) !important;
+}
+
+.shop-hero-controls {
+  top: var(--header-height) !important;
+}
+
+.shop-hero-controls__inner {
+  gap: 12px !important;
+}
+
+.shop-icon-tabs {
+  gap: 16px !important;
+}
+
 .shop-icon-tab__glyph {
-  width: 24px !important;
-  height: 24px !important;
+  width: 26px !important;
+  height: 26px !important;
 }
 
 .shop-icon-tab__glyph svg {
-  width: 22px !important;
-  height: 22px !important;
+  width: 24px !important;
+  height: 24px !important;
 }
 
 .shop-icon-tab__label {
@@ -87,13 +174,71 @@
   letter-spacing: .1em !important;
 }
 
+.header-catalog-search {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  min-width: min(100%, 340px);
+  max-width: 340px;
+  min-height: 42px;
+  margin-left: auto;
+  padding: 0 12px;
+  border: 1.5px solid rgba(41,42,40,.18);
+  border-radius: var(--radius);
+  background: rgba(41,42,40,.04);
+}
+
+.header-catalog-search__icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  color: rgba(41,42,40,.72);
+  flex: 0 0 auto;
+}
+
+.header-catalog-search__icon svg {
+  width: 18px;
+  height: 18px;
+  stroke: currentColor;
+  fill: none;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.header-catalog-search__input {
+  flex: 1 1 auto;
+  min-width: 0;
+  border: 0;
+  background: transparent;
+  color: var(--charcoal);
+  font-size: 14px;
+}
+
+.header-catalog-search__input::placeholder {
+  color: rgba(41,42,40,.54);
+}
+
+.header-catalog-search__input:focus {
+  outline: none;
+}
+
+.header-catalog-search__clear {
+  border: 0;
+  background: transparent;
+  color: rgba(41,42,40,.74);
+  font-size: 22px;
+  line-height: 1;
+  cursor: pointer;
+  padding: 0;
+}
+
 @media (max-width: 959px) {
   .site-header {
-    background: var(--off-white) !important;
-    box-shadow: 0 1px 12px rgba(0,0,0,.10) !important;
     gap: 8px !important;
     padding: 0 16px !important;
-    overflow: visible !important;
   }
 
   .logo-brand {
@@ -103,17 +248,6 @@
   }
 
   .brand-logo {
-    width: auto !important;
-    object-fit: contain !important;
-    object-position: left center !important;
-  }
-
-  .brand-logo--desktop {
-    display: none !important;
-  }
-
-  .brand-logo--mobile {
-    display: block !important;
     height: 42px !important;
     max-width: 132px !important;
   }
@@ -126,20 +260,9 @@
     max-width: none !important;
   }
 
-  .header-search-slot {
-    margin-left: 0 !important;
-  }
-
   .header-search-button {
     width: 36px !important;
     height: 36px !important;
-    color: rgba(41,42,40,.84) !important;
-  }
-
-  .header-search-button:hover,
-  .header-search-button.is-open {
-    color: var(--burnt-orange) !important;
-    transform: none !important;
   }
 
   .header-search-button svg {
@@ -157,7 +280,11 @@
 
   .menu-button span {
     width: 20px !important;
-    background: var(--charcoal) !important;
+  }
+
+  .pill-eyebrow--search {
+    min-height: 44px !important;
+    width: min(100%, 100%) !important;
   }
 
   .shop-icon-tab__glyph {
@@ -174,6 +301,14 @@
     font-size: 7px !important;
     letter-spacing: .1em !important;
   }
+
+  .header-catalog-search {
+    min-width: 0;
+    flex: 1 1 auto;
+    max-width: none;
+    margin-left: 0;
+    order: 2;
+  }
 }
 
 @media (max-width: 420px) {
@@ -189,7 +324,7 @@
     height: 40px !important;
   }
 
-  .brand-logo--mobile {
+  .brand-logo {
     height: 38px !important;
     max-width: 118px !important;
   }
@@ -213,5 +348,14 @@
   .menu-button {
     min-width: 34px !important;
     min-height: 34px !important;
+  }
+
+  .header-catalog-search {
+    min-height: 38px;
+    padding: 0 10px;
+  }
+
+  .header-catalog-search__input {
+    font-size: 13px;
   }
 }
