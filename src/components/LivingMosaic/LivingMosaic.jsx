@@ -284,7 +284,11 @@ export default function LivingMosaic() {
     <section className="hero hero-dark living-mosaic living-mosaic--hero" id="collection" ref={sectionRef}>
       <div className="hero-inner living-mosaic__hero-inner">
         <SearchEyebrow label="HER STORY & CREATIONS. YOUR CHOICE." />
-        <h1>The closer you get, the more you see.</h1>
+        <h1>
+          The closer you get,
+          <br />
+          the more you see.
+        </h1>
 
         <div className="living-mosaic__body">
           <div className="living-mosaic__visual">

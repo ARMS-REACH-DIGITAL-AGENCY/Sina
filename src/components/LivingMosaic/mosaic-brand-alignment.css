@@ -4,6 +4,15 @@
    only covers what's unique to the mosaic hero: the two-up frame + story row
    below the heading, the mosaic frame itself, and the tile grid dressing. */
 
+/* The shared .hero h1 caps at 760px, which is narrower than "The closer
+   you get," at this heading's font size and forces an unwanted mid-phrase
+   wrap before the intentional break. Widen just this heading so the line
+   break happens where we put it (at the comma), not wherever the shared
+   cap runs out. */
+.living-mosaic__hero-inner h1 {
+  max-width: 920px;
+}
+
 .living-mosaic__body {
   display: grid;
   grid-template-columns: clamp(240px, 24vw, 340px) minmax(0, 1fr);
