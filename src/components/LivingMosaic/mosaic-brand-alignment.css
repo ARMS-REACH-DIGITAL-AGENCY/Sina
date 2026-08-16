@@ -1,17 +1,8 @@
-/* Homepage mosaic hero now reuses the shared .hero / .hero-inner / .pill-eyebrow
-   / .hero h1 rules from global.css directly (same container width, overflow
-   clipping, eyebrow, and heading size as every other page's hero). This file
-   only covers what's unique to the mosaic hero: the two-up frame + story row
-   below the heading, the mosaic frame itself, and the tile grid dressing. */
-
-/* The shared .hero h1 caps at 760px, which is narrower than "The closer
-   you get," at this heading's font size and forces an unwanted mid-phrase
-   wrap before the intentional break. Widen just this heading so the line
-   break happens where we put it (at the comma), not wherever the shared
-   cap runs out. */
-.living-mosaic__hero-inner h1 {
-  max-width: 920px;
-}
+/* The homepage's LivingMosaic widget now lives inside a normal cream-section
+   (Home() in SinaPages.jsx owns the pill/heading/story copy/CTA using the
+   same .section-header / .dark-card / .button classes every other content
+   section uses). This file only covers the two-up frame + story row layout,
+   the mosaic frame itself, and the tile grid dressing. */
 
 .living-mosaic__body {
   display: grid;
@@ -119,22 +110,14 @@
 }
 
 .living-mosaic__story {
-  min-width: 0;
-}
-
-.living-mosaic__copy-stack {
   display: grid;
   gap: 14px;
-}
-
-.living-mosaic__lead-stack {
-  display: grid;
-  gap: 10px;
+  min-width: 0;
 }
 
 .living-mosaic__lead {
   margin: 0;
-  color: var(--off-white);
+  color: var(--charcoal);
   font-family: var(--font-body);
   font-size: clamp(16px, 1.08vw, 18px);
   line-height: 1.45;
@@ -144,11 +127,15 @@
 
 .living-mosaic__story-copy {
   margin: 0;
-  color: rgba(247, 244, 236, .72);
+  color: var(--muted-olive);
   font-family: var(--font-body);
   font-size: clamp(14px, .98vw, 16px);
   line-height: 1.65;
   text-wrap: pretty;
+}
+
+.living-mosaic__card {
+  margin-top: 6px;
 }
 
 @media (max-width: 959px) {

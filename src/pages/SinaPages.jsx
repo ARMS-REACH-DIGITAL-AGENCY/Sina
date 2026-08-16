@@ -36,6 +36,7 @@ const footerConnect = [
 ];
 
 const pageHeroImages = {
+  home: '/images/meet-sina/meet-sina-studio.jpg',
   artist: '/images/hero/meet-sina-painted-portrait.jpg',
   creations: '/images/hero/home-mosaic-box-logo.jpg',
   commission: '/images/hero/commission-sina-group-pendants.jpg',
@@ -166,6 +167,7 @@ function Hero({
   secondaryTo = '/meet-sina',
   backgroundImage,
   backgroundPosition = 'center top',
+  backgroundFlip = false,
 }) {
   return (
     <section className={`hero hero-dark${backgroundImage ? ' hero--screened-image' : ''}`}>
@@ -177,6 +179,8 @@ function Hero({
             style={{
               backgroundImage: `url(${backgroundImage})`,
               backgroundPosition,
+              transform: backgroundFlip ? 'scaleX(-1) scale(1.02)' : undefined,
+              transformOrigin: backgroundFlip ? 'center' : undefined,
             }}
           />
           <div className="hero__scrim" aria-hidden="true" />
@@ -267,24 +271,38 @@ export function Home() {
 
   return (
     <Layout>
-      <LivingMosaic />
-      <section className="cream-section split-section home-story-section">
-        <div>
-          <SectionHeader
-            eyebrow="The Mission"
-            title="More than jewelry. A story you can hold."
-            copy="Every creation begins as glass, but it becomes something more personal once Thomasina names it. Each piece is made by hand, chosen with intention, and offered to one person who feels connected to its color, texture, and story."
-          />
-          <div className="tag-row">
-            <span>Named Once</span>
-            <span>Made by Hand</span>
-            <span>Adopted Once</span>
+      <Hero
+        eyebrow="Crafted. Named. Adopted."
+        title="More than jewelry. A story you can hold."
+        copy="Every creation begins as glass, but it becomes something more personal once Thomasina names it. Each piece is made by hand, chosen with intention, and offered to one person who feels connected to its color, texture, and story."
+        primary="A Message From The Artist"
+        primaryTo="/meet-sina"
+        backgroundImage={pageHeroImages.home}
+        backgroundPosition="18% 12%"
+        backgroundFlip
+      />
+      <section className="cream-section living-mosaic-section" id="collection">
+        <div className="section-header">
+          <span>Her Story. Her Creations. Your Choice.</span>
+          <h2>The closer she gets, the more she sees.</h2>
+        </div>
+        <div className="living-mosaic__body">
+          <div className="living-mosaic__visual">
+            <LivingMosaic />
+          </div>
+          <div className="living-mosaic__story">
+            <p className="living-mosaic__lead">Step back to see this amazing legally blind artist.</p>
+            <p className="living-mosaic__story-copy">Every named creation carries a piece of Sina&rsquo;s vision &mdash; glass, light, color, texture, and touch shaped into something that will never exist again.</p>
+            <p className="living-mosaic__lead">Come closer to meet her family of one-of-a-kind creations.</p>
+            <div className="dark-card living-mosaic__card">
+              <span>1 of 1</span>
+              <h3>Each creation waits for the person it was meant to find.</h3>
+              <p>When a piece is adopted, it leaves Thomasina&apos;s hands and begins its next story in a new home.</p>
+            </div>
           </div>
         </div>
-        <div className="dark-card">
-          <span>1 of 1</span>
-          <h3>Each creation waits for the person it was meant to find.</h3>
-          <p>When a piece is adopted, it leaves Thomasina&apos;s hands and begins its next story in a new home.</p>
+        <div className="hero-actions">
+          <Link className="button primary" to="/shop">Adopt Sina&apos;s Creations</Link>
         </div>
       </section>
       <FeaturedProducts products={products} />
