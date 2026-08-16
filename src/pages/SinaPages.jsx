@@ -5,6 +5,7 @@ import WholesaleApplicationForm from '../components/WholesaleApplicationForm.jsx
 import SearchEyebrow from '../components/SearchEyebrow.jsx';
 import { SiteSearchProvider } from '../components/SiteSearchContext.jsx';
 import useCatalogProducts from '../hooks/useCatalogProducts.js';
+import '../styles/hero-image-overrides.css';
 
 const headerLogoPath = '/assets/brand/sinas-creations-black-logo.png';
 const footerLogoPath = '/assets/brand/sinas-creations-white-logo.png';
@@ -35,10 +36,10 @@ const footerConnect = [
 ];
 
 const pageHeroImages = {
-  artist: '/images/thomasina.jpg',
-  creations: '/images/hero/PLQ-FG-LG-45.JPG',
-  commission: '/images/products/111.JPG',
-  wholesale: '/images/products/67.JPG',
+  artist: '/images/hero/meet-sina-painted-portrait.jpg',
+  creations: '/images/hero/home-mosaic-box-logo.jpg',
+  commission: '/images/hero/commission-sina-group-pendants.jpg',
+  wholesale: '/images/hero/wholesale-partners-piece-in-box.png',
   shop: '/images/products/103.JPG',
   schedule: '/images/products/100.JPG',
 };
@@ -164,33 +165,21 @@ function Hero({
   secondary,
   secondaryTo = '/meet-sina',
   backgroundImage,
-  backgroundPosition = 'center center',
+  backgroundPosition = 'center top',
 }) {
   return (
-    <section className="hero hero-dark">
+    <section className={`hero hero-dark${backgroundImage ? ' hero--screened-image' : ''}`}>
       {backgroundImage && (
         <>
           <div
+            className="hero__background"
             aria-hidden="true"
             style={{
-              position: 'absolute',
-              inset: 0,
               backgroundImage: `url(${backgroundImage})`,
               backgroundPosition,
-              backgroundRepeat: 'no-repeat',
-              backgroundSize: 'cover',
-              opacity: 0.6,
-              transform: 'scale(1.03)',
             }}
           />
-          <div
-            aria-hidden="true"
-            style={{
-              position: 'absolute',
-              inset: 0,
-              background: 'linear-gradient(90deg, rgba(23,24,22,.97) 0%, rgba(23,24,22,.9) 28%, rgba(23,24,22,.62) 52%, rgba(23,24,22,.28) 76%, rgba(23,24,22,.18) 100%)',
-            }}
-          />
+          <div className="hero__scrim" aria-hidden="true" />
         </>
       )}
       <div className="hero-inner">
@@ -307,7 +296,6 @@ export function Story() {
         primary="Adopt Sina's Creations"
         primaryTo="/shop"
         backgroundImage={pageHeroImages.artist}
-        backgroundPosition="94% center"
       />
       <section className="cream-section meet-sina-page">
         <div className="meet-sina-message">
@@ -366,7 +354,6 @@ export function Collections() {
         primary="Shop Available Pieces"
         primaryTo="/shop"
         backgroundImage={pageHeroImages.creations}
-        backgroundPosition="88% center"
       />
       <section className="cream-section collection-grid">
         {collections.map((name) => (
@@ -390,7 +377,6 @@ export function Collaborate() {
         primary="Start a Commission"
         primaryTo="/schedule"
         backgroundImage={pageHeroImages.commission}
-        backgroundPosition="88% 42%"
       />
       <FormPage
         title="Commission inquiry"
@@ -411,7 +397,6 @@ export function Wholesale() {
         primary="Start the Application"
         primaryTo="/wholesale#application"
         backgroundImage={pageHeroImages.wholesale}
-        backgroundPosition="88% 42%"
       />
       <WholesaleApplicationForm />
     </Layout>
@@ -659,7 +644,6 @@ export function Schedule() {
         primary="View Available Pieces"
         primaryTo="/shop"
         backgroundImage={pageHeroImages.schedule}
-        backgroundPosition="88% 38%"
       />
       <FormPage title="Book your conversation" intro="Send the details and we will follow up with the right next step." />
     </Layout>
