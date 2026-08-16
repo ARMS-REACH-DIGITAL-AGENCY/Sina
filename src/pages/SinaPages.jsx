@@ -284,7 +284,7 @@ export function Home() {
       <section className="cream-section living-mosaic-section" id="collection">
         <div className="section-header">
           <span>Her Story. Her Creations. Your Choice.</span>
-          <h2>The closer she gets, the more she sees.</h2>
+          <h2 className="living-mosaic-section__title">The Closer She Gets, The More She Sees.</h2>
         </div>
         <div className="living-mosaic__body">
           <div className="living-mosaic__visual">
@@ -299,10 +299,10 @@ export function Home() {
               <h3>Each creation waits for the person it was meant to find.</h3>
               <p>When a piece is adopted, it leaves Thomasina&apos;s hands and begins its next story in a new home.</p>
             </div>
+            <div className="hero-actions">
+              <Link className="button primary" to="/shop">Adopt Sina&apos;s Creations</Link>
+            </div>
           </div>
-        </div>
-        <div className="hero-actions">
-          <Link className="button primary" to="/shop">Adopt Sina&apos;s Creations</Link>
         </div>
       </section>
       <FeaturedProducts products={products} />

@@ -4,6 +4,31 @@
    section uses). This file only covers the two-up frame + story row layout,
    the mosaic frame itself, and the tile grid dressing. */
 
+/* The generic .section-header h2 (clamp 26-44px) is sized for short
+   headers and wraps this longer line. Scale by vw and force one line so
+   it always fits the full section width instead of breaking.
+   Note: .section-header h2 sets text-wrap:balance at (0,1,1) specificity,
+   which -- like white-space -- writes to the shared text-wrap-mode
+   longhand. A plain white-space:nowrap here loses that fight since this
+   selector alone is only (0,1,0); set text-wrap explicitly too, and match
+   the ancestor selector's specificity so nowrap actually wins. */
+.section-header h2.living-mosaic-section__title {
+  margin: 0 0 18px;
+  color: var(--charcoal);
+  /* Measured this string's rendered width scales at exactly 22.4px of
+     width per 1px of font-size (zero-intercept, verified at two sizes).
+     Fit that against the section's actual available width at several
+     breakpoints (332px at a 412px-wide phone, 1104px at desktop) and
+     solved a line through those points so the heading is as large as
+     possible while never exceeding its container -- including on the
+     412px-wide phone this was tested on. */
+  font-size: clamp(13px, calc(4.5vw - 4px), 46px);
+  line-height: 1.05;
+  letter-spacing: -.02em;
+  white-space: nowrap;
+  text-wrap: nowrap;
+}
+
 .living-mosaic__body {
   display: grid;
   grid-template-columns: clamp(110px, 26vw, 250px) minmax(0, 1fr);
