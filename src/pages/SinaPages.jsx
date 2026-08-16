@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Link, NavLink, useLocation } from 'react-router-dom';
+import { Link, NavLink, useLocation, useNavigate } from 'react-router-dom';
 import LivingMosaic from '../components/LivingMosaic/LivingMosaic.jsx';
 import WholesaleApplicationForm from '../components/WholesaleApplicationForm.jsx';
 import useCatalogProducts from '../hooks/useCatalogProducts.js';
@@ -64,35 +64,110 @@ function createInitialFormState(lockedInterest = '') {
   };
 }
 
-function Layout({ children, headerSearchControl = null }) {
+function readShopSearchTerm(searchString = '') {
+  return new URLSearchParams(searchString).get('q')?.trim() || '';
+}
+
+function Layout({ children }) {
   const [open, setOpen] = useState(false);
+  const [searchOpen, setSearchOpen] = useState(false);
+  const [searchValue, setSearchValue] = useState('');
+  const location = useLocation();
+  const navigate = useNavigate();
+
+  React.useEffect(() => {
+    setSearchValue(readShopSearchTerm(location.search));
+  }, [location.search]);
+
   const close = () => setOpen(false);
+  const closeSearch = () => setSearchOpen(false);
+  const handleMenuToggle = () => {
+    setSearchOpen(false);
+    setOpen((current) => !current);
+  };
+  const handleSearchToggle = () => {
+    setOpen(false);
+    setSearchOpen((current) => !current);
+  };
+  const handleSearchSubmit = (event) => {
+    event.preventDefault();
+    const trimmed = searchValue.trim();
+    setSearchOpen(false);
+    navigate(trimmed ? `/shop?q=${encodeURIComponent(trimmed)}` : '/shop');
+  };
+  const clearSearch = () => {
+    setSearchValue('');
+    setSearchOpen(false);
+
+    if (location.pathname === '/shop' && readShopSearchTerm(location.search)) {
+      const params = new URLSearchParams(location.search);
+      params.delete('q');
+      navigate(params.toString() ? `/shop?${params.toString()}` : '/shop');
+    }
+  };
 
   return (
-    <div className="site-shell">
+    <div className={`site-shell${searchOpen ? ' site-shell--search-open' : ''}`}>
       <header className="site-header">
-        <Link className="brand logo-brand" to="/" onClick={close} aria-label="Sina's Creations home">
+        <Link className="brand logo-brand" to="/" onClick={() => { close(); closeSearch(); }} aria-label="Sina's Creations home">
           <img className="brand-logo" src={logoWhitePath} alt="Sina's Creations" />
           <span className="brand-fallback" aria-hidden="true"><span>Sina</span><small>Creations</small></span>
         </Link>
         <nav className="desktop-nav" aria-label="Main navigation">
           {primaryNav.map((item) => <NavLink key={item.to} to={item.to}>{item.label}</NavLink>)}
         </nav>
-        {headerSearchControl ? <div className="header-search-slot">{headerSearchControl}</div> : null}
-        <Link className="nav-cta" to="/shop">
+        <div className="header-search-slot">
+          <button
+            type="button"
+            className={`header-search-button${searchOpen ? ' is-open' : ''}`}
+            aria-label={searchOpen ? 'Hide search' : 'Show search'}
+            aria-expanded={searchOpen}
+            aria-controls="site-search-panel"
+            onClick={handleSearchToggle}
+          >
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <circle cx="11" cy="11" r="6.5" />
+              <path d="M16 16l4.5 4.5" />
+            </svg>
+          </button>
+        </div>
+        <Link className="nav-cta" to="/shop" onClick={closeSearch}>
           <span className="nav-cta__desktop">Adopt Sina's Creations</span>
-          <span className="nav-cta__mobile">Adopt</span>
+          <span className="nav-cta__mobile">Adopt Sina's Creations</span>
         </Link>
-        <button className="menu-button" onClick={() => setOpen(!open)} aria-label={open ? 'Close menu' : 'Open menu'}>
+        <button className="menu-button" onClick={handleMenuToggle} aria-label={open ? 'Close menu' : 'Open menu'}>
           <span className={open ? 'x' : ''}></span>
           <span className={open ? 'x' : ''}></span>
           <span className={open ? 'x' : ''}></span>
         </button>
       </header>
+      {searchOpen && (
+        <div className="site-search-panel" id="site-search-panel">
+          <div className="site-search-panel__inner">
+            <form className="site-search-form" onSubmit={handleSearchSubmit}>
+              <span className="site-search-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24">
+                  <circle cx="11" cy="11" r="6.5" />
+                  <path d="M16 16l4.5 4.5" />
+                </svg>
+              </span>
+              <input
+                className="site-search-input"
+                type="search"
+                value={searchValue}
+                onChange={(event) => setSearchValue(event.target.value)}
+                placeholder="Search by SKU or piece name"
+                autoFocus
+              />
+              <button type="button" className="site-search-close" onClick={clearSearch} aria-label="Close search">×</button>
+            </form>
+          </div>
+        </div>
+      )}
       {open && (
         <div className="mobile-menu">
-          {primaryNav.map((item) => <NavLink key={item.to} onClick={close} to={item.to}>{item.label}</NavLink>)}
-          <Link onClick={close} className="mobile-adopt" to="/shop">Adopt Sina's Creations</Link>
+          {primaryNav.map((item) => <NavLink key={item.to} onClick={() => { close(); closeSearch(); }} to={item.to}>{item.label}</NavLink>)}
+          <Link onClick={() => { close(); closeSearch(); }} className="mobile-adopt" to="/shop">Adopt Sina's Creations</Link>
         </div>
       )}
       {children}
@@ -381,14 +456,13 @@ export function Wholesale() {
 export function Shop() {
   const { products, collections } = useCatalogProducts();
   const location = useLocation();
+  const navigate = useNavigate();
   const productGridRef = React.useRef(null);
   const queryFilter = React.useMemo(() => {
     const requested = new URLSearchParams(location.search).get('collection');
     return collections.includes(requested) ? requested : '';
   }, [location.search, collections]);
-  const [filter, setFilter] = useState(queryFilter);
-  const [search, setSearch] = useState('');
-  const [searchOpen, setSearchOpen] = useState(false);
+  const searchTerm = React.useMemo(() => readShopSearchTerm(location.search).toLowerCase(), [location.search]);
 
   const scrollProductsToTop = React.useCallback(() => {
     if (typeof window === 'undefined') {
@@ -396,8 +470,10 @@ export function Shop() {
     }
 
     const siteHeader = document.querySelector('.site-header');
+    const siteSearchPanel = document.querySelector('.site-search-panel');
     const stickyControls = document.querySelector('.shop-hero-controls');
     const siteHeaderHeight = siteHeader ? siteHeader.getBoundingClientRect().height : 0;
+    const siteSearchPanelHeight = siteSearchPanel ? siteSearchPanel.getBoundingClientRect().height : 0;
     const stickyControlsHeight = stickyControls ? stickyControls.getBoundingClientRect().height : 0;
     const target = productGridRef.current;
 
@@ -406,84 +482,30 @@ export function Shop() {
       return;
     }
 
-    const top = window.scrollY + target.getBoundingClientRect().top - siteHeaderHeight - stickyControlsHeight - 8;
+    const top = window.scrollY + target.getBoundingClientRect().top - siteHeaderHeight - siteSearchPanelHeight - stickyControlsHeight - 8;
     window.scrollTo({ top: Math.max(0, top), behavior: 'smooth' });
   }, []);
 
-  React.useEffect(() => {
-    setFilter(queryFilter);
-  }, [queryFilter]);
-
   const visible = React.useMemo(() => {
-    const term = search.trim().toLowerCase();
-
-    if (term) {
+    if (searchTerm) {
       return products.filter((product) => {
         const sku = String(product.sku ?? '').toLowerCase();
         const name = String(product.name ?? '').toLowerCase();
-        return sku.includes(term) || name.includes(term);
+        return sku.includes(searchTerm) || name.includes(searchTerm);
       });
     }
 
-    return filter ? products.filter((product) => product.category === filter) : products;
-  }, [filter, search, products]);
+    return queryFilter ? products.filter((product) => product.category === queryFilter) : products;
+  }, [products, queryFilter, searchTerm]);
 
   return (
-    <Layout
-      headerSearchControl={(
-        <button
-          type="button"
-          className={`header-search-button${searchOpen ? ' is-open' : ''}`}
-          aria-label={searchOpen ? 'Hide search' : 'Show search'}
-          aria-expanded={searchOpen}
-          aria-controls="shop-search-panel"
-          onClick={() => setSearchOpen((current) => !current)}
-        >
-          <svg viewBox="0 0 24 24" aria-hidden="true">
-            <circle cx="11" cy="11" r="6.5" />
-            <path d="M16 16l4.5 4.5" />
-          </svg>
-        </button>
-      )}
-    >
+    <Layout>
       <section className="shop-hero-controls" aria-label="Shop search and filters">
         <div className="shop-hero-controls__inner">
-          {searchOpen && (
-            <div className="shop-search-panel" id="shop-search-panel">
-              <div className="shop-search-input-wrap shop-search-input-wrap--hero shop-search-input-wrap--inline">
-                <span className="shop-search-input-icon" aria-hidden="true">
-                  <svg viewBox="0 0 24 24">
-                    <circle cx="11" cy="11" r="6.5" />
-                    <path d="M16 16l4.5 4.5" />
-                  </svg>
-                </span>
-                <input
-                  id="shop-search"
-                  className="shop-search-input shop-search-input--hero"
-                  type="search"
-                  value={search}
-                  onChange={(event) => setSearch(event.target.value)}
-                  placeholder="Search by SKU or piece name"
-                  autoFocus
-                />
-                <button
-                  type="button"
-                  className="shop-search-inline-close"
-                  onClick={() => {
-                    setSearch('');
-                    setSearchOpen(false);
-                  }}
-                  aria-label="Close search"
-                >
-                  ×
-                </button>
-              </div>
-            </div>
-          )}
           <div className="shop-icon-tabs" role="tablist" aria-label="Filter products by collection">
             {collections.map((tab) => {
               const iconType = collectionIcons[tab] || 'sets';
-              const isActive = filter === tab;
+              const isActive = queryFilter === tab;
               return (
                 <button
                   key={tab}
@@ -493,9 +515,8 @@ export function Shop() {
                   aria-label={tab}
                   className={`shop-icon-tab${isActive ? ' active' : ''}`}
                   onClick={() => {
-                    setFilter(tab);
-                    setSearch('');
-                    scrollProductsToTop();
+                    navigate(`/shop?collection=${encodeURIComponent(tab)}`);
+                    window.requestAnimationFrame(() => window.requestAnimationFrame(scrollProductsToTop));
                   }}
                 >
                   <span className="shop-icon-tab__glyph"><CategoryIcon type={iconType} /></span>
