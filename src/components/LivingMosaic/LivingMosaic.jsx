@@ -8,14 +8,22 @@ import './living-mosaic.css';
 import './mosaic-experiment-overrides.css';
 import './mosaic-brand-alignment.css';
 
-const PORTRAIT_SRC = '/images/hero/PLQ-FG-LG-45.JPG';
-const GRID_COLS = 29;
-const GRID_ROWS = 51;
+const PORTRAIT_SRC = '/images/hero/mosaic_portrait.jpg';
+const DESKTOP_GRID = { cols: 45, rows: 60 };
+const MOBILE_GRID = { cols: 30, rows: 40 };
+const MOBILE_BREAKPOINT = 767;
 const MAX_ZOOM = 4;
 const ZOOM_RESET_THRESHOLD = 1.02;
 
 function clamp(value, min, max) {
   return Math.min(Math.max(value, min), max);
+}
+
+function getGridConfig() {
+  if (typeof window !== 'undefined' && window.innerWidth <= MOBILE_BREAKPOINT) {
+    return MOBILE_GRID;
+  }
+  return DESKTOP_GRID;
 }
 
 export default function LivingMosaic() {
@@ -28,6 +36,7 @@ export default function LivingMosaic() {
   const [modalProduct, setModalProduct] = useState(null);
   const [active, setActive] = useState(false);
   const [zoomState, setZoomState] = useState({ scale: 1, x: 0, y: 0 });
+  const [gridConfig, setGridConfig] = useState(getGridConfig);
 
   const sectionRef = useRef(null);
   const viewportRef = useRef(null);
@@ -35,9 +44,30 @@ export default function LivingMosaic() {
   const gestureRef = useRef({ type: 'idle' });
   const suppressTapRef = useRef(false);
 
+  const { cols: gridCols, rows: gridRows } = gridConfig;
+
   useEffect(() => {
     zoomRef.current = zoomState;
   }, [zoomState]);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return undefined;
+
+    const media = window.matchMedia(`(max-width: ${MOBILE_BREAKPOINT}px)`);
+    const syncGridConfig = () => {
+      setGridConfig(media.matches ? MOBILE_GRID : DESKTOP_GRID);
+    };
+
+    syncGridConfig();
+
+    if (typeof media.addEventListener === 'function') {
+      media.addEventListener('change', syncGridConfig);
+      return () => media.removeEventListener('change', syncGridConfig);
+    }
+
+    media.addListener(syncGridConfig);
+    return () => media.removeListener(syncGridConfig);
+  }, []);
 
   useEffect(() => {
     const el = sectionRef.current;
@@ -60,7 +90,7 @@ export default function LivingMosaic() {
     let cancelled = false;
     setGridLoading(true);
     setGridError(false);
-    buildMosaicGrid({ portraitSrc: PORTRAIT_SRC, products, cols: GRID_COLS, rows: GRID_ROWS })
+    buildMosaicGrid({ portraitSrc: PORTRAIT_SRC, products, cols: gridCols, rows: gridRows })
       .then((result) => {
         if (!cancelled) {
           setGrid(result);
@@ -76,7 +106,7 @@ export default function LivingMosaic() {
     return () => {
       cancelled = true;
     };
-  }, [products, productsLoading]);
+  }, [gridCols, gridRows, products, productsLoading]);
 
   useEffect(() => {
     const viewport = viewportRef.current;
@@ -289,7 +319,7 @@ export default function LivingMosaic() {
               >
                 <div className="living-mosaic__grid-reveal" aria-hidden={!mosaicReady}>
                   {!gridError && grid.length > 0 && (
-                    <div className="living-mosaic__grid" style={{ '--mosaic-cols': GRID_COLS, '--mosaic-rows': GRID_ROWS }}>
+                    <div className="living-mosaic__grid" style={{ '--mosaic-cols': gridCols, '--mosaic-rows': gridRows }}>
                       {grid.map((cell) => {
                         const key = `${cell.col}-${cell.row}`;
                         return (
