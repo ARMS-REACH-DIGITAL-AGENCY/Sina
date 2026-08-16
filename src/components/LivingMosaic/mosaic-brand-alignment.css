@@ -68,6 +68,13 @@
   letter-spacing: -.035em;
 }
 
+.living-mosaic__intro-copy {
+  display: grid;
+  gap: 18px;
+  max-width: 620px;
+  margin-top: 24px;
+}
+
 .living-mosaic__copy-stack {
   display: grid;
   gap: 18px;
@@ -92,7 +99,7 @@
   display: grid;
   gap: 10px;
   max-width: 620px;
-  margin-top: 26px;
+  margin-top: 0;
 }
 
 .living-mosaic__lead {
@@ -245,6 +252,11 @@
     font-size: clamp(44px, 11vw, 58px);
   }
 
+  .living-mosaic__intro-copy {
+    margin-top: 20px;
+    gap: 14px;
+  }
+
   .living-mosaic__copy-stack {
     margin-top: 0;
     gap: 16px;
@@ -255,7 +267,6 @@
   }
 
   .living-mosaic__lead-stack {
-    margin-top: 22px;
     gap: 8px;
   }
 
@@ -265,9 +276,9 @@
 
   .living-mosaic__visual {
     width: 100%;
-    max-width: 560px;
+    max-width: min(520px, calc(100% - 32px));
     height: auto;
-    justify-self: start;
+    justify-self: center;
   }
 
   .living-mosaic__frame {
@@ -276,8 +287,8 @@
   }
 
   .living-mosaic__baseline-hint {
-    width: min(100%, 560px);
-    justify-self: start;
+    width: min(520px, calc(100% - 32px));
+    justify-self: center;
     margin-top: -2px;
     text-align: right;
     font-size: 11px;
@@ -303,6 +314,14 @@
     font-size: 8.25px;
     letter-spacing: .08em;
     padding-inline: 12px;
+  }
+
+  .living-mosaic__visual {
+    max-width: min(500px, calc(100% - 28px));
+  }
+
+  .living-mosaic__baseline-hint {
+    width: min(500px, calc(100% - 28px));
   }
 
   .living-mosaic__cta-row {
