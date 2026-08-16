@@ -48,7 +48,7 @@ button,input,select,textarea{font:inherit}
 .hero-inner{position:relative;z-index:1;max-width:1200px;min-height:clamp(420px,58vh,620px);margin:0 auto;padding:56px var(--page-gutter) 72px;display:flex;flex-direction:column;justify-content:flex-start}
 .shop-hero-inner{min-height:clamp(420px,58vh,620px)}
 .pill-eyebrow{display:inline-flex;align-items:center;border:2px solid var(--burnt-orange);color:var(--burnt-orange);border-radius:var(--radius);padding:11px 20px;margin:0 0 32px;font-family:var(--font-body);font-size:11px;text-transform:uppercase;font-weight:700;letter-spacing:.18em;align-self:flex-start}
-.pill-eyebrow:before{content:'';width:8px;height:8px;border-radius:50%;background:var(--burnt-orange);margin-right:10px;flex:0 0 auto}
+.pill-eyebrow:before{display:none}
 .hero h1{margin:0;max-width:760px;font-size:clamp(44px,7vw,78px);line-height:1.02;letter-spacing:-.035em;font-weight:800;color:var(--off-white)}
 .hero p{max-width:680px;margin:30px 0 0;color:rgba(247,244,236,.72);font-size:clamp(18px,2.3vw,30px);line-height:1.55;font-weight:400}
 .hero-actions{display:flex;gap:12px;flex-wrap:wrap;margin-top:36px}
