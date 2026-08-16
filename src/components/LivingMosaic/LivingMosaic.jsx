@@ -296,7 +296,7 @@ export default function LivingMosaic() {
     <section className="living-mosaic living-mosaic--hero" id="collection" ref={sectionRef}>
       <div className="living-mosaic__hero-shell">
         <div className="living-mosaic__intro">
-          <SearchEyebrow label="Her Story & Creations. Your Choice." className="living-mosaic__eyebrow" />
+          <SearchEyebrow label="HER STORY & CREATIONS. YOUR CHOICE." className="living-mosaic__eyebrow" />
           <h1>The closer you get, the more you see.</h1>
         </div>
 
