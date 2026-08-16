@@ -15,11 +15,11 @@
 
 .living-mosaic__body {
   display: grid;
-  grid-template-columns: clamp(240px, 24vw, 340px) minmax(0, 1fr);
-  column-gap: clamp(28px, 3.4vw, 48px);
+  grid-template-columns: clamp(110px, 26vw, 250px) minmax(0, 1fr);
+  column-gap: clamp(18px, 3.4vw, 48px);
   row-gap: 24px;
   align-items: start;
-  margin-top: 40px;
+  margin-top: 28px;
 }
 
 .living-mosaic__visual {
@@ -153,14 +153,7 @@
 
 @media (max-width: 959px) {
   .living-mosaic__body {
-    grid-template-columns: minmax(0, 1fr);
-    row-gap: 20px;
-    margin-top: 32px;
-  }
-
-  .living-mosaic__visual {
-    width: min(100%, 304px);
-    margin: 0 auto;
+    margin-top: 24px;
   }
 
   .living-mosaic__lead {
@@ -171,11 +164,5 @@
   .living-mosaic__story-copy {
     font-size: 14px;
     line-height: 1.65;
-  }
-}
-
-@media (max-width: 620px) {
-  .living-mosaic__visual {
-    width: min(100%, 292px);
   }
 }
