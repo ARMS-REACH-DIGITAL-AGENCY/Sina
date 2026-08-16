@@ -255,14 +255,18 @@ export default function LivingMosaic() {
       <div className="living-mosaic__hero-shell">
         <div className="living-mosaic__intro">
           <SearchEyebrow label="HER STORY & CREATIONS. YOUR CHOICE." className="living-mosaic__eyebrow" />
-          <h1>The closer you get, the more you see.</h1>
+          <h1>
+            The closer you get,
+            <br />
+            <span className="nowrap">the more you see.</span>
+          </h1>
         </div>
 
         <div className="living-mosaic__story">
           <div className="living-mosaic__copy-stack">
             <div className="living-mosaic__lead-stack">
-              <p className="living-mosaic__lead">Step back to see this amazing legally blind artist.</p>
-              <p className="living-mosaic__lead">Come closer to meet her 1-of-1 creations.</p>
+              <p className="living-mosaic__lead">Step back to see this amazing <span className="nowrap">legally blind artist.</span></p>
+              <p className="living-mosaic__lead">Come closer to meet her <span className="nowrap">1-of-1</span> creations.</p>
             </div>
 
             <p className="living-mosaic__story-copy">Every named creation carries a piece of Sina&rsquo;s vision &mdash; glass, light, color, texture, and touch shaped into something that will never exist again.</p>
