@@ -4,6 +4,7 @@ import useMosaicProducts from '../../hooks/useMosaicProducts.js';
 import { buildMosaicGrid } from './colorMatch.js';
 import MosaicTile from './MosaicTile.jsx';
 import ProductModal from './ProductModal.jsx';
+import SearchEyebrow from '../SearchEyebrow.jsx';
 import './living-mosaic.css';
 import './mosaic-experiment-overrides.css';
 import './mosaic-brand-alignment.css';
@@ -295,7 +296,7 @@ export default function LivingMosaic() {
     <section className="living-mosaic living-mosaic--hero" id="collection" ref={sectionRef}>
       <div className="living-mosaic__hero-shell">
         <div className="living-mosaic__story">
-          <div className="pill-eyebrow living-mosaic__eyebrow">Her Story. Her Creations. Your Choice.</div>
+          <SearchEyebrow label="Her Story. Her Creations. Your Choice." className="living-mosaic__eyebrow" />
           <h1>The closer you get, the more you see.</h1>
 
           <div className="living-mosaic__copy-stack">
