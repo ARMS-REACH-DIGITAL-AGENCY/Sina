@@ -17,6 +17,7 @@ const primaryNav = [
   { to: '/', label: 'Home' },
   { to: '/meet-sina', label: 'Meet Sina' },
   { to: '/commission', label: 'Commission Sina' },
+  { to: '/shop', label: 'Adopt Sina\'s Creations' },
   { to: '/wholesale', label: 'Wholesale Partners' },
 ];
 
