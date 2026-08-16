@@ -3,10 +3,11 @@ import { Link, NavLink, useLocation, useNavigate } from 'react-router-dom';
 import LivingMosaic from '../components/LivingMosaic/LivingMosaic.jsx';
 import WholesaleApplicationForm from '../components/WholesaleApplicationForm.jsx';
 import SearchEyebrow from '../components/SearchEyebrow.jsx';
-import { SiteSearchProvider, useSiteSearch } from '../components/SiteSearchContext.jsx';
+import { SiteSearchProvider } from '../components/SiteSearchContext.jsx';
 import useCatalogProducts from '../hooks/useCatalogProducts.js';
 
-const logoWhitePath = '/assets/brand/sinas-creations-white-logo.png';
+const headerLogoPath = '/assets/brand/sinas-creations-black-logo.png';
+const footerLogoPath = '/assets/brand/sinas-creations-white-logo.png';
 const meetSinaSmile = '/images/meet-sina/meet-sina-smile-square.jpg';
 const meetSinaCloseup = '/images/meet-sina/meet-sina-closeup.jpg';
 const meetSinaStudio = '/images/meet-sina/meet-sina-studio.jpg';
@@ -81,7 +82,6 @@ function LayoutFrame({ children }) {
   const [headerSearchValue, setHeaderSearchValue] = useState('');
   const location = useLocation();
   const navigate = useNavigate();
-  const { searchOpen, toggleSearch, closeSearch } = useSiteSearch();
   const isShopPage = location.pathname === '/shop';
 
   React.useEffect(() => {
@@ -90,76 +90,52 @@ function LayoutFrame({ children }) {
 
   const close = () => setOpen(false);
   const handleMenuToggle = () => {
-    closeSearch();
     setOpen((current) => !current);
-  };
-  const handleSearchToggle = () => {
-    setOpen(false);
-    toggleSearch();
   };
   const handleHeaderSearchSubmit = (event) => {
     event.preventDefault();
+    close();
     const trimmed = headerSearchValue.trim();
     navigate(trimmed ? `/shop?q=${encodeURIComponent(trimmed)}` : '/shop');
   };
   const clearHeaderSearch = () => {
     setHeaderSearchValue('');
-    const params = new URLSearchParams(location.search);
-    params.delete('q');
-    navigate(params.toString() ? `/shop?${params.toString()}` : '/shop');
+
+    if (location.pathname === '/shop') {
+      const params = new URLSearchParams(location.search);
+      params.delete('q');
+      navigate(params.toString() ? `/shop?${params.toString()}` : '/shop');
+    }
   };
 
   return (
-    <div className={`site-shell${searchOpen ? ' site-shell--search-open' : ''}${isShopPage ? ' site-shell--shop' : ''}`}>
+    <div className={`site-shell${isShopPage ? ' site-shell--shop' : ''}`}>
       <header className="site-header">
-        <Link className="brand logo-brand" to="/" onClick={() => { close(); closeSearch(); }} aria-label="Sina's Creations home">
-          <img className="brand-logo" src={logoWhitePath} alt="Sina's Creations" />
+        <Link className="brand logo-brand" to="/" onClick={close} aria-label="Sina's Creations home">
+          <img className="brand-logo" src={headerLogoPath} alt="Sina's Creations" />
           <span className="brand-fallback" aria-hidden="true"><span>Sina</span><small>Creations</small></span>
         </Link>
         <nav className="desktop-nav" aria-label="Main navigation">
           {primaryNav.map((item) => <NavLink key={item.to} to={item.to}>{item.label}</NavLink>)}
         </nav>
-        {!isShopPage && (
-          <div className="header-search-slot">
-            <button
-              type="button"
-              className={`header-search-button${searchOpen ? ' is-open' : ''}`}
-              aria-label={searchOpen ? 'Hide search' : 'Show search'}
-              aria-expanded={searchOpen}
-              onClick={handleSearchToggle}
-            >
-              <svg viewBox="0 0 24 24" aria-hidden="true">
-                <circle cx="11" cy="11" r="6.5" />
-                <path d="M16 16l4.5 4.5" />
-              </svg>
-            </button>
-          </div>
-        )}
-        {isShopPage ? (
-          <form className="header-catalog-search" onSubmit={handleHeaderSearchSubmit} role="search">
-            <span className="header-catalog-search__icon" aria-hidden="true">
-              <svg viewBox="0 0 24 24">
-                <circle cx="11" cy="11" r="6.5" />
-                <path d="M16 16l4.5 4.5" />
-              </svg>
-            </span>
-            <input
-              className="header-catalog-search__input"
-              type="search"
-              value={headerSearchValue}
-              onChange={(event) => setHeaderSearchValue(event.target.value)}
-              placeholder="Search by SKU or piece name"
-            />
-            {headerSearchValue && (
-              <button type="button" className="header-catalog-search__clear" onClick={clearHeaderSearch} aria-label="Clear search">×</button>
-            )}
-          </form>
-        ) : (
-          <Link className="nav-cta" to="/shop" onClick={closeSearch}>
-            <span className="nav-cta__desktop">Adopt Sina's Creations</span>
-            <span className="nav-cta__mobile">Browse Catalog</span>
-          </Link>
-        )}
+        <form className="header-catalog-search header-catalog-search--global" onSubmit={handleHeaderSearchSubmit} role="search">
+          <span className="header-catalog-search__icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24">
+              <circle cx="11" cy="11" r="6.5" />
+              <path d="M16 16l4.5 4.5" />
+            </svg>
+          </span>
+          <input
+            className="header-catalog-search__input"
+            type="search"
+            value={headerSearchValue}
+            onChange={(event) => setHeaderSearchValue(event.target.value)}
+            placeholder="Search by SKU or piece name"
+          />
+          {headerSearchValue && (
+            <button type="button" className="header-catalog-search__clear" onClick={clearHeaderSearch} aria-label="Clear search">×</button>
+          )}
+        </form>
         <button className="menu-button" onClick={handleMenuToggle} aria-label={open ? 'Close menu' : 'Open menu'}>
           <span className={open ? 'x' : ''}></span>
           <span className={open ? 'x' : ''}></span>
@@ -168,8 +144,7 @@ function LayoutFrame({ children }) {
       </header>
       {open && (
         <div className="mobile-menu">
-          {primaryNav.map((item) => <NavLink key={item.to} onClick={() => { close(); closeSearch(); }} to={item.to}>{item.label}</NavLink>)}
-          {!isShopPage && <Link onClick={() => { close(); closeSearch(); }} className="mobile-adopt" to="/shop">Adopt Sina's Creations</Link>}
+          {primaryNav.map((item) => <NavLink key={item.to} onClick={close} to={item.to}>{item.label}</NavLink>)}
         </div>
       )}
       {children}
@@ -791,7 +766,7 @@ function Footer() {
   return (
     <footer className="footer">
       <div className="footer-brand">
-        <img className="footer-logo" src={logoWhitePath} alt="Sina's Creations" />
+        <img className="footer-logo" src={footerLogoPath} alt="Sina's Creations" />
         <p>1 of 1 fused glass art. Named, made by hand, and adopted once.</p>
       </div>
       <div>
