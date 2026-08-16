@@ -1,5 +1,6 @@
 /* Logo and first-fold spacing fixes.
-   Keep the Sina logo at its natural aspect ratio: no stretching or perspective change. */
+   Desktop keeps the dark header treatment.
+   Mobile switches to the repo's black-and-gold logo on a white header. */
 
 .site-header {
   position: sticky !important;
@@ -30,7 +31,16 @@
   max-height: 52px !important;
   object-fit: contain !important;
   object-position: left center !important;
+}
+
+.brand-logo--desktop {
+  display: block !important;
   filter: brightness(0) invert(1) !important;
+}
+
+.brand-logo--mobile {
+  display: none !important;
+  filter: none !important;
 }
 
 .desktop-nav a {
@@ -63,24 +73,115 @@
 }
 
 @media (max-width: 959px) {
+  .site-header {
+    background: var(--off-white) !important;
+    box-shadow: 0 1px 12px rgba(0,0,0,.10) !important;
+    gap: 8px !important;
+    padding: 0 16px !important;
+    overflow: visible !important;
+  }
+
   .logo-brand {
-    height: 52px !important;
+    width: 132px !important;
+    min-width: 132px !important;
+    height: 44px !important;
   }
 
   .brand-logo {
     width: auto !important;
-    height: 52px !important;
-    max-width: 170px !important;
-    max-height: 52px !important;
     object-fit: contain !important;
+    object-position: left center !important;
+  }
+
+  .brand-logo--desktop {
+    display: none !important;
+  }
+
+  .brand-logo--mobile {
+    display: block !important;
+    height: 42px !important;
+    max-width: 132px !important;
+  }
+
+  .nav-cta {
+    padding: 5px 10px !important;
+    min-height: 34px !important;
+    font-size: 9px !important;
+    letter-spacing: .07em !important;
+    max-width: none !important;
+  }
+
+  .header-search-slot {
+    margin-left: 0 !important;
+  }
+
+  .header-search-button {
+    width: 36px !important;
+    height: 36px !important;
+    color: rgba(41,42,40,.84) !important;
+  }
+
+  .header-search-button:hover,
+  .header-search-button.is-open {
+    color: var(--burnt-orange) !important;
+    transform: none !important;
+  }
+
+  .header-search-button svg {
+    width: 26px !important;
+    height: 26px !important;
+  }
+
+  .menu-button {
+    display: flex !important;
+    min-width: 36px !important;
+    min-height: 36px !important;
+    padding: 6px !important;
+    gap: 4px !important;
+  }
+
+  .menu-button span {
+    width: 20px !important;
+    background: var(--charcoal) !important;
   }
 }
 
 @media (max-width: 420px) {
-  .brand-logo {
-    width: auto !important;
-    height: 50px !important;
-    max-width: 160px !important;
-    max-height: 50px !important;
+  .site-header {
+    padding-left: 12px !important;
+    padding-right: 12px !important;
+    gap: 6px !important;
+  }
+
+  .logo-brand {
+    width: 118px !important;
+    min-width: 118px !important;
+    height: 40px !important;
+  }
+
+  .brand-logo--mobile {
+    height: 38px !important;
+    max-width: 118px !important;
+  }
+
+  .nav-cta {
+    padding: 4px 8px !important;
+    min-height: 32px !important;
+    font-size: 8px !important;
+  }
+
+  .header-search-button {
+    width: 34px !important;
+    height: 34px !important;
+  }
+
+  .header-search-button svg {
+    width: 24px !important;
+    height: 24px !important;
+  }
+
+  .menu-button {
+    min-width: 34px !important;
+    min-height: 34px !important;
   }
 }
