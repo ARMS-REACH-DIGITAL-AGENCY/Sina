@@ -2,10 +2,11 @@ import React, { useState } from 'react';
 import { Link, NavLink, useLocation, useNavigate } from 'react-router-dom';
 import LivingMosaic from '../components/LivingMosaic/LivingMosaic.jsx';
 import WholesaleApplicationForm from '../components/WholesaleApplicationForm.jsx';
+import SearchEyebrow from '../components/SearchEyebrow.jsx';
+import { SiteSearchProvider, useSiteSearch } from '../components/SiteSearchContext.jsx';
 import useCatalogProducts from '../hooks/useCatalogProducts.js';
 
 const logoWhitePath = '/assets/brand/sinas-creations-white-logo.png';
-const logoBlackPath = '/assets/brand/sinas-creations-black-logo.png';
 const meetSinaSmile = '/images/meet-sina/meet-sina-smile-square.jpg';
 const meetSinaCloseup = '/images/meet-sina/meet-sina-closeup.jpg';
 const meetSinaStudio = '/images/meet-sina/meet-sina-studio.jpg';
@@ -43,9 +44,7 @@ const inquiryOptions = ['Adoption', 'Commission', 'Wholesale', 'Meet Sina', 'Gif
 
 const collectionIcons = {
   Pendants: 'pendants',
-  'Wire Wrapped': 'wire-wrapped',
   Necklaces: 'necklaces',
-  'Ocean Necklaces': 'ocean-necklaces',
   Lanyards: 'lanyards',
   Plates: 'plates',
   'Wall Art': 'wall-art',
@@ -70,106 +69,107 @@ function readShopSearchTerm(searchString = '') {
 }
 
 function Layout({ children }) {
+  return (
+    <SiteSearchProvider>
+      <LayoutFrame>{children}</LayoutFrame>
+    </SiteSearchProvider>
+  );
+}
+
+function LayoutFrame({ children }) {
   const [open, setOpen] = useState(false);
-  const [searchOpen, setSearchOpen] = useState(false);
-  const [searchValue, setSearchValue] = useState('');
+  const [headerSearchValue, setHeaderSearchValue] = useState('');
   const location = useLocation();
   const navigate = useNavigate();
+  const { searchOpen, toggleSearch, closeSearch } = useSiteSearch();
+  const isShopPage = location.pathname === '/shop';
 
   React.useEffect(() => {
-    setSearchValue(readShopSearchTerm(location.search));
+    setHeaderSearchValue(readShopSearchTerm(location.search));
   }, [location.search]);
 
   const close = () => setOpen(false);
-  const closeSearch = () => setSearchOpen(false);
   const handleMenuToggle = () => {
-    setSearchOpen(false);
+    closeSearch();
     setOpen((current) => !current);
   };
   const handleSearchToggle = () => {
     setOpen(false);
-    setSearchOpen((current) => !current);
+    toggleSearch();
   };
-  const handleSearchSubmit = (event) => {
+  const handleHeaderSearchSubmit = (event) => {
     event.preventDefault();
-    const trimmed = searchValue.trim();
-    setSearchOpen(false);
+    const trimmed = headerSearchValue.trim();
     navigate(trimmed ? `/shop?q=${encodeURIComponent(trimmed)}` : '/shop');
   };
-  const clearSearch = () => {
-    setSearchValue('');
-    setSearchOpen(false);
-
-    if (location.pathname === '/shop' && readShopSearchTerm(location.search)) {
-      const params = new URLSearchParams(location.search);
-      params.delete('q');
-      navigate(params.toString() ? `/shop?${params.toString()}` : '/shop');
-    }
+  const clearHeaderSearch = () => {
+    setHeaderSearchValue('');
+    const params = new URLSearchParams(location.search);
+    params.delete('q');
+    navigate(params.toString() ? `/shop?${params.toString()}` : '/shop');
   };
 
   return (
-    <div className={`site-shell${searchOpen ? ' site-shell--search-open' : ''}`}>
+    <div className={`site-shell${searchOpen ? ' site-shell--search-open' : ''}${isShopPage ? ' site-shell--shop' : ''}`}>
       <header className="site-header">
         <Link className="brand logo-brand" to="/" onClick={() => { close(); closeSearch(); }} aria-label="Sina's Creations home">
-          <img className="brand-logo brand-logo--desktop" src={logoWhitePath} alt="Sina's Creations" />
-          <img className="brand-logo brand-logo--mobile" src={logoBlackPath} alt="Sina's Creations" />
+          <img className="brand-logo" src={logoWhitePath} alt="Sina's Creations" />
           <span className="brand-fallback" aria-hidden="true"><span>Sina</span><small>Creations</small></span>
         </Link>
         <nav className="desktop-nav" aria-label="Main navigation">
           {primaryNav.map((item) => <NavLink key={item.to} to={item.to}>{item.label}</NavLink>)}
         </nav>
-        <div className="header-search-slot">
-          <button
-            type="button"
-            className={`header-search-button${searchOpen ? ' is-open' : ''}`}
-            aria-label={searchOpen ? 'Hide search' : 'Show search'}
-            aria-expanded={searchOpen}
-            aria-controls="site-search-panel"
-            onClick={handleSearchToggle}
-          >
-            <svg viewBox="0 0 24 24" aria-hidden="true">
-              <circle cx="11" cy="11" r="6.5" />
-              <path d="M16 16l4.5 4.5" />
-            </svg>
-          </button>
-        </div>
-        <Link className="nav-cta" to="/shop" onClick={closeSearch}>
-          <span className="nav-cta__desktop">Adopt Sina's Creations</span>
-          <span className="nav-cta__mobile">Browse Catalog</span>
-        </Link>
+        {!isShopPage && (
+          <div className="header-search-slot">
+            <button
+              type="button"
+              className={`header-search-button${searchOpen ? ' is-open' : ''}`}
+              aria-label={searchOpen ? 'Hide search' : 'Show search'}
+              aria-expanded={searchOpen}
+              onClick={handleSearchToggle}
+            >
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <circle cx="11" cy="11" r="6.5" />
+                <path d="M16 16l4.5 4.5" />
+              </svg>
+            </button>
+          </div>
+        )}
+        {isShopPage ? (
+          <form className="header-catalog-search" onSubmit={handleHeaderSearchSubmit} role="search">
+            <span className="header-catalog-search__icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24">
+                <circle cx="11" cy="11" r="6.5" />
+                <path d="M16 16l4.5 4.5" />
+              </svg>
+            </span>
+            <input
+              className="header-catalog-search__input"
+              type="search"
+              value={headerSearchValue}
+              onChange={(event) => setHeaderSearchValue(event.target.value)}
+              placeholder="Search by SKU or piece name"
+            />
+            {headerSearchValue && (
+              <button type="button" className="header-catalog-search__clear" onClick={clearHeaderSearch} aria-label="Clear search">×</button>
+            )}
+          </form>
+        ) : (
+          <Link className="nav-cta" to="/shop" onClick={closeSearch}>
+            <span className="nav-cta__desktop">Adopt Sina's Creations</span>
+            <span className="nav-cta__mobile">Browse Catalog</span>
+          </Link>
+        )}
         <button className="menu-button" onClick={handleMenuToggle} aria-label={open ? 'Close menu' : 'Open menu'}>
           <span className={open ? 'x' : ''}></span>
           <span className={open ? 'x' : ''}></span>
           <span className={open ? 'x' : ''}></span>
         </button>
       </header>
-      {searchOpen && (
-        <div className="site-search-panel" id="site-search-panel">
-          <div className="site-search-panel__inner">
-            <form className="site-search-form" onSubmit={handleSearchSubmit}>
-              <span className="site-search-icon" aria-hidden="true">
-                <svg viewBox="0 0 24 24">
-                  <circle cx="11" cy="11" r="6.5" />
-                  <path d="M16 16l4.5 4.5" />
-                </svg>
-              </span>
-              <input
-                className="site-search-input"
-                type="search"
-                value={searchValue}
-                onChange={(event) => setSearchValue(event.target.value)}
-                placeholder="Search by SKU or piece name"
-                autoFocus
-              />
-              <button type="button" className="site-search-close" onClick={clearSearch} aria-label="Close search">×</button>
-            </form>
-          </div>
-        </div>
-      )}
       {open && (
         <div className="mobile-menu">
           {primaryNav.map((item) => <NavLink key={item.to} onClick={() => { close(); closeSearch(); }} to={item.to}>{item.label}</NavLink>)}
-          <Link onClick={() => { close(); closeSearch(); }} className="mobile-adopt" to="/shop">Adopt Sina's Creations</Link>
+          {!isShopPage && <Link onClick={() => { close(); closeSearch(); }} className="mobile-adopt" to="/shop">Adopt Sina's Creations</Link>}
         </div>
       )}
       {children}
@@ -217,7 +217,7 @@ function Hero({
         </>
       )}
       <div className="hero-inner">
-        {eyebrow && <div className="pill-eyebrow">{eyebrow}</div>}
+        {eyebrow && <SearchEyebrow label={eyebrow} className="hero-search-eyebrow" />}
         <h1>{title}</h1>
         <p>{copy}</p>
         <div className="hero-actions">
@@ -248,25 +248,11 @@ function CategoryIcon({ type }) {
           <path d="M12 11l4.5 5.5L12 21l-4.5-4.5L12 11Z" />
         </svg>
       );
-    case 'wire-wrapped':
-      return (
-        <svg viewBox="0 0 24 24" aria-hidden="true">
-          <path d="M6 17c0-2.8 2.2-5 5-5h2c2.2 0 4-1.8 4-4s-1.8-4-4-4-4 1.8-4 4" />
-          <path d="M18 7c0 2.8-2.2 5-5 5h-2c-2.2 0-4 1.8-4 4s1.8 4 4 4 4-1.8 4-4" />
-        </svg>
-      );
     case 'necklaces':
       return (
         <svg viewBox="0 0 24 24" aria-hidden="true">
           <path d="M7 4c0 3 2.2 5.5 5 7c2.8-1.5 5-4 5-7" />
           <path d="M9 15c0-1.7 1.3-3 3-3s3 1.3 3 3-1.3 3-3 3-3-1.3-3-3Z" />
-        </svg>
-      );
-    case 'ocean-necklaces':
-      return (
-        <svg viewBox="0 0 24 24" aria-hidden="true">
-          <path d="M3 14c1.4 0 1.4-1 2.8-1s1.4 1 2.8 1s1.4-1 2.8-1s1.4 1 2.8 1s1.4-1 2.8-1s1.4 1 2.8 1" />
-          <path d="M5 10c1.4 0 1.4-1 2.8-1s1.4 1 2.8 1s1.4-1 2.8-1s1.4 1 2.8 1" />
         </svg>
       );
     case 'lanyards':
@@ -406,7 +392,7 @@ export function Collections() {
         backgroundPosition="88% center"
       />
       <section className="cream-section collection-grid">
-        {collections.filter((name) => name !== 'All').map((name) => (
+        {collections.map((name) => (
           <Link className="collection-card" to={`/shop?collection=${encodeURIComponent(name)}`} key={name}>
             <span>{name}</span>
             <strong>View pieces &rarr;</strong>
@@ -460,13 +446,17 @@ export function Shop() {
   const location = useLocation();
   const navigate = useNavigate();
   const productGridRef = React.useRef(null);
+  const shopCollections = React.useMemo(
+    () => collections.filter((name) => collectionIcons[name]),
+    [collections]
+  );
   const queryFilter = React.useMemo(() => {
     const requested = new URLSearchParams(location.search).get('collection');
-    if (collections.includes(requested)) {
+    if (shopCollections.includes(requested)) {
       return requested;
     }
-    return 'Pendants';
-  }, [location.search, collections]);
+    return shopCollections[0] || '';
+  }, [location.search, shopCollections]);
   const searchTerm = React.useMemo(() => readShopSearchTerm(location.search).toLowerCase(), [location.search]);
 
   const scrollProductsToTop = React.useCallback(() => {
@@ -475,10 +465,8 @@ export function Shop() {
     }
 
     const siteHeader = document.querySelector('.site-header');
-    const siteSearchPanel = document.querySelector('.site-search-panel');
     const stickyControls = document.querySelector('.shop-hero-controls');
     const siteHeaderHeight = siteHeader ? siteHeader.getBoundingClientRect().height : 0;
-    const siteSearchPanelHeight = siteSearchPanel ? siteSearchPanel.getBoundingClientRect().height : 0;
     const stickyControlsHeight = stickyControls ? stickyControls.getBoundingClientRect().height : 0;
     const target = productGridRef.current;
 
@@ -487,7 +475,7 @@ export function Shop() {
       return;
     }
 
-    const top = window.scrollY + target.getBoundingClientRect().top - siteHeaderHeight - siteSearchPanelHeight - stickyControlsHeight - 8;
+    const top = window.scrollY + target.getBoundingClientRect().top - siteHeaderHeight - stickyControlsHeight - 8;
     window.scrollTo({ top: Math.max(0, top), behavior: 'smooth' });
   }, []);
 
@@ -505,10 +493,10 @@ export function Shop() {
 
   return (
     <Layout>
-      <section className="shop-hero-controls" aria-label="Shop search and filters">
+      <section className="shop-hero-controls" aria-label="Shop filters">
         <div className="shop-hero-controls__inner">
           <div className="shop-icon-tabs" role="tablist" aria-label="Filter products by collection">
-            {collections.map((tab) => {
+            {shopCollections.map((tab) => {
               const iconType = collectionIcons[tab] || 'sets';
               const isActive = queryFilter === tab;
               return (
