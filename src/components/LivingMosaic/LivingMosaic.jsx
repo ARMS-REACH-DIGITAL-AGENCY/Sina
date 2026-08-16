@@ -292,17 +292,6 @@ export default function LivingMosaic() {
           </h1>
         </div>
 
-        <div className="living-mosaic__story">
-          <div className="living-mosaic__copy-stack">
-            <div className="living-mosaic__lead-stack">
-              <p className="living-mosaic__lead">Step back to see this amazing <span className="nowrap">legally blind artist.</span></p>
-              <p className="living-mosaic__lead">Come closer to meet her <span className="nowrap">1-of-1</span> creations.</p>
-            </div>
-
-            <p className="living-mosaic__story-copy">Every named creation carries a piece of Sina&rsquo;s vision &mdash; glass, light, color, texture, and touch shaped into something that will never exist again.</p>
-          </div>
-        </div>
-
         <div className="living-mosaic__visual">
           <div className={`living-mosaic__frame${mosaicReady ? ' is-mosaic-ready' : ''}`}>
             <div
@@ -354,6 +343,23 @@ export default function LivingMosaic() {
                   : 'The portrait is visible while the mosaic is being assembled.'}
             </div>
           </div>
+        </div>
+
+        <div className="living-mosaic__details">
+          <div className="living-mosaic__story">
+            <div className="living-mosaic__copy-stack">
+              <div className="living-mosaic__lead-stack">
+                <p className="living-mosaic__lead">Step back to see this amazing <span className="nowrap">legally blind artist.</span></p>
+                <p className="living-mosaic__lead">Come closer to meet her <span className="nowrap">1-of-1</span> creations.</p>
+              </div>
+
+              <p className="living-mosaic__story-copy">Every named creation carries a piece of Sina&rsquo;s vision &mdash; glass, light, color, texture, and touch shaped into something that will never exist again.</p>
+            </div>
+          </div>
+
+          <a className="button ghost living-mosaic__cta" href="/meet-sina">
+            A Message From The Designer
+          </a>
         </div>
       </div>
 
