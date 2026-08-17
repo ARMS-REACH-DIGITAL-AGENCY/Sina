@@ -53,7 +53,7 @@ const collectionIcons = {
   Necklaces: 'necklaces',
   Lanyards: 'lanyards',
   Plates: 'plates',
-  'Wall Art': 'wall-art',
+  Plaques: 'wall-art',
   Charms: 'charms',
   Sets: 'sets',
 };
@@ -638,7 +638,7 @@ const FEATURED_EYEBROW_BY_CATEGORY = {
   Necklaces: 'Featured Necklace',
   'Ocean Necklaces': 'Featured Necklace',
   Plates: 'Featured Plate',
-  'Wall Art': 'Featured Wall Art',
+  Plaques: 'Featured Plaque',
   Charms: 'Featured Charm',
   Sets: 'Featured Set',
   Lanyards: 'Featured Lanyard',
@@ -676,6 +676,9 @@ function FeaturedProducts({ products }) {
         {featured.map(({ product, eyebrow }) => (
           <ProductCard product={product} eyebrowOverride={eyebrow} key={product.sku} />
         ))}
+      </div>
+      <div className="hero-actions">
+        <Link className="button primary" to="/shop">Browse Sina&rsquo;s Full Collection</Link>
       </div>
     </section>
   );

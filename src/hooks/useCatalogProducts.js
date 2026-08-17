@@ -6,7 +6,7 @@ const preferredCollectionOrder = [
   'Necklaces',
   'Lanyards',
   'Plates',
-  'Wall Art',
+  'Plaques',
   'Charms',
   'Sets',
 ];
@@ -14,6 +14,7 @@ const preferredCollectionOrder = [
 const categoryAliases = {
   'Wire Wrapped': 'Pendants',
   'Ocean Necklaces': 'Necklaces',
+  'Wall Art': 'Plaques',
 };
 
 function normalizeCategory(category = '') {

@@ -43,7 +43,6 @@ const creationInterestOptions = [
   'Necklaces',
   'Ocean Necklaces',
   'Plates',
-  'Wall Art',
   'Plaques',
   'Charms',
   'Sets',
