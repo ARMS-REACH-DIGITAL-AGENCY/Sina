@@ -44,29 +44,32 @@ function ShareIcon() {
   );
 }
 
-function ProductCardSkuRow({ eyebrowLabel, sku, onShare, shareStatus }) {
+function ProductCardSkuRow({ eyebrowLabel, sku }) {
   return (
     <div className="sku-row">
       <span>{eyebrowLabel}</span>
-      <span className="sku-row__right">
-        <button
-          type="button"
-          className="product-card__share"
-          onClick={onShare}
-          aria-label={`Share ${sku}`}
-        >
-          {shareStatus === 'copied' ? (
-            'Copied'
-          ) : (
-            <>
-              <ShareIcon />
-              <span>Share</span>
-            </>
-          )}
-        </button>
-        <strong>SKU {sku}</strong>
-      </span>
+      <strong>SKU {sku}</strong>
     </div>
+  );
+}
+
+function ShareButton({ sku, onShare, shareStatus }) {
+  return (
+    <button
+      type="button"
+      className="product-card__share"
+      onClick={onShare}
+      aria-label={`Share ${sku}`}
+    >
+      {shareStatus === 'copied' ? (
+        'Copied'
+      ) : (
+        <>
+          <ShareIcon />
+          <span>Share</span>
+        </>
+      )}
+    </button>
   );
 }
 
@@ -221,17 +224,18 @@ export function ProductCard({ product, eyebrowOverride, sharedSku }) {
       <div className="product-card__panel">
         {!showBack ? (
           <>
-            <ProductCardSkuRow eyebrowLabel={eyebrowLabel} sku={product.sku} onShare={handleShare} shareStatus={shareStatus} />
+            <ProductCardSkuRow eyebrowLabel={eyebrowLabel} sku={product.sku} />
             <h3>{product.name}</h3>
             <p>{product.line}</p>
             <div className="price-row"><span><span className="nowrap">1-of-1</span> Cost of Adoption</span><strong>${product.price}</strong></div>
             <div className="product-card__flip-cta-row">
               <span className="product-card__flip-cta">Read {product.name}&rsquo;s Story Before Adopting</span>
+              <ShareButton sku={product.sku} onShare={handleShare} shareStatus={shareStatus} />
             </div>
           </>
         ) : (
           <>
-            <ProductCardSkuRow eyebrowLabel={eyebrowLabel} sku={product.sku} onShare={handleShare} shareStatus={shareStatus} />
+            <ProductCardSkuRow eyebrowLabel={eyebrowLabel} sku={product.sku} />
             <h3>{product.name}</h3>
             <p>{product.line}</p>
             <div className="product-card__description-shell">
@@ -245,6 +249,9 @@ export function ProductCard({ product, eyebrowOverride, sharedSku }) {
               </div>
             )}
             <div className="price-row"><span><span className="nowrap">1-of-1</span> Cost of Adoption</span><strong>${product.price}</strong></div>
+            <div className="product-card__flip-cta-row product-card__flip-cta-row--back">
+              <ShareButton sku={product.sku} onShare={handleShare} shareStatus={shareStatus} />
+            </div>
             <button type="button" className="button primary product-card__adopt-cta">Adopt Me</button>
             <p className="product-card__close-hint">Close</p>
           </>
