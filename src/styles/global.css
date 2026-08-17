@@ -48,15 +48,16 @@ button,input,select,textarea{font:inherit}
 .hero-inner{position:relative;z-index:1;max-width:1200px;height:740px;margin:0 auto;padding:56px var(--page-gutter) 72px;display:flex;flex-direction:column;justify-content:flex-start}
 .shop-hero-inner{min-height:clamp(420px,58vh,620px)}
 .pill-eyebrow{display:inline-flex;align-items:center;border:2px solid var(--burnt-orange);color:var(--burnt-orange);border-radius:var(--radius);padding:11px 20px;margin:0 0 32px;font-family:var(--font-body);font-size:11px;text-transform:uppercase;font-weight:700;letter-spacing:.18em;align-self:flex-start}
+.hero .pill-eyebrow{width:min(480px,100%)}
 .pill-eyebrow:before{display:none}
 .hero h1{margin:0;max-width:760px;font-size:clamp(44px,7vw,78px);line-height:1.02;letter-spacing:-.035em;font-weight:800;color:var(--off-white);text-wrap:balance}
 .hero h1:has(.fit-heading){max-width:none}
-.hero p{max-width:720px;margin:30px 0 0;color:rgba(247,244,236,.72);font-size:clamp(18px,2.3vw,30px);line-height:1.55;font-weight:400;text-wrap:pretty}
+.hero p{max-width:min(480px,100%);margin:30px 0 0;color:rgba(247,244,236,.72);font-size:clamp(18px,2.3vw,30px);line-height:1.55;font-weight:400;text-wrap:pretty}
 .fit-heading{display:block;max-width:none}
 .fit-heading__row{display:block;white-space:nowrap;font-size:var(--fit-size,inherit)}
 .hero-actions{display:flex;gap:12px;flex-wrap:wrap;margin-top:36px}
 .hero .hero-actions{margin-top:auto;padding-top:36px}
-@media(min-width:960px){.hero .hero-actions .button.primary{width:272px}}
+.hero .hero-actions .button.primary{width:min(480px,100%)}
 .button{display:inline-flex;align-items:center;justify-content:center;border-radius:var(--radius);text-transform:uppercase;letter-spacing:.06em;font-family:var(--font-body);font-size:13px;font-weight:700;padding:13px 24px;min-height:48px;border:2px solid transparent;white-space:normal;text-align:center}
 .button.primary{background:#EEBF68;color:var(--black);border-color:#EEBF68}
 .button.ghost{border-color:rgba(247,244,236,.5);color:var(--off-white);background:transparent}

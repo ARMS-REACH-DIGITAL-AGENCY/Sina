@@ -38,8 +38,9 @@ function ProductCardDescription({ product }) {
 function ShareIcon() {
   return (
     <svg viewBox="0 0 24 24" aria-hidden="true">
-      <path d="M14 8l5 5-5 5" />
-      <path d="M4 19v-6a5 5 0 0 1 5-5h10" />
+      <path d="M12 15V3" />
+      <path d="M7.5 7.5 12 3l4.5 4.5" />
+      <path d="M5 12v6a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-6" />
     </svg>
   );
 }
