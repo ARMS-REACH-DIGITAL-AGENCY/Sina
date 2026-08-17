@@ -12,10 +12,20 @@ import {
 import './styles/meet-sina.css';
 
 function ScrollToTop() {
-  const { pathname } = useLocation();
+  const { pathname, hash } = useLocation();
   React.useEffect(() => {
+    if (hash) {
+      // The target section may not have rendered/laid out yet on the very
+      // first paint of a fresh navigation, so give it a frame before
+      // measuring its position.
+      const id = hash.slice(1);
+      window.requestAnimationFrame(() => {
+        document.getElementById(id)?.scrollIntoView({ block: 'start' });
+      });
+      return;
+    }
     window.scrollTo(0, 0);
-  }, [pathname]);
+  }, [pathname, hash]);
   return null;
 }
 

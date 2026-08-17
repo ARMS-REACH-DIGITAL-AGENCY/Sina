@@ -311,13 +311,13 @@ export function Home() {
         title="More than jewelry. A story you can hold."
         copy="Every creation begins as glass, but it becomes something more personal once Thomasina names it. Each piece is made by hand, chosen with intention, and offered to one person who feels connected to its color, texture, and story."
         primary="A Message From The Artist"
-        primaryTo="/meet-sina"
+        primaryTo="/meet-sina#message"
         backgroundImages={heroHomeSlides}
         backgroundPosition="left center"
       />
       <section className="cream-section living-mosaic-section" id="collection">
         <div className="section-header">
-          <span>Her Story. Her Creations. Your Choice.</span>
+          <span>Her Story &amp; Creations. Your Choice.</span>
           <h2 className="living-mosaic-section__title">The Closer She Gets, The More She Sees.</h2>
         </div>
         <div className="living-mosaic__body">
@@ -355,7 +355,7 @@ export function Story() {
         primaryTo="/shop"
         backgroundImage={pageHeroImages.artist}
       />
-      <section className="cream-section meet-sina-page">
+      <section className="cream-section meet-sina-page" id="message">
         <div className="meet-sina-message">
           <div className="meet-sina-mobile-intro">
             <SectionHeader eyebrow="A Message From the Designer" title={<>My&nbsp;name&nbsp;is<br />Thomasina&nbsp;Schnepf.</>} className="meet-sina-headline" />
@@ -578,6 +578,14 @@ function ProductCardDescription({ product }) {
 function ProductCard({ product, eyebrowOverride }) {
   const [showBack, setShowBack] = React.useState(false);
   const [activeImage, setActiveImage] = React.useState(product.image);
+  // Sheet data entry mistakes happen -- a row's "Final Image Filename" can
+  // name a file that was never actually uploaded under that name, while the
+  // real photo sits under the legacy shoot-number filename every other
+  // product uses (e.g. NKL-166.JPG requested, 166.JPG is what's really
+  // there). api/catalog.js hands back every plausible filename for a photo;
+  // track which ones have already failed so a load error advances to the
+  // next candidate instead of just leaving a broken image.
+  const [failedSrcs, setFailedSrcs] = React.useState(() => new Set());
   // Only the product's own real photo(s). Previously this padded out to 4
   // "thumbnails" using unrelated Thomasina studio photos as a placeholder --
   // the catalog only has one photo per piece today, so the thumbnail row
@@ -586,7 +594,18 @@ function ProductCard({ product, eyebrowOverride }) {
 
   React.useEffect(() => {
     setActiveImage(product.image);
+    setFailedSrcs(new Set());
   }, [product.image]);
+
+  const imageFallbackChain = React.useMemo(
+    () => [activeImage, ...(product.imageFallbacks || [])].filter(Boolean),
+    [activeImage, product.imageFallbacks]
+  );
+  const displayImage = imageFallbackChain.find((src) => !failedSrcs.has(src)) || imageFallbackChain[imageFallbackChain.length - 1];
+
+  const handleImageError = () => {
+    setFailedSrcs((prev) => (prev.has(displayImage) ? prev : new Set(prev).add(displayImage)));
+  };
 
   const toggleCard = () => setShowBack((current) => !current);
   const handleKeyDown = (event) => {
@@ -599,6 +618,7 @@ function ProductCard({ product, eyebrowOverride }) {
   const handleThumbClick = (event, image) => {
     event.stopPropagation();
     setActiveImage(image);
+    setFailedSrcs(new Set());
   };
 
   const hasDimensions = Boolean(product.height || product.width || product.weight);
@@ -617,10 +637,11 @@ function ProductCard({ product, eyebrowOverride }) {
       <div className="product-card__visual">
         <div className="product-card__image">
           <img
-            src={activeImage}
+            src={displayImage}
             alt={`${product.name}, ${product.category} by Sina's Creations`}
             loading="lazy"
             decoding="async"
+            onError={handleImageError}
           />
           <span className="product-card__one-of-one"><span className="nowrap">1-of-1</span></span>
         </div>
