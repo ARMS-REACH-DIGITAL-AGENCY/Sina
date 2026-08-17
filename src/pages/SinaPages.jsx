@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Link, NavLink, useLocation, useNavigate } from 'react-router-dom';
+import { Link, Navigate, NavLink, useLocation, useNavigate, useParams } from 'react-router-dom';
 import LivingMosaic from '../components/LivingMosaic/LivingMosaic.jsx';
 import WholesaleApplicationForm from '../components/WholesaleApplicationForm.jsx';
 import SearchEyebrow from '../components/SearchEyebrow.jsx';
@@ -173,6 +173,54 @@ function useHeroSlideshow(slideCount, intervalMs) {
   return index;
 }
 
+// Renders each string in `lines` as its own non-wrapping row, sized to the
+// widest row's actual measured pixel width so it always fills -- but never
+// overflows -- its container, on any device or font. Measures at
+// maxFontSize once, then scales down proportionally if that overflows
+// (font metrics scale linearly with font-size for a given string/font, so
+// one measurement is enough -- no iterative fitting needed).
+function FitHeading({ as: Tag = 'span', lines, maxFontSize, minFontSize = 16, className = '' }) {
+  const containerRef = React.useRef(null);
+  const rowRefs = React.useRef([]);
+
+  React.useLayoutEffect(() => {
+    const container = containerRef.current;
+    if (!container) return undefined;
+
+    const fit = () => {
+      const availableWidth = container.clientWidth;
+      if (!availableWidth) return;
+
+      container.style.setProperty('--fit-size', `${maxFontSize}px`);
+      let widest = 0;
+      rowRefs.current.forEach((el) => {
+        if (el && el.scrollWidth > widest) widest = el.scrollWidth;
+      });
+
+      const size = widest > availableWidth
+        ? Math.max(minFontSize, Math.floor(maxFontSize * (availableWidth / widest)))
+        : maxFontSize;
+
+      container.style.setProperty('--fit-size', `${size}px`);
+    };
+
+    fit();
+    const observer = new ResizeObserver(fit);
+    observer.observe(container);
+    return () => observer.disconnect();
+  }, [maxFontSize, minFontSize, lines]);
+
+  return (
+    <Tag ref={containerRef} className={`fit-heading${className ? ` ${className}` : ''}`}>
+      {lines.map((line, index) => (
+        <span key={index} ref={(el) => { rowRefs.current[index] = el; }} className="fit-heading__row">
+          {line}
+        </span>
+      ))}
+    </Tag>
+  );
+}
+
 function Hero({
   eyebrow,
   title,
@@ -308,7 +356,7 @@ export function Home() {
     <Layout>
       <Hero
         eyebrow="Crafted. Named. Adopted."
-        title="More than jewelry. A story you can hold."
+        title={<FitHeading lines={['More Than Jewelry.', 'A Story You Can Hold.']} maxFontSize={78} minFontSize={18} />}
         copy="Every creation begins as glass, but it becomes something more personal once Thomasina names it. Each piece is made by hand, chosen with intention, and offered to one person who feels connected to its color, texture, and story."
         primary="A Message From The Artist"
         primaryTo="/meet-sina#message"
@@ -318,7 +366,13 @@ export function Home() {
       <section className="cream-section living-mosaic-section" id="collection">
         <div className="section-header">
           <span>Her Story &amp; Creations. Your Choice.</span>
-          <h2 className="living-mosaic-section__title">The Closer She Gets, The More She Sees.</h2>
+          <FitHeading
+            as="h2"
+            className="living-mosaic-section__title"
+            lines={['The Closer She Gets,', 'The More She Sees.']}
+            maxFontSize={44}
+            minFontSize={16}
+          />
         </div>
         <div className="living-mosaic__body">
           <div className="living-mosaic__visual">
@@ -349,7 +403,7 @@ export function Story() {
     <Layout>
       <Hero
         eyebrow="Meet Sina"
-        title={<>The artist behind every <span className="nowrap">1-of-1</span> creation.</>}
+        title={<FitHeading lines={['The Artist Behind', 'Every 1-of-1 Creation.']} maxFontSize={78} minFontSize={18} />}
         copy="Thomasina Schnepf creates by touch, light, color, and close attention. Her work is personal, tactile, and made to be worn, displayed, gifted, and remembered one original at a time."
         primary="Adopt Sina's Creations"
         primaryTo="/shop"
@@ -427,7 +481,7 @@ export function Collaborate() {
     <Layout>
       <Hero
         eyebrow="Commission Sina"
-        title={<>Begin a custom piece <span className="nowrap">with Sina.</span></>}
+        title={<FitHeading lines={['Collaborate With', 'Sina’s Customs.']} maxFontSize={78} minFontSize={18} />}
         copy="If you want a piece shaped around a person, memory, color story, or meaning, start the conversation here and we will guide the next step together."
         primary="Start a Commission"
         primaryTo="/schedule"
@@ -447,7 +501,7 @@ export function Wholesale() {
     <Layout>
       <Hero
         eyebrow="Wholesale Partners"
-        title={<>Carry Sina's Creations <span className="nowrap">in your store.</span></>}
+        title={<FitHeading lines={['Wholesale Partners:', 'Sell Sina’s Creations.']} maxFontSize={78} minFontSize={18} />}
         copy="Sina's Creations is accepting wholesale applications from boutiques, galleries, gift shops, and community retailers who want one-of-one jewelry and glass art with a personal story behind every piece."
         primary="Start the Application"
         primaryTo="/wholesale#application"
@@ -456,6 +510,15 @@ export function Wholesale() {
       <WholesaleApplicationForm />
     </Layout>
   );
+}
+
+// A short path for shared product links (/p/SKU) that just forwards into
+// the real shop deep link (/shop?sku=SKU) -- keeps what actually goes out
+// in a text or social caption short, without needing a separate redirect
+// service.
+export function ProductShortLink() {
+  const { sku } = useParams();
+  return <Navigate to={`/shop?sku=${encodeURIComponent(sku || '')}`} replace />;
 }
 
 export function Shop() {
@@ -467,13 +530,27 @@ export function Shop() {
     () => collections.filter((name) => collectionIcons[name]),
     [collections]
   );
+  const sharedSku = React.useMemo(
+    () => new URLSearchParams(location.search).get('sku')?.trim().toUpperCase() || '',
+    [location.search]
+  );
+  const sharedProduct = React.useMemo(
+    () => (sharedSku ? products.find((product) => product.sku === sharedSku) : null),
+    [products, sharedSku]
+  );
   const queryFilter = React.useMemo(() => {
     const requested = new URLSearchParams(location.search).get('collection');
     if (shopCollections.includes(requested)) {
       return requested;
     }
+    // A shared-product link (?sku=) should land on that product's own
+    // category tab so the card is actually visible, not whatever tab
+    // happens to be first.
+    if (sharedProduct && shopCollections.includes(sharedProduct.category)) {
+      return sharedProduct.category;
+    }
     return shopCollections[0] || '';
-  }, [location.search, shopCollections]);
+  }, [location.search, shopCollections, sharedProduct]);
   const searchTerm = React.useMemo(() => readShopSearchTerm(location.search).toLowerCase(), [location.search]);
 
   const scrollProductsToTop = React.useCallback(() => {
@@ -539,7 +616,7 @@ export function Shop() {
       </section>
       <section className="shop-section shop-section--floating-controls">
         <div className="product-grid" ref={productGridRef}>
-          {visible.map((product) => <ProductCard product={product} key={product.sku} />)}
+          {visible.map((product) => <ProductCard product={product} sharedSku={sharedSku} key={product.sku} />)}
         </div>
         {!visible.length && (
           <div className="shop-empty-state">
@@ -559,9 +636,21 @@ function cleanProductHtml(value = '') {
     .trim();
 }
 
+// descriptionHtml's first paragraph is almost always `<p><strong>{headline}</strong></p>`
+// -- the exact same text already shown as product.line directly above it on the
+// card. Strip that lead paragraph so expanding a card doesn't show the short
+// description twice.
+function stripLeadingHeadline(html, headline) {
+  if (!headline) return html;
+  const escaped = headline.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  const pattern = new RegExp(`^\\s*<p>\\s*<strong>\\s*${escaped}\\s*<\\/strong>\\s*<\\/p>`, 'i');
+  return html.replace(pattern, '');
+}
+
 function ProductCardDescription({ product }) {
   if (product.descriptionHtml) {
-    return <div className="product-card__description" dangerouslySetInnerHTML={{ __html: cleanProductHtml(product.descriptionHtml) }} />;
+    const html = stripLeadingHeadline(cleanProductHtml(product.descriptionHtml), product.line);
+    return <div className="product-card__description" dangerouslySetInnerHTML={{ __html: html }} />;
   }
 
   // The short description (product.line) is already shown above this. Only
@@ -575,7 +664,35 @@ function ProductCardDescription({ product }) {
   return <p className="product-card__description">{product.description}</p>;
 }
 
-function ProductCard({ product, eyebrowOverride }) {
+function ShareIcon() {
+  return (
+    <svg viewBox="0 0 24 24" aria-hidden="true">
+      <path d="M14 8l5 5-5 5" />
+      <path d="M4 19v-6a5 5 0 0 1 5-5h10" />
+    </svg>
+  );
+}
+
+function ProductCardSkuRow({ eyebrowLabel, sku, onShare, shareStatus }) {
+  return (
+    <div className="sku-row">
+      <span>{eyebrowLabel}</span>
+      <span className="sku-row__right">
+        <button
+          type="button"
+          className="product-card__share"
+          onClick={onShare}
+          aria-label={`Share ${sku}`}
+        >
+          {shareStatus === 'copied' ? 'Copied' : <ShareIcon />}
+        </button>
+        <strong>SKU {sku}</strong>
+      </span>
+    </div>
+  );
+}
+
+function ProductCard({ product, eyebrowOverride, sharedSku }) {
   const [showBack, setShowBack] = React.useState(false);
   const [activeImage, setActiveImage] = React.useState(product.image);
   // Sheet data entry mistakes happen -- a row's "Final Image Filename" can
@@ -624,8 +741,69 @@ function ProductCard({ product, eyebrowOverride }) {
   const hasDimensions = Boolean(product.height || product.width || product.weight);
   const eyebrowLabel = eyebrowOverride || product.category;
 
+  const articleRef = React.useRef(null);
+  const [shareStatus, setShareStatus] = React.useState('idle');
+
+  React.useEffect(() => {
+    if (sharedSku && product.sku === sharedSku) {
+      setShowBack(true);
+      articleRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+    // Only meant to fire once, for whichever card matches the link someone
+    // arrived with -- not every time sharedSku happens to re-render.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const handleShare = async (event) => {
+    event.stopPropagation();
+    // /p/:sku is a short redirect to the full /shop?sku= deep link (see
+    // ProductShortLink below) -- keeps shared links (texts, DMs, social
+    // captions) from being the long shop-with-query-string URL.
+    const shareUrl = `${window.location.origin}/p/${encodeURIComponent(product.sku)}`;
+    const shareTitle = `${product.name} — Sina's Creations`;
+    // Some share targets (notably Android's SMS/Messages) only surface the
+    // `text` field, dropping `title` entirely -- so the piece's name has to
+    // be part of the text itself, not rely on title showing up.
+    const shareText = `${product.name}\n${product.line}\nOne-of-one, handcrafted by Thomasina Schnepf.`;
+
+    // Try to attach the actual product photo so the share carries the image,
+    // not just a link -- most share targets (Messages, Instagram, Mail) will
+    // use a shared file directly when the OS share sheet supports it.
+    let files;
+    if (navigator.canShare) {
+      try {
+        const response = await fetch(displayImage);
+        const blob = await response.blob();
+        const file = new File([blob], `${product.sku}.jpg`, { type: blob.type || 'image/jpeg' });
+        if (navigator.canShare({ files: [file] })) {
+          files = [file];
+        }
+      } catch (error) {
+        // Image couldn't be fetched/packaged as a file -- share the link alone.
+      }
+    }
+
+    if (navigator.share) {
+      try {
+        await navigator.share({ title: shareTitle, text: shareText, url: shareUrl, ...(files ? { files } : {}) });
+        return;
+      } catch (error) {
+        if (error && error.name === 'AbortError') return;
+      }
+    }
+
+    try {
+      await navigator.clipboard.writeText(shareUrl);
+      setShareStatus('copied');
+      window.setTimeout(() => setShareStatus('idle'), 2000);
+    } catch (error) {
+      // No Web Share API and no clipboard access -- nothing more to do.
+    }
+  };
+
   return (
     <article
+      ref={articleRef}
       className={`product-card${showBack ? ' is-back' : ''}`}
       role="button"
       tabIndex={0}
@@ -665,15 +843,17 @@ function ProductCard({ product, eyebrowOverride }) {
       <div className="product-card__panel">
         {!showBack ? (
           <>
-            <div className="sku-row"><span>{eyebrowLabel}</span><strong>SKU {product.sku}</strong></div>
+            <ProductCardSkuRow eyebrowLabel={eyebrowLabel} sku={product.sku} onShare={handleShare} shareStatus={shareStatus} />
             <h3>{product.name}</h3>
             <p>{product.line}</p>
             <div className="price-row"><span><span className="nowrap">1-of-1</span> Cost of Adoption</span><strong>${product.price}</strong></div>
-            <p className="product-card__flip-hint">Tap anywhere to flip for full details.</p>
+            <div className="product-card__flip-cta-row">
+              <span className="product-card__flip-cta">Read {product.name}&rsquo;s Story Before Adopting</span>
+            </div>
           </>
         ) : (
           <>
-            <div className="sku-row"><span>{eyebrowLabel}</span><strong>SKU {product.sku}</strong></div>
+            <ProductCardSkuRow eyebrowLabel={eyebrowLabel} sku={product.sku} onShare={handleShare} shareStatus={shareStatus} />
             <h3>{product.name}</h3>
             <p>{product.line}</p>
             <div className="product-card__description-shell">
@@ -687,9 +867,8 @@ function ProductCard({ product, eyebrowOverride }) {
               </div>
             )}
             <div className="price-row"><span><span className="nowrap">1-of-1</span> Cost of Adoption</span><strong>${product.price}</strong></div>
-            <button type="button" className="button primary product-card__disabled-cta" disabled aria-disabled="true">Adopt Me</button>
-            <p className="product-card__disabled-note">Inventory is being updated, so adoption checkout is temporarily paused.</p>
-            <p className="product-card__flip-hint">Tap anywhere to flip back.</p>
+            <button type="button" className="button primary product-card__adopt-cta">Adopt Me</button>
+            <p className="product-card__close-hint">Close</p>
           </>
         )}
       </div>
@@ -719,7 +898,11 @@ function FeaturedProducts({ products }) {
 
   return (
     <section className="cream-section">
-      <SectionHeader eyebrow="Available Now" title="Featured pieces ready for adoption" copy="Begin with a few of the creations currently available from Thomasina's first release." />
+      <SectionHeader
+        eyebrow="Available Now"
+        title={<FitHeading lines={['Weekly Featured Pieces:', 'Ready For Adoption']} maxFontSize={44} minFontSize={16} />}
+        copy="Begin with a few of the creations currently available from Thomasina's first release."
+      />
       <div className="product-grid compact">
         {featured.map(({ product, eyebrow }) => (
           <ProductCard product={product} eyebrowOverride={eyebrow} key={product.sku} />
@@ -843,23 +1026,146 @@ function CTA({ title, copy }) {
   );
 }
 
+function InstagramIcon() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
+      <rect x="3" y="3" width="18" height="18" rx="5" stroke="currentColor" strokeWidth="1.8" />
+      <circle cx="12" cy="12" r="4" stroke="currentColor" strokeWidth="1.8" />
+      <circle cx="17.3" cy="6.7" r="1.1" fill="currentColor" />
+    </svg>
+  );
+}
+
+function FacebookIcon() {
+  return (
+    <svg viewBox="0 0 24 24" aria-hidden="true">
+      <path fill="currentColor" d="M13.5 21v-7.7h2.6l.4-3h-3v-1.9c0-.87.24-1.46 1.5-1.46H16.6V4.14C16.3 4.1 15.3 4 14.2 4c-2.35 0-3.95 1.43-3.95 4.06v2.24H7.6v3h2.65V21h3.25Z" />
+    </svg>
+  );
+}
+
+function XIcon() {
+  return (
+    <svg viewBox="0 0 24 24" aria-hidden="true">
+      <path fill="currentColor" d="M13.6 10.5 20 3h-2l-5.2 6-4.2-6H3l6.7 9.5L3 21h2l5.6-6.5L15 21h5.5l-6.9-10.5Zm-2 2.3-.65-.9L5.4 4.6h2l4.2 5.9.65.9 5.9 8.3h-2l-4.5-6.3Z" />
+    </svg>
+  );
+}
+
+function TikTokIcon() {
+  return (
+    <svg viewBox="0 0 24 24" aria-hidden="true">
+      <path fill="currentColor" d="M16.6 3h-3v11.6a2.6 2.6 0 1 1-1.9-2.5V8.9a5.9 5.9 0 1 0 4.9 5.8V9.4a7.5 7.5 0 0 0 4.4 1.4V7.7A4.6 4.6 0 0 1 16.6 3Z" />
+    </svg>
+  );
+}
+
+const footerSocialLinks = [
+  { label: 'Instagram', href: 'https://www.instagram.com/sinascreations?igsh=bThtdGtrbzNmOG9m&igsi=bThtdGtrbzNmOG9m', Icon: InstagramIcon },
+  { label: 'Facebook', href: 'https://www.facebook.com/share/1CvzKETZEP/', Icon: FacebookIcon },
+  { label: 'X', href: 'https://x.com/SinasGlasss', Icon: XIcon },
+  { label: 'TikTok', href: 'https://www.tiktok.com/@sinascreations?_r=1&_t=ZT-98xLwfn3d2T', Icon: TikTokIcon },
+];
+
 function Footer() {
   return (
     <footer className="footer">
-      <div className="footer-brand">
-        <img className="footer-logo" src={footerLogoPath} alt="Sina's Creations" />
-        <p>1 of 1 fused glass art. Named, made by hand, and adopted once.</p>
+      <div className="footer-top">
+        <div className="footer-brand">
+          <img className="footer-logo" src={footerLogoPath} alt="Sina's Creations" />
+          <p>1 of 1 fused glass art. Named, made by hand, and adopted once.</p>
+        </div>
+        <div>
+          <h4>Navigate</h4>
+          {footerNav.map((item) => <Link key={item.to} to={item.to}>{item.label}</Link>)}
+        </div>
+        <div>
+          <h4>Connect</h4>
+          {footerConnect.map((item) => <Link key={item.to} to={item.to}>{item.label}</Link>)}
+          <a href="tel:+14804476002">(480) 447-6002</a>
+          <a href="mailto:sinasartisticcreations@gmail.com">sinasartisticcreations@gmail.com</a>
+          <div className="footer-social">
+            {footerSocialLinks.map(({ label, href, Icon }) => (
+              <a key={label} href={href} target="_blank" rel="noopener noreferrer" aria-label={label} className="footer-social__link">
+                <Icon />
+              </a>
+            ))}
+          </div>
+        </div>
+        <div><h4>Adopt</h4><p>Choose a piece, ask a question, or start a custom conversation.</p><Link className="button primary footer-button" to="/shop">Adopt</Link></div>
       </div>
-      <div>
-        <h4>Navigate</h4>
-        {footerNav.map((item) => <Link key={item.to} to={item.to}>{item.label}</Link>)}
+      <div className="footer-bottom">
+        <p className="footer-disclaimer">Disclaimer: Each piece is handmade from fused glass and one-of-one; natural variation in color, texture, and shape is part of the process, not a defect. Product images are for reference only. Pricing and availability may change.</p>
+        <div className="footer-legal">
+          <div className="footer-legal__links">
+            <Link to="/privacy">Privacy Policy</Link>
+            <Link to="/terms">Terms &amp; Messaging Terms</Link>
+          </div>
+          <p className="footer-copyright">&copy; 2026 Sina&apos;s Creations &middot; sinascreations.com &middot; Queen Creek, AZ</p>
+          <p className="footer-powered">Powered by <a href="https://armsreachdigital.agency" target="_blank" rel="noopener noreferrer">ARMS REACH Digital Agency</a></p>
+        </div>
       </div>
-      <div>
-        <h4>Connect</h4>
-        {footerConnect.map((item) => <Link key={item.to} to={item.to}>{item.label}</Link>)}
-      </div>
-      <div><h4>Adopt</h4><p>Choose a piece, ask a question, or start a custom conversation.</p><Link className="button primary footer-button" to="/shop">Adopt</Link></div>
     </footer>
+  );
+}
+
+const legalLastUpdated = 'August 17, 2026';
+
+function LegalPage({ eyebrow, title, children }) {
+  return (
+    <Layout>
+      <section className="cream-section legal-page">
+        <div className="legal-page__header">
+          <span>{eyebrow}</span>
+          <h1>{title}</h1>
+          <p className="legal-page__updated">Last updated {legalLastUpdated}.</p>
+        </div>
+        <div className="legal-page__body">{children}</div>
+      </section>
+    </Layout>
+  );
+}
+
+export function Privacy() {
+  return (
+    <LegalPage eyebrow="Privacy" title="Privacy Policy">
+      <h2>Information we collect</h2>
+      <p>When you use this website, ask about adopting a piece, request a commission or wholesale application, or otherwise contact Sina&apos;s Creations, we may collect information you provide such as your name, email address, phone number, mailing address, and the content of your message or inquiry. We may also collect basic website analytics and technical information such as device, browser, referring page, and pages viewed.</p>
+      <h2>How we use information</h2>
+      <p>We use information to respond to inquiries, process adoption and commission requests, fulfill and ship orders, follow up about a request, improve the website and shopping experience, maintain business records, and protect the security and operation of our services.</p>
+      <h2>Text messages and email</h2>
+      <p>If you expressly agree to receive follow-up messages, Sina&apos;s Creations may contact you by text message or email about your inquiry, order, commission, or related services. Consent to receive marketing messages is not a condition of purchase. Message and data rates may apply. Message frequency varies. You may reply STOP to opt out of text messages and HELP for help.</p>
+      <h2>Service providers</h2>
+      <p>We may use service providers that help operate the website, forms, scheduling, payment processing, communications, analytics, and hosting. These providers may process information on our behalf as necessary to provide those services. We do not sell your personal information.</p>
+      <h2>Payment information</h2>
+      <p>Payments for adopted pieces are processed by a third-party payment processor. Sina&apos;s Creations does not store your full payment card details.</p>
+      <h2>Your choices</h2>
+      <p>You may ask to review, correct, or delete personal information that Sina&apos;s Creations maintains about you, subject to legal or operational retention requirements. You may also opt out of non-essential follow-up communications at any time.</p>
+      <h2>Contact</h2>
+      <p>For privacy questions or requests, contact Sina&apos;s Creations at <a href="mailto:sinasartisticcreations@gmail.com">sinasartisticcreations@gmail.com</a> or <a href="tel:+14804476002">(480) 447-6002</a>.</p>
+    </LegalPage>
+  );
+}
+
+export function Terms() {
+  return (
+    <LegalPage eyebrow="Terms" title="Terms &amp; Messaging Terms">
+      <h2>Website information</h2>
+      <p>Sina&apos;s Creations provides this website for general information, browsing available pieces, requesting commissions and wholesale applications, and client communication. Website content is provided for informational purposes and is not a guarantee of availability, appearance, or delivery timing for any specific piece.</p>
+      <h2>Products and adoption</h2>
+      <p>Every piece is handmade, one-of-one fused glass art. Natural variation in color, texture, and shape is part of the handmade process, not a defect. Availability, pricing, and package terms may change. Sina&apos;s Creations may decline or postpone an adoption when appropriate.</p>
+      <h2>Scheduling and purchases</h2>
+      <p>Appointment availability, pricing, and service details may change. Any purchase-specific terms presented at checkout also apply. Contact Sina&apos;s Creations before purchase if you have questions about a piece, commission, or scheduling.</p>
+      <h2>Text messaging terms</h2>
+      <p>When you provide your mobile number and expressly consent to follow-up messages, you authorize Sina&apos;s Creations to send text messages related to your inquiry, commission, appointments, order updates, and, when permitted by your consent, promotional follow-up. Message frequency varies. Message and data rates may apply. Consent is not a condition of purchase.</p>
+      <p>Reply STOP to opt out of text messages. Reply HELP for help. Carriers are not liable for delayed or undelivered messages. You are responsible for providing a mobile number you are authorized to use.</p>
+      <h2>Acceptable use</h2>
+      <p>You agree not to misuse the website, attempt unauthorized access, interfere with website operation, submit unlawful or misleading information, or use the website in a manner that harms Sina&apos;s Creations or other users.</p>
+      <h2>Privacy</h2>
+      <p>Use of personal information is described in the <Link to="/privacy">Privacy Policy</Link>.</p>
+      <h2>Contact</h2>
+      <p>Questions about these terms may be sent to <a href="mailto:sinasartisticcreations@gmail.com">sinasartisticcreations@gmail.com</a> or <a href="tel:+14804476002">(480) 447-6002</a>.</p>
+    </LegalPage>
   );
 }
 
