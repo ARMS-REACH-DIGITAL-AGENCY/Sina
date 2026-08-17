@@ -7,6 +7,8 @@ import {
   Wholesale,
   Shop,
   Schedule,
+  Privacy,
+  Terms,
   NotFound,
 } from './pages/SinaPages.jsx';
 import './styles/meet-sina.css';
@@ -45,6 +47,8 @@ export default function App() {
         <Route path="/shop" element={<Shop />} />
         <Route path="/schedule" element={<Schedule />} />
         <Route path="/contact" element={<Navigate to="/schedule" replace />} />
+        <Route path="/privacy" element={<Privacy />} />
+        <Route path="/terms" element={<Terms />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
     </BrowserRouter>
