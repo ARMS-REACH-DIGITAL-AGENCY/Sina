@@ -12,7 +12,6 @@ const footerLogoPath = '/assets/brand/sinas-creations-white-logo.png';
 const meetSinaSmile = '/images/meet-sina/meet-sina-smile-square.jpg';
 const meetSinaCloseup = '/images/meet-sina/meet-sina-closeup.jpg';
 const meetSinaStudio = '/images/meet-sina/meet-sina-studio.jpg';
-const meetSinaTray = '/images/meet-sina/meet-sina-tray.jpg';
 
 const primaryNav = [
   { to: '/', label: 'Home' },
@@ -391,9 +390,6 @@ export function Story() {
             <article className="meet-sina-photo-card">
               <img src={meetSinaStudio} alt="Wide view of Sina's work table with glass materials, tools, and trays." />
             </article>
-            <article className="meet-sina-photo-card meet-sina-photo-card--wide">
-              <img src={meetSinaTray} alt="Finished and in-progress fused glass pieces laid out on a blue tray in Sina's studio." />
-            </article>
           </div>
         </div>
       </section>
@@ -568,18 +564,25 @@ function ProductCardDescription({ product }) {
     return <div className="product-card__description" dangerouslySetInnerHTML={{ __html: cleanProductHtml(product.descriptionHtml) }} />;
   }
 
-  return <p className="product-card__description">{product.description || product.line}</p>;
+  // The short description (product.line) is already shown above this. Only
+  // fall back to it here -- and only render at all -- when there's a real,
+  // distinct long description; otherwise this would just repeat the same
+  // line the card already showed.
+  if (!product.description || product.description === product.line) {
+    return null;
+  }
+
+  return <p className="product-card__description">{product.description}</p>;
 }
 
-function ProductCard({ product }) {
-  const [showBack, setShowBack] = React.useState(() => (
-    typeof window !== 'undefined' && window.matchMedia('(min-width: 768px)').matches
-  ));
+function ProductCard({ product, eyebrowOverride }) {
+  const [showBack, setShowBack] = React.useState(false);
   const [activeImage, setActiveImage] = React.useState(product.image);
-  const galleryImages = React.useMemo(
-    () => [product.image, meetSinaCloseup, meetSinaStudio, meetSinaTray].filter(Boolean),
-    [product.image],
-  );
+  // Only the product's own real photo(s). Previously this padded out to 4
+  // "thumbnails" using unrelated Thomasina studio photos as a placeholder --
+  // the catalog only has one photo per piece today, so the thumbnail row
+  // just doesn't render until there's more than one real image to show.
+  const galleryImages = React.useMemo(() => [product.image].filter(Boolean), [product.image]);
 
   React.useEffect(() => {
     setActiveImage(product.image);
@@ -593,13 +596,17 @@ function ProductCard({ product }) {
     }
   };
 
-  const handleThumbClick = (image) => {
+  const handleThumbClick = (event, image) => {
+    event.stopPropagation();
     setActiveImage(image);
   };
 
+  const hasDimensions = Boolean(product.height || product.width || product.weight);
+  const eyebrowLabel = eyebrowOverride || product.category;
+
   return (
     <article
-      className={`product-card product-card--detail${showBack ? ' is-back' : ''}`}
+      className={`product-card${showBack ? ' is-back' : ''}`}
       role="button"
       tabIndex={0}
       aria-pressed={showBack}
@@ -607,87 +614,95 @@ function ProductCard({ product }) {
       onClick={toggleCard}
       onKeyDown={handleKeyDown}
     >
-      <div className="product-card__inner">
-        <div className="product-card__face product-card__face--front">
-          <div className="product-card__media product-card__media--front">
-            <div
-              className="product-image"
-              style={{
-                background: 'var(--warm-cream)',
-                padding: '12px',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-              }}
-            >
-              <img
-                src={product.image}
-                alt={`${product.name}, ${product.category} by Sina's Creations`}
-                loading="lazy"
-                decoding="async"
-                style={{
-                  width: '100%',
-                  height: '100%',
-                  maxWidth: '100%',
-                  maxHeight: '100%',
-                  objectFit: 'contain',
-                  objectPosition: 'center center',
-                }}
-              />
-              <span className="product-card__one-of-one"><span className="nowrap">1-of-1</span></span>
-            </div>
+      <div className="product-card__visual">
+        <div className="product-card__image">
+          <img
+            src={activeImage}
+            alt={`${product.name}, ${product.category} by Sina's Creations`}
+            loading="lazy"
+            decoding="async"
+          />
+          <span className="product-card__one-of-one"><span className="nowrap">1-of-1</span></span>
+        </div>
+        {galleryImages.length > 1 && (
+          <div className="product-card__thumbs" aria-label={`${product.name} image gallery`}>
+            {galleryImages.map((image, index) => (
+              <button
+                key={`${product.sku}-${index}`}
+                type="button"
+                className={`product-card__thumb${activeImage === image ? ' active' : ''}`}
+                onClick={(event) => handleThumbClick(event, image)}
+                aria-label={`View image ${index + 1} for ${product.name}`}
+              >
+                <img src={image} alt="" />
+              </button>
+            ))}
           </div>
-          <div className="product-body product-body--front">
-            <div className="sku-row"><span>{product.category}</span><strong>SKU {product.sku}</strong></div>
+        )}
+      </div>
+
+      <div className="product-card__panel">
+        {!showBack ? (
+          <>
+            <div className="sku-row"><span>{eyebrowLabel}</span><strong>SKU {product.sku}</strong></div>
             <h3>{product.name}</h3>
             <p>{product.line}</p>
             <div className="price-row"><span><span className="nowrap">1-of-1</span> Cost of Adoption</span><strong>${product.price}</strong></div>
             <p className="product-card__flip-hint">Tap anywhere to flip for full details.</p>
-          </div>
-        </div>
-
-        <div className="product-card__face product-card__face--back">
-          <div className="product-body product-body--back">
-            <div className="sku-row"><span>{product.category}</span><strong>SKU {product.sku}</strong></div>
+          </>
+        ) : (
+          <>
+            <div className="sku-row"><span>{eyebrowLabel}</span><strong>SKU {product.sku}</strong></div>
             <h3>{product.name}</h3>
+            <p>{product.line}</p>
             <div className="product-card__description-shell">
               <ProductCardDescription product={product} />
             </div>
+            {hasDimensions && (
+              <div className="product-card__dimensions">
+                {product.height && <span>H {product.height}&Prime;</span>}
+                {product.width && <span>W {product.width}&Prime;</span>}
+                {product.weight && <span>{product.weight} oz</span>}
+              </div>
+            )}
             <div className="price-row"><span><span className="nowrap">1-of-1</span> Cost of Adoption</span><strong>${product.price}</strong></div>
-            <button type="button" className="button primary product-card__disabled-cta" disabled aria-disabled="true">Adoption Coming Soon</button>
+            <button type="button" className="button primary product-card__disabled-cta" disabled aria-disabled="true">Adopt Me</button>
             <p className="product-card__disabled-note">Inventory is being updated, so adoption checkout is temporarily paused.</p>
             <p className="product-card__flip-hint">Tap anywhere to flip back.</p>
-          </div>
-          <div className="product-card__gallery-panel">
-            <div className="product-card__viewer">
-              <img src={activeImage} alt={`${product.name} detail view`} />
-            </div>
-            <div className="product-card__thumbs" aria-label={`${product.name} image gallery`}>
-              {galleryImages.map((image, index) => (
-                <button
-                  key={`${product.sku}-${index}`}
-                  type="button"
-                  className={`product-card__thumb${activeImage === image ? ' active' : ''}`}
-                  onClick={() => handleThumbClick(image)}
-                  aria-label={`View image ${index + 1} for ${product.name}`}
-                >
-                  <img src={image} alt="" />
-                </button>
-              ))}
-            </div>
-          </div>
-        </div>
+          </>
+        )}
       </div>
     </article>
   );
 }
 
+const FEATURED_SKUS = [
+  { sku: 'PND-SM-200', eyebrow: 'Featured Pendant' },
+  { sku: 'NKL-140', eyebrow: 'Featured Necklace' },
+  { sku: 'LNY-20', eyebrow: 'Featured Lanyard' },
+  { sku: 'PLT-FG-33', eyebrow: 'Featured Plate' },
+  { sku: 'PLQ-FG-SM-56', eyebrow: 'Featured Wall Art' },
+  { sku: 'CHM-202', eyebrow: 'Featured Charm' },
+  { sku: 'SET-NKLO-EAR-116', eyebrow: 'Featured Set' },
+];
+
 function FeaturedProducts({ products }) {
+  const featured = React.useMemo(() => {
+    const bySku = new Map(products.map((product) => [product.sku, product]));
+    return FEATURED_SKUS
+      .map(({ sku, eyebrow }) => (bySku.has(sku) ? { product: bySku.get(sku), eyebrow } : null))
+      .filter(Boolean);
+  }, [products]);
+
+  if (!featured.length) return null;
+
   return (
     <section className="cream-section">
       <SectionHeader eyebrow="Available Now" title="Featured pieces ready for adoption" copy="Begin with a few of the creations currently available from Thomasina's first release." />
       <div className="product-grid compact">
-        {products.slice(0, 3).map((product) => <ProductCard product={product} key={product.sku} />)}
+        {featured.map(({ product, eyebrow }) => (
+          <ProductCard product={product} eyebrowOverride={eyebrow} key={product.sku} />
+        ))}
       </div>
     </section>
   );
