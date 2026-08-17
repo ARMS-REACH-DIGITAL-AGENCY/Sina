@@ -251,10 +251,10 @@ export function ProductCard({ product, eyebrowOverride, sharedSku }) {
             )}
             <div className="price-row">
               <strong>${product.price}</strong>
-              <span>Cost to adopt this <span className="nowrap">1-of-1</span> original</span>
-            </div>
-            <div className="product-card__flip-cta-row product-card__flip-cta-row--back">
-              <ShareButton sku={product.sku} onShare={handleShare} shareStatus={shareStatus} />
+              <div className="price-row__cost-share">
+                <span className="product-card__flip-cta-caption">Cost to adopt this <span className="nowrap">1-of-1</span> original</span>
+                <ShareButton sku={product.sku} onShare={handleShare} shareStatus={shareStatus} />
+              </div>
             </div>
             <button type="button" className="button primary product-card__adopt-cta">Adopt Me</button>
             <p className="product-card__close-hint">Close</p>
