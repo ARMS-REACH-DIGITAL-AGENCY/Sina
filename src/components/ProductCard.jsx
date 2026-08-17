@@ -38,9 +38,8 @@ function ProductCardDescription({ product }) {
 function ShareIcon() {
   return (
     <svg viewBox="0 0 24 24" aria-hidden="true">
-      <path d="M12 15V3" />
-      <path d="M7.5 7.5 12 3l4.5 4.5" />
-      <path d="M5 12v6a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-6" />
+      <path d="M4 17C4 9.5 9.5 4.5 17 4.5" />
+      <path d="M13 2l5 2.5-2.5 5.5" />
     </svg>
   );
 }
@@ -56,7 +55,14 @@ function ProductCardSkuRow({ eyebrowLabel, sku, onShare, shareStatus }) {
           onClick={onShare}
           aria-label={`Share ${sku}`}
         >
-          {shareStatus === 'copied' ? 'Copied' : <ShareIcon />}
+          {shareStatus === 'copied' ? (
+            'Copied'
+          ) : (
+            <>
+              <ShareIcon />
+              <span>Share</span>
+            </>
+          )}
         </button>
         <strong>SKU {sku}</strong>
       </span>

@@ -140,9 +140,10 @@ button,input,select,textarea{font:inherit}
 .sku-row,.price-row{display:flex;justify-content:space-between;gap:12px;align-items:center}
 .sku-row span{color:var(--burnt-orange);text-transform:uppercase;letter-spacing:.14em;font-size:10px;font-weight:700}
 .sku-row .sku-row__right{display:flex;align-items:center;gap:8px;color:var(--charcoal);text-transform:none;letter-spacing:normal;font-size:inherit;font-weight:400}
-.product-card__share{display:inline-flex;align-items:center;justify-content:center;min-width:20px;height:20px;padding:0 2px;border:0;background:transparent;color:var(--muted-olive);cursor:pointer;font-size:9px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;white-space:nowrap}
+.product-card__share{display:inline-flex;align-items:center;gap:5px;height:20px;padding:0;border:0;background:transparent;color:var(--muted-olive);cursor:pointer;font-size:11px;font-weight:700;letter-spacing:.02em;text-transform:none;white-space:nowrap}
 .product-card__share:hover{color:var(--burnt-orange)}
-.product-card__share svg{width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.product-card__share svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.sku-row .product-card__share span{color:inherit;text-transform:none;letter-spacing:inherit;font-size:inherit;font-weight:inherit}
 .sku-row strong{font-size:10px;background:rgba(41,42,40,.06);padding:4px 7px}
 .product-card h3{font-size:26px;margin:12px 0 6px;line-height:1.02;font-weight:800;color:var(--charcoal)}
 .product-card p{font-size:15px;line-height:1.55;color:var(--muted-olive);margin:0}
