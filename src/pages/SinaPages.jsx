@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Link, NavLink, useLocation, useNavigate } from 'react-router-dom';
+import { Link, Navigate, NavLink, useLocation, useNavigate, useParams } from 'react-router-dom';
 import LivingMosaic from '../components/LivingMosaic/LivingMosaic.jsx';
 import WholesaleApplicationForm from '../components/WholesaleApplicationForm.jsx';
 import SearchEyebrow from '../components/SearchEyebrow.jsx';
@@ -512,6 +512,15 @@ export function Wholesale() {
   );
 }
 
+// A short path for shared product links (/p/SKU) that just forwards into
+// the real shop deep link (/shop?sku=SKU) -- keeps what actually goes out
+// in a text or social caption short, without needing a separate redirect
+// service.
+export function ProductShortLink() {
+  const { sku } = useParams();
+  return <Navigate to={`/shop?sku=${encodeURIComponent(sku || '')}`} replace />;
+}
+
 export function Shop() {
   const { products, collections } = useCatalogProducts();
   const location = useLocation();
@@ -747,9 +756,15 @@ function ProductCard({ product, eyebrowOverride, sharedSku }) {
 
   const handleShare = async (event) => {
     event.stopPropagation();
-    const shareUrl = `${window.location.origin}/shop?sku=${encodeURIComponent(product.sku)}`;
+    // /p/:sku is a short redirect to the full /shop?sku= deep link (see
+    // ProductShortLink below) -- keeps shared links (texts, DMs, social
+    // captions) from being the long shop-with-query-string URL.
+    const shareUrl = `${window.location.origin}/p/${encodeURIComponent(product.sku)}`;
     const shareTitle = `${product.name} — Sina's Creations`;
-    const shareText = `${product.line} One-of-one, handcrafted by Thomasina Schnepf.`;
+    // Some share targets (notably Android's SMS/Messages) only surface the
+    // `text` field, dropping `title` entirely -- so the piece's name has to
+    // be part of the text itself, not rely on title showing up.
+    const shareText = `${product.name}\n${product.line}\nOne-of-one, handcrafted by Thomasina Schnepf.`;
 
     // Try to attach the actual product photo so the share carries the image,
     // not just a link -- most share targets (Messages, Instagram, Mail) will

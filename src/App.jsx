@@ -9,6 +9,7 @@ import {
   Schedule,
   Privacy,
   Terms,
+  ProductShortLink,
   NotFound,
 } from './pages/SinaPages.jsx';
 import './styles/meet-sina.css';
@@ -45,6 +46,7 @@ export default function App() {
         <Route path="/collaborate" element={<Navigate to="/commission" replace />} />
         <Route path="/wholesale" element={<Wholesale />} />
         <Route path="/shop" element={<Shop />} />
+        <Route path="/p/:sku" element={<ProductShortLink />} />
         <Route path="/schedule" element={<Schedule />} />
         <Route path="/contact" element={<Navigate to="/schedule" replace />} />
         <Route path="/privacy" element={<Privacy />} />
