@@ -630,22 +630,37 @@ export function Shop() {
   );
 }
 
-const FEATURED_SKUS = [
-  { sku: 'PND-SM-200', eyebrow: 'Featured Pendant' },
-  { sku: 'NKL-140', eyebrow: 'Featured Necklace' },
-  { sku: 'LNY-20', eyebrow: 'Featured Lanyard' },
-  { sku: 'PLT-FG-33', eyebrow: 'Featured Plate' },
-  { sku: 'PLQ-FG-SM-56', eyebrow: 'Featured Wall Art' },
-  { sku: 'CHM-202', eyebrow: 'Featured Charm' },
-  { sku: 'SET-NKLO-EAR-116', eyebrow: 'Featured Set' },
-];
+// Matches api/catalog.js's CATEGORY_MAP output -- every category a product
+// can actually end up with -- to a singular "Featured X" eyebrow label.
+const FEATURED_EYEBROW_BY_CATEGORY = {
+  Pendants: 'Featured Pendant',
+  'Wire Wrapped': 'Featured Pendant',
+  Necklaces: 'Featured Necklace',
+  'Ocean Necklaces': 'Featured Necklace',
+  Plates: 'Featured Plate',
+  'Wall Art': 'Featured Wall Art',
+  Charms: 'Featured Charm',
+  Sets: 'Featured Set',
+  Lanyards: 'Featured Lanyard',
+};
+
+// Featured Pieces is driven by a "Featured" checkbox column in the Google
+// Sheet (same TRUE/FALSE pattern as "Published") instead of a hardcoded SKU
+// list, so adopting-out a featured piece and unchecking Published there
+// drops it here automatically -- no code change/deploy needed to keep this
+// section current. Capped so an enthusiastic amount of checked boxes can't
+// turn "weekly featured pieces" into the whole catalog.
+const MAX_FEATURED = 8;
 
 function FeaturedProducts({ products }) {
   const featured = React.useMemo(() => {
-    const bySku = new Map(products.map((product) => [product.sku, product]));
-    return FEATURED_SKUS
-      .map(({ sku, eyebrow }) => (bySku.has(sku) ? { product: bySku.get(sku), eyebrow } : null))
-      .filter(Boolean);
+    return products
+      .filter((product) => product.featured)
+      .slice(0, MAX_FEATURED)
+      .map((product) => ({
+        product,
+        eyebrow: FEATURED_EYEBROW_BY_CATEGORY[product.category] || 'Featured Piece',
+      }));
   }, [products]);
 
   if (!featured.length) return null;
