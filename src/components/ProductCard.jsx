@@ -80,11 +80,14 @@ export function ProductCard({ product, eyebrowOverride, sharedSku }) {
   // track which ones have already failed so a load error advances to the
   // next candidate instead of just leaving a broken image.
   const [failedSrcs, setFailedSrcs] = React.useState(() => new Set());
-  // Only the product's own real photo(s). Previously this padded out to 4
-  // "thumbnails" using unrelated Thomasina studio photos as a placeholder --
-  // the catalog only has one photo per piece today, so the thumbnail row
-  // just doesn't render until there's more than one real image to show.
-  const galleryImages = React.useMemo(() => [product.image].filter(Boolean), [product.image]);
+  // api/catalog.js fills product.gallery with the primary photo plus any
+  // optional extra angles a row has (Image 2/3/4 Filename columns). Most
+  // rows only have the one photo, so the thumbnail strip just doesn't
+  // render until there's more than one real image to show.
+  const galleryImages = React.useMemo(
+    () => (product.gallery && product.gallery.length ? product.gallery : [product.image]).filter(Boolean),
+    [product.gallery, product.image]
+  );
 
   React.useEffect(() => {
     setActiveImage(product.image);
@@ -185,7 +188,7 @@ export function ProductCard({ product, eyebrowOverride, sharedSku }) {
       role="button"
       tabIndex={0}
       aria-pressed={showBack}
-      aria-label={`${product.name} product card. ${showBack ? 'Showing full details.' : 'Showing front of card.'} Activate to flip.`}
+      aria-label={`${product.name} product card. ${showBack ? 'Showing full details. Activate to close.' : 'Activate to see full details.'}`}
       onClick={toggleCard}
       onKeyDown={handleKeyDown}
     >
@@ -200,7 +203,7 @@ export function ProductCard({ product, eyebrowOverride, sharedSku }) {
           />
           <span className="product-card__one-of-one"><span className="nowrap">1-of-1</span></span>
         </div>
-        {galleryImages.length > 1 && (
+        {showBack && galleryImages.length > 1 && (
           <div className="product-card__thumbs" aria-label={`${product.name} image gallery`}>
             {galleryImages.map((image, index) => (
               <button

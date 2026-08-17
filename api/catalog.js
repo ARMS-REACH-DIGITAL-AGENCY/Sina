@@ -142,6 +142,19 @@ function buildImageCandidates(row) {
   return [...new Set(candidates)];
 }
 
+// Extra gallery photos beyond the primary shot -- filled in only for pieces
+// where there's more than one angle worth showing. Optional columns, so
+// most rows simply won't have them and the card falls back to just the
+// primary image.
+function buildGalleryImages(row, primaryImage) {
+  const extras = ['Image 2 Filename', 'Image 3 Filename', 'Image 4 Filename']
+    .map((key) => normalizeText(row[key]))
+    .filter(Boolean)
+    .map((filename) => `/images/products/${ensureImageExtension(filename)}`);
+
+  return [...new Set([primaryImage, ...extras])];
+}
+
 function normalizeSku(row) {
   const resolvedSku = normalizeText(row.SKU)
     || normalizeText(row['Variant SKU'])
@@ -189,6 +202,7 @@ function normalizeProduct(row) {
     price: normalizePrice(row['Variant Price']),
     image,
     imageFallbacks,
+    gallery: buildGalleryImages(row, image),
     line: extractHeadline(bodyHtml) || 'One of one. Handcrafted by Thomasina Schnepf.',
     description,
     descriptionHtml: bodyHtml,
