@@ -4,36 +4,10 @@
    section uses). This file only covers the two-up frame + story row layout,
    the mosaic frame itself, and the tile grid dressing. */
 
-/* Below ~800px, fitting this whole line on one row forces the font under
-   ~30px -- at a 412px phone that's ~14px, smaller than the eyebrow pill
-   above it. Not worth it: below 800px this just inherits the normal
-   .section-header h2 sizing (clamp 26-44px, 34px fixed at <=959px) and
-   wraps like any other heading. From 800px up, the fitted one-line
-   treatment actually stays a reasonable size (>=32px), so it kicks in
-   there instead. */
-.section-header h2.living-mosaic-section__title {
-  margin: 0 0 18px;
-  color: var(--charcoal);
-  letter-spacing: -.02em;
-}
-
-/* Note: .section-header h2 sets text-wrap:balance at (0,1,1) specificity,
-   which -- like white-space -- writes to the shared text-wrap-mode
-   longhand, so a plain white-space:nowrap at (0,1,0) can't win that fight;
-   matching the ancestor selector's specificity and setting text-wrap
-   explicitly is what makes nowrap actually stick here. Measured this
-   string's rendered width scales at exactly 22.4px of width per 1px of
-   font-size (zero-intercept, verified at two sizes); fit against the
-   section's available width at 800px+ so it's as large as possible
-   without ever exceeding its container. */
-@media (min-width: 800px) {
-  .section-header h2.living-mosaic-section__title {
-    font-size: clamp(30px, calc(4.5vw - 4px), 46px);
-    line-height: 1.05;
-    white-space: nowrap;
-    text-wrap: nowrap;
-  }
-}
+/* The heading itself now uses the shared FitHeading component (see
+   SinaPages.jsx / .fit-heading in global.css), which measures its own
+   rendered width and sizes to fit -- no bespoke breakpoint math needed
+   here anymore. */
 
 .living-mosaic__body {
   display: grid;

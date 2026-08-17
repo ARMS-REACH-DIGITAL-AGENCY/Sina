@@ -173,6 +173,54 @@ function useHeroSlideshow(slideCount, intervalMs) {
   return index;
 }
 
+// Renders each string in `lines` as its own non-wrapping row, sized to the
+// widest row's actual measured pixel width so it always fills -- but never
+// overflows -- its container, on any device or font. Measures at
+// maxFontSize once, then scales down proportionally if that overflows
+// (font metrics scale linearly with font-size for a given string/font, so
+// one measurement is enough -- no iterative fitting needed).
+function FitHeading({ as: Tag = 'span', lines, maxFontSize, minFontSize = 16, className = '' }) {
+  const containerRef = React.useRef(null);
+  const rowRefs = React.useRef([]);
+
+  React.useLayoutEffect(() => {
+    const container = containerRef.current;
+    if (!container) return undefined;
+
+    const fit = () => {
+      const availableWidth = container.clientWidth;
+      if (!availableWidth) return;
+
+      container.style.setProperty('--fit-size', `${maxFontSize}px`);
+      let widest = 0;
+      rowRefs.current.forEach((el) => {
+        if (el && el.scrollWidth > widest) widest = el.scrollWidth;
+      });
+
+      const size = widest > availableWidth
+        ? Math.max(minFontSize, Math.floor(maxFontSize * (availableWidth / widest)))
+        : maxFontSize;
+
+      container.style.setProperty('--fit-size', `${size}px`);
+    };
+
+    fit();
+    const observer = new ResizeObserver(fit);
+    observer.observe(container);
+    return () => observer.disconnect();
+  }, [maxFontSize, minFontSize, lines]);
+
+  return (
+    <Tag ref={containerRef} className={`fit-heading${className ? ` ${className}` : ''}`}>
+      {lines.map((line, index) => (
+        <span key={index} ref={(el) => { rowRefs.current[index] = el; }} className="fit-heading__row">
+          {line}
+        </span>
+      ))}
+    </Tag>
+  );
+}
+
 function Hero({
   eyebrow,
   title,
@@ -308,7 +356,7 @@ export function Home() {
     <Layout>
       <Hero
         eyebrow="Crafted. Named. Adopted."
-        title="More than jewelry. A story you can hold."
+        title={<FitHeading lines={['More Than Jewelry.', 'A Story You Can Hold.']} maxFontSize={78} minFontSize={18} />}
         copy="Every creation begins as glass, but it becomes something more personal once Thomasina names it. Each piece is made by hand, chosen with intention, and offered to one person who feels connected to its color, texture, and story."
         primary="A Message From The Artist"
         primaryTo="/meet-sina#message"
@@ -318,7 +366,13 @@ export function Home() {
       <section className="cream-section living-mosaic-section" id="collection">
         <div className="section-header">
           <span>Her Story &amp; Creations. Your Choice.</span>
-          <h2 className="living-mosaic-section__title">The Closer She Gets, The More She Sees.</h2>
+          <FitHeading
+            as="h2"
+            className="living-mosaic-section__title"
+            lines={['The Closer She Gets,', 'The More She Sees.']}
+            maxFontSize={44}
+            minFontSize={16}
+          />
         </div>
         <div className="living-mosaic__body">
           <div className="living-mosaic__visual">
@@ -427,7 +481,7 @@ export function Collaborate() {
     <Layout>
       <Hero
         eyebrow="Commission Sina"
-        title={<>Begin a custom piece <span className="nowrap">with Sina.</span></>}
+        title={<FitHeading lines={['Collaborate With', 'Sina’s Customs.']} maxFontSize={78} minFontSize={18} />}
         copy="If you want a piece shaped around a person, memory, color story, or meaning, start the conversation here and we will guide the next step together."
         primary="Start a Commission"
         primaryTo="/schedule"
@@ -447,7 +501,7 @@ export function Wholesale() {
     <Layout>
       <Hero
         eyebrow="Wholesale Partners"
-        title={<>Carry Sina's Creations <span className="nowrap">in your store.</span></>}
+        title={<FitHeading lines={['Wholesale Partners:', 'Sell Sina’s Creations.']} maxFontSize={78} minFontSize={18} />}
         copy="Sina's Creations is accepting wholesale applications from boutiques, galleries, gift shops, and community retailers who want one-of-one jewelry and glass art with a personal story behind every piece."
         primary="Start the Application"
         primaryTo="/wholesale#application"
@@ -669,7 +723,9 @@ function ProductCard({ product, eyebrowOverride }) {
             <h3>{product.name}</h3>
             <p>{product.line}</p>
             <div className="price-row"><span><span className="nowrap">1-of-1</span> Cost of Adoption</span><strong>${product.price}</strong></div>
-            <p className="product-card__flip-hint">Tap anywhere to flip for full details.</p>
+            <div className="product-card__flip-cta-row">
+              <span className="product-card__flip-cta">Read {product.name}&rsquo;s Story Before Adopting</span>
+            </div>
           </>
         ) : (
           <>
@@ -719,7 +775,11 @@ function FeaturedProducts({ products }) {
 
   return (
     <section className="cream-section">
-      <SectionHeader eyebrow="Available Now" title="Featured pieces ready for adoption" copy="Begin with a few of the creations currently available from Thomasina's first release." />
+      <SectionHeader
+        eyebrow="Available Now"
+        title={<FitHeading lines={['Weekly Featured Pieces:', 'Ready For Adoption']} maxFontSize={44} minFontSize={16} />}
+        copy="Begin with a few of the creations currently available from Thomasina's first release."
+      />
       <div className="product-grid compact">
         {featured.map(({ product, eyebrow }) => (
           <ProductCard product={product} eyebrowOverride={eyebrow} key={product.sku} />
