@@ -71,37 +71,36 @@ function ShareButton({ sku, onShare, shareStatus }) {
 
 export function ProductCard({ product, eyebrowOverride, sharedSku }) {
   const [showBack, setShowBack] = React.useState(false);
-  const [activeImage, setActiveImage] = React.useState(product.image);
   // Sheet data entry mistakes happen -- a row's "Final Image Filename" can
-  // name a file that was never actually uploaded under that name, while the
-  // real photo sits under the legacy shoot-number filename every other
-  // product uses (e.g. NKL-166.JPG requested, 166.JPG is what's really
-  // there). api/catalog.js hands back every plausible filename for a photo;
-  // track which ones have already failed so a load error advances to the
-  // next candidate instead of just leaving a broken image.
+  // name a file that was never actually uploaded under that name (or was
+  // typed with a different case/extension than what's really on disk,
+  // e.g. ".jpg" typed but ".JPG" uploaded). api/catalog.js hands back every
+  // plausible filename for a photo; track which ones have already failed
+  // so a load error advances to the next candidate instead of just leaving
+  // a broken image.
   const [failedSrcs, setFailedSrcs] = React.useState(() => new Set());
-  // api/catalog.js fills product.gallery with the primary photo plus any
-  // optional extra angles a row has (Image 2/3/4 Filename columns). Most
-  // rows only have the one photo, so the thumbnail strip just doesn't
-  // render until there's more than one real image to show.
-  const galleryImages = React.useMemo(
-    () => (product.gallery && product.gallery.length ? product.gallery : [product.image]).filter(Boolean),
-    [product.gallery, product.image]
-  );
+  // api/catalog.js fills product.gallery with one candidate-list "slot" per
+  // photo -- slot 0 is the primary shot's full fallback chain, and any
+  // optional extra angles (Image 2/3/4 Filename columns) each get their own
+  // chain too. Most rows only have the one photo, so the thumbnail strip
+  // just doesn't render until there's more than one real image to show.
+  const gallerySlots = React.useMemo(() => {
+    if (product.gallery && product.gallery.length) return product.gallery;
+    return [[product.image, ...(product.imageFallbacks || [])].filter(Boolean)];
+  }, [product.gallery, product.image, product.imageFallbacks]);
+
+  const [activeSlot, setActiveSlot] = React.useState(0);
 
   React.useEffect(() => {
-    setActiveImage(product.image);
+    setActiveSlot(0);
     setFailedSrcs(new Set());
-  }, [product.image]);
+  }, [product.sku]);
 
-  const imageFallbackChain = React.useMemo(
-    () => [activeImage, ...(product.imageFallbacks || [])].filter(Boolean),
-    [activeImage, product.imageFallbacks]
-  );
-  const displayImage = imageFallbackChain.find((src) => !failedSrcs.has(src)) || imageFallbackChain[imageFallbackChain.length - 1];
+  const resolveSlotSrc = (candidates) => candidates.find((src) => !failedSrcs.has(src)) || candidates[candidates.length - 1];
+  const displayImage = resolveSlotSrc(gallerySlots[activeSlot] || []);
 
-  const handleImageError = () => {
-    setFailedSrcs((prev) => (prev.has(displayImage) ? prev : new Set(prev).add(displayImage)));
+  const markSrcFailed = (src) => {
+    setFailedSrcs((prev) => (prev.has(src) ? prev : new Set(prev).add(src)));
   };
 
   const toggleCard = () => setShowBack((current) => !current);
@@ -112,10 +111,9 @@ export function ProductCard({ product, eyebrowOverride, sharedSku }) {
     }
   };
 
-  const handleThumbClick = (event, image) => {
+  const handleThumbClick = (event, index) => {
     event.stopPropagation();
-    setActiveImage(image);
-    setFailedSrcs(new Set());
+    setActiveSlot(index);
   };
 
   const hasDimensions = Boolean(product.height || product.width || product.weight);
@@ -199,23 +197,26 @@ export function ProductCard({ product, eyebrowOverride, sharedSku }) {
             alt={`${product.name}, ${product.category} by Sina's Creations`}
             loading="lazy"
             decoding="async"
-            onError={handleImageError}
+            onError={() => markSrcFailed(displayImage)}
           />
           <span className="product-card__one-of-one"><span className="nowrap">1-of-1</span></span>
         </div>
-        {showBack && galleryImages.length > 1 && (
+        {showBack && gallerySlots.length > 1 && (
           <div className="product-card__thumbs" aria-label={`${product.name} image gallery`}>
-            {galleryImages.map((image, index) => (
-              <button
-                key={`${product.sku}-${index}`}
-                type="button"
-                className={`product-card__thumb${activeImage === image ? ' active' : ''}`}
-                onClick={(event) => handleThumbClick(event, image)}
-                aria-label={`View image ${index + 1} for ${product.name}`}
-              >
-                <img src={image} alt="" />
-              </button>
-            ))}
+            {gallerySlots.map((candidates, index) => {
+              const thumbSrc = resolveSlotSrc(candidates);
+              return (
+                <button
+                  key={`${product.sku}-${index}`}
+                  type="button"
+                  className={`product-card__thumb${activeSlot === index ? ' active' : ''}`}
+                  onClick={(event) => handleThumbClick(event, index)}
+                  aria-label={`View image ${index + 1} for ${product.name}`}
+                >
+                  <img src={thumbSrc} alt="" onError={() => markSrcFailed(thumbSrc)} />
+                </button>
+              );
+            })}
           </div>
         )}
       </div>
