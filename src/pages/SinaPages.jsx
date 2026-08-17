@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link, NavLink, useLocation, useNavigate } from 'react-router-dom';
 import LivingMosaic from '../components/LivingMosaic/LivingMosaic.jsx';
 import WholesaleApplicationForm from '../components/WholesaleApplicationForm.jsx';
@@ -35,8 +35,9 @@ const footerConnect = [
   { to: '/schedule', label: 'Schedule' },
 ];
 
+const heroHomeSlides = [1, 2, 3, 4, 5, 6].map((n) => `/images/hero/hero_home${n}.jpg`);
+
 const pageHeroImages = {
-  home: '/images/meet-sina/meet-sina-studio.jpg',
   artist: '/images/hero/meet-sina-painted-portrait.jpg',
   creations: '/images/hero/home-mosaic-box-logo.jpg',
   commission: '/images/hero/commission-sina-group-pendants.jpg',
@@ -157,6 +158,22 @@ function LayoutFrame({ children }) {
   );
 }
 
+function useHeroSlideshow(slideCount, intervalMs) {
+  const [index, setIndex] = useState(0);
+
+  useEffect(() => {
+    if (slideCount < 2) return undefined;
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return undefined;
+
+    const id = setInterval(() => {
+      setIndex((current) => (current + 1) % slideCount);
+    }, intervalMs);
+    return () => clearInterval(id);
+  }, [slideCount, intervalMs]);
+
+  return index;
+}
+
 function Hero({
   eyebrow,
   title,
@@ -166,12 +183,31 @@ function Hero({
   secondary,
   secondaryTo = '/meet-sina',
   backgroundImage,
+  backgroundImages,
   backgroundPosition = 'center top',
   backgroundFlip = false,
+  slideIntervalMs = 8000,
 }) {
+  const slides = backgroundImages && backgroundImages.length ? backgroundImages : null;
+  const activeSlide = useHeroSlideshow(slides ? slides.length : 0, slideIntervalMs);
+  const hasBackground = Boolean(backgroundImage) || Boolean(slides);
+
   return (
-    <section className={`hero hero-dark${backgroundImage ? ' hero--screened-image' : ''}`}>
-      {backgroundImage && (
+    <section className={`hero hero-dark${hasBackground ? ' hero--screened-image' : ''}`}>
+      {slides ? (
+        <>
+          <div className="hero__background-stack" aria-hidden="true">
+            {slides.map((src, i) => (
+              <div
+                key={src}
+                className={`hero__background-slide${i === activeSlide ? ' is-active' : ''}`}
+                style={{ backgroundImage: `url(${src})`, backgroundPosition }}
+              />
+            ))}
+          </div>
+          <div className="hero__scrim" aria-hidden="true" />
+        </>
+      ) : backgroundImage && (
         <>
           <div
             className="hero__background"
@@ -277,9 +313,8 @@ export function Home() {
         copy="Every creation begins as glass, but it becomes something more personal once Thomasina names it. Each piece is made by hand, chosen with intention, and offered to one person who feels connected to its color, texture, and story."
         primary="A Message From The Artist"
         primaryTo="/meet-sina"
-        backgroundImage={pageHeroImages.home}
-        backgroundPosition="18% 12%"
-        backgroundFlip
+        backgroundImages={heroHomeSlides}
+        backgroundPosition="left center"
       />
       <section className="cream-section living-mosaic-section" id="collection">
         <div className="section-header">

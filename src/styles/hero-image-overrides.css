@@ -29,6 +29,34 @@
   z-index: 1;
 }
 
+/* Rotating hero background (Home page): every slide is mounted at once,
+   stacked and cross-faded via opacity so there's no load-in flash when a
+   slide becomes active. Locked to the left edge and cover-fit so each
+   image fills the hero from top to bottom regardless of its own aspect
+   ratio, cropping from the right rather than the sides. */
+.hero__background-stack {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+}
+
+.hero__background-slide {
+  position: absolute;
+  inset: 0;
+  background-repeat: no-repeat;
+  background-size: cover;
+  background-position: left center;
+  opacity: 0;
+  pointer-events: none;
+  transform: scale(1.02);
+  transform-origin: left center;
+  transition: opacity 2s ease;
+}
+
+.hero__background-slide.is-active {
+  opacity: 0.78;
+}
+
 @media (max-width: 959px) {
   .hero--screened-image .hero__background {
     opacity: 0.56;
@@ -37,5 +65,9 @@
 
   .hero--screened-image .hero__scrim {
     background: linear-gradient(90deg, rgba(23,24,22,.97) 0%, rgba(23,24,22,.93) 34%, rgba(23,24,22,.74) 58%, rgba(23,24,22,.34) 82%, rgba(23,24,22,.14) 100%);
+  }
+
+  .hero__background-slide.is-active {
+    opacity: 0.56;
   }
 }
