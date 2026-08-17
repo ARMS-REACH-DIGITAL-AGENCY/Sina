@@ -199,11 +199,12 @@ function normalizeProduct(row) {
     colors: normalizeText(row.Colors),
     shopifyUrl: normalizeText(row['Shopify Product URL']),
     status: normalizeStatus(row),
-    // A "Featured" checkbox column in the sheet (same TRUE/FALSE pattern as
-    // "Published") lets Featured Pieces on the home page be managed by
-    // checking a box, not by editing FEATURED_SKUS in code every time a
-    // featured piece sells and drops out of the published rows.
-    featured: normalizeText(row.Featured).toUpperCase() === 'TRUE',
+    // A "Featured" column in the sheet lets Featured Pieces on the home page
+    // be managed by marking a cell, not by editing FEATURED_SKUS in code
+    // every time a featured piece sells and drops out of the published rows.
+    // Accepts a real Sheets checkbox (TRUE) or just typing a mark in the
+    // cell (x, yes, y, 1) -- whatever's fastest for whoever's filling it in.
+    featured: /^(true|x|yes|y|1)$/i.test(normalizeText(row.Featured)),
   };
 }
 
