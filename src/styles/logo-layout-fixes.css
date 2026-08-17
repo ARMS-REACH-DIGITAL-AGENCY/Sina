@@ -160,7 +160,7 @@
 .shop-icon-tabs {
   display: grid !important;
   grid-template-columns: repeat(7, minmax(0, 1fr)) !important;
-  align-items: end !important;
+  align-items: center !important;
   gap: 6px !important;
   width: 100% !important;
   overflow: visible !important;
@@ -171,7 +171,7 @@
   min-width: 0 !important;
   padding: 0 2px 2px !important;
   gap: 2px !important;
-  justify-content: flex-end !important;
+  justify-content: center !important;
 }
 
 .shop-icon-tab::after {

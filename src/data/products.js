@@ -8,7 +8,7 @@
 // physical inventory pass -- image filenames use the legacy shoot number
 // (e.g. 174a.JPG) until pieces are renamed to their final SKU.
 
-export const collections = ['All', 'Pendants', 'Wire Wrapped', 'Necklaces', 'Ocean Necklaces', 'Plates', 'Wall Art', 'Charms', 'Sets'];
+export const collections = ['All', 'Pendants', 'Wire Wrapped', 'Necklaces', 'Ocean Necklaces', 'Plates', 'Plaques', 'Charms', 'Sets'];
 
 export const products = [
   { sku: 'CHM-171a', name: 'Fern', category: 'Charms', price: 30, image: '/images/products/171a.JPG', line: 'Three wishes, cast in glass.', status: 'available' },
@@ -90,11 +90,11 @@ export const products = [
   { sku: 'NKLO-90', name: 'Annabelle', category: 'Ocean Necklaces', price: 115, image: '/images/products/90.JPG', line: 'Deep waters, wild spirit within.', status: 'available' },
   { sku: 'NKLO-97', name: 'Marlene', category: 'Ocean Necklaces', price: 98, image: '/images/products/97.JPG', line: 'Deep waters call her home.', status: 'available' },
   { sku: 'NKLO-98', name: 'Joanne', category: 'Ocean Necklaces', price: 95, image: '/images/products/98.JPG', line: 'Where the ocean meets the shore.', status: 'available' },
-  { sku: 'PLQ-FG-LG-45', name: 'Justina', category: 'Wall Art', price: 325, image: '/images/products/45.JPG', line: 'She holds a whole celebration in one frame.', status: 'available' },
-  { sku: 'PLQ-FG-LG-54', name: 'Corabelle', category: 'Wall Art', price: 325, image: '/images/products/54.JPG', line: 'A whole composition, framed in wood.', status: 'available' },
-  { sku: 'PLQ-FG-MD-55', name: 'Marguerite', category: 'Wall Art', price: 120, image: '/images/products/55.JPG', line: 'Green fields, one silver spark.', status: 'available' },
-  { sku: 'PLQ-FG-MD-67', name: 'Judith', category: 'Wall Art', price: 120, image: '/images/products/67.JPG', line: 'Four textures, one brilliant story.', status: 'available' },
-  { sku: 'PLQ-FG-SM-56', name: 'Selma', category: 'Wall Art', price: 95, image: '/images/products/56.JPG', line: 'A heart made of every color at once.', status: 'available' },
+  { sku: 'PLQ-FG-LG-45', name: 'Justina', category: 'Plaques', price: 325, image: '/images/products/45.JPG', line: 'She holds a whole celebration in one frame.', status: 'available' },
+  { sku: 'PLQ-FG-LG-54', name: 'Corabelle', category: 'Plaques', price: 325, image: '/images/products/54.JPG', line: 'A whole composition, framed in wood.', status: 'available' },
+  { sku: 'PLQ-FG-MD-55', name: 'Marguerite', category: 'Plaques', price: 120, image: '/images/products/55.JPG', line: 'Green fields, one silver spark.', status: 'available' },
+  { sku: 'PLQ-FG-MD-67', name: 'Judith', category: 'Plaques', price: 120, image: '/images/products/67.JPG', line: 'Four textures, one brilliant story.', status: 'available' },
+  { sku: 'PLQ-FG-SM-56', name: 'Selma', category: 'Plaques', price: 95, image: '/images/products/56.JPG', line: 'A heart made of every color at once.', status: 'available' },
   { sku: 'PLT-FG-31', name: 'Ashley', category: 'Plates', price: 95, image: '/images/products/31.JPG', line: 'Quiet smoke, soft light, steady grace.', status: 'available' },
   { sku: 'PLT-FG-32', name: 'Verna', category: 'Plates', price: 95, image: '/images/products/32.JPG', line: 'Storm clouds, smoothed to glass.', status: 'available' },
   { sku: 'PLT-FG-33', name: 'Nadia', category: 'Plates', price: 95, image: '/images/products/33.JPG', line: 'Sky just before the rain.', status: 'available' },
