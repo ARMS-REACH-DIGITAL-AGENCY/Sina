@@ -4,7 +4,6 @@ import { buildMosaicGrid } from './colorMatch.js';
 import MosaicTile from './MosaicTile.jsx';
 import ProductModal from './ProductModal.jsx';
 import './living-mosaic.css';
-import './mosaic-experiment-overrides.css';
 import './mosaic-brand-alignment.css';
 
 const PORTRAIT_SRC = '/images/hero/mosaic_portrait.jpg';
