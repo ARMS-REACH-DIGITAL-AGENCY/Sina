@@ -16,6 +16,22 @@ function loadImage(src) {
   });
 }
 
+// The sheet's "primary" filename for a product can be wrong (typo, stale
+// extension, bulk-edit that doesn't match what's actually uploaded) --
+// same situation the product cards already recover from via their own
+// onError fallback chain. Without this, a bad primary filename here
+// doesn't just lose one tile, it loses that product from the whole
+// mosaic, and a systemic sheet mistake (every row's extension changed at
+// once) can empty the grid entirely.
+async function loadImageWithFallbacks(candidates) {
+  for (const src of candidates) {
+    if (!src) continue;
+    const img = await loadImage(src);
+    if (img) return img;
+  }
+  return null;
+}
+
 // Drawing a full-resolution image onto a tiny canvas makes the browser's
 // own downscaling do the color-averaging for us: one destination pixel
 // (via drawImage's resampling) is an approximation of that region's
@@ -54,7 +70,7 @@ export async function buildMosaicGrid({ portraitSrc, products, cols, rows }) {
 
   const [portraitImg, ...productImgs] = await Promise.all([
     loadImage(portraitSrc),
-    ...products.map((p) => loadImage(p.image)),
+    ...products.map((p) => loadImageWithFallbacks([p.image, ...(p.imageFallbacks || [])])),
   ]);
 
   if (!portraitImg) throw new Error(`Failed to load portrait image: ${portraitSrc}`);
