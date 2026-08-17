@@ -165,6 +165,8 @@ button,input,select,textarea{font:inherit}
 .shop-empty-state{max-width:1200px;margin:28px auto 0;padding:28px;border:1.5px solid rgba(41,42,40,.14);background:rgba(247,244,236,.74);border-radius:var(--radius)}
 .shop-empty-state h3{margin:0 0 10px;color:var(--charcoal);font-size:26px;line-height:1.08}
 .shop-empty-state p{margin:0;color:var(--muted-olive)}
+.shop-sold-notice{max-width:1200px;margin:0 auto 20px;padding:16px 20px;border:1.5px solid var(--burnt-orange);background:rgba(199,106,50,.08);border-radius:var(--radius)}
+.shop-sold-notice p{margin:0;color:var(--charcoal);font-size:14px;font-weight:600}
 .form-layout{display:grid;grid-template-columns:minmax(0,.9fr) minmax(300px,1fr);gap:54px}
 .option-list{display:grid;gap:12px;margin-top:30px}
 .option-list div{background:var(--off-white);border-left:3px solid var(--burnt-orange);border-radius:var(--radius);padding:16px 18px;font-weight:700}
