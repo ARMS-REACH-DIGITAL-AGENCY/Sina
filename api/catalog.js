@@ -105,8 +105,27 @@ function normalizeCategory(row) {
   return CATEGORY_MAP[rawCategory] || rawCategory || 'Creations';
 }
 
-function ensureImageExtension(value) {
-  return /\.[a-z0-9]+$/i.test(value) ? value : `${value}.JPG`;
+// Vercel serves /public as a case-sensitive filesystem, so a filename's
+// extension has to match the real uploaded file exactly -- but nobody
+// filling in a spreadsheet is going to remember whether a given photo was
+// uploaded as .JPG, .jpg, .png, etc. Rather than force one convention (the
+// old code always assumed .JPG when no extension was typed, which is why
+// anything uploaded as .png/.jpeg silently failed), try every common
+// extension/case combo and let the frontend fall through to whichever one
+// actually exists. Whatever extension *was* typed still goes first, since
+// it's the most likely to be right.
+const EXTENSION_CANDIDATES = ['JPG', 'jpg', 'jpeg', 'JPEG', 'png', 'PNG'];
+
+function buildExtensionCandidates(rawFilename) {
+  const match = rawFilename.match(/^(.*)\.([a-z0-9]+)$/i);
+  const base = match ? match[1] : rawFilename;
+  const typedExt = match ? match[2] : null;
+
+  const orderedExtensions = typedExt
+    ? [typedExt, ...EXTENSION_CANDIDATES.filter((ext) => ext.toLowerCase() !== typedExt.toLowerCase())]
+    : EXTENSION_CANDIDATES;
+
+  return [...new Set(orderedExtensions)].map((ext) => `/images/products/${base}.${ext}`);
 }
 
 // Returns every plausible image path for this row, most-trusted first, so
@@ -121,25 +140,40 @@ function buildImageCandidates(row) {
 
   const finalFilename = normalizeText(row['Final Image Filename']);
   if (finalFilename) {
-    candidates.push(`/images/products/${ensureImageExtension(finalFilename)}`);
+    candidates.push(...buildExtensionCandidates(finalFilename));
   }
 
   const legacySku = normalizeText(row.SKU);
   if (legacySku) {
     const lastSegment = legacySku.split('-').filter(Boolean).pop();
     if (lastSegment) {
-      candidates.push(`/images/products/${ensureImageExtension(lastSegment)}`);
+      candidates.push(...buildExtensionCandidates(lastSegment));
     }
   }
 
   const legacyImageId = normalizeText(row['Legacy Image ID']);
   if (legacyImageId) {
-    candidates.push(`/images/products/${ensureImageExtension(legacyImageId)}`);
+    candidates.push(...buildExtensionCandidates(legacyImageId));
   }
 
   candidates.push('/images/thomasina.jpg');
 
   return [...new Set(candidates)];
+}
+
+// Extra gallery photos beyond the primary shot -- filled in only for pieces
+// where there's more than one angle worth showing. Optional columns, so
+// most rows simply won't have them and the card falls back to just the
+// primary image. Each slot carries its own extension-candidate chain (same
+// case-mismatch tolerance as the primary photo) so the frontend can fall
+// through per-thumbnail instead of giving up on the whole gallery.
+function buildGalleryImages(row, primaryImageCandidates) {
+  const extraSlots = ['Image 2 Filename', 'Image 3 Filename', 'Image 4 Filename']
+    .map((key) => normalizeText(row[key]))
+    .filter(Boolean)
+    .map((filename) => buildExtensionCandidates(filename));
+
+  return [primaryImageCandidates, ...extraSlots];
 }
 
 function normalizeSku(row) {
@@ -180,7 +214,8 @@ function readDimension(row, ...keys) {
 function normalizeProduct(row) {
   const bodyHtml = normalizeText(row['Body (HTML)']);
   const description = stripHtml(bodyHtml);
-  const [image, ...imageFallbacks] = buildImageCandidates(row);
+  const imageCandidates = buildImageCandidates(row);
+  const [image, ...imageFallbacks] = imageCandidates;
 
   return {
     sku: normalizeSku(row),
@@ -189,6 +224,7 @@ function normalizeProduct(row) {
     price: normalizePrice(row['Variant Price']),
     image,
     imageFallbacks,
+    gallery: buildGalleryImages(row, imageCandidates),
     line: extractHeadline(bodyHtml) || 'One of one. Handcrafted by Thomasina Schnepf.',
     description,
     descriptionHtml: bodyHtml,
