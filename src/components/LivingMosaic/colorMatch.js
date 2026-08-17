@@ -91,6 +91,11 @@ export async function buildMosaicGrid({ portraitSrc, products, cols, rows }) {
 
   const cellColors = sampleColorGrid(portraitImg, cols, rows);
   const productColors = available.map((entry) => sampleColorGrid(entry.img, 1, 1)[0]);
+  // `entry.img.src` is whichever candidate actually loaded (primary or a
+  // fallback) -- hand it back per productIndex so the tile renders that
+  // same verified-working image instead of re-guessing with the product's
+  // (possibly wrong) primary filename and silently 404ing.
+  const resolvedSrcByIndex = new Map(available.map((entry) => [entry.productIndex, entry.img.src]));
 
   const grid = [];
   let aboveRowChoices = new Array(cols).fill(-1);
@@ -122,7 +127,13 @@ export async function buildMosaicGrid({ portraitSrc, products, cols, rows }) {
 
       thisRowChoices[col] = chosen.productIndex;
       leftChoice = chosen.productIndex;
-      grid.push({ col, row, productIndex: chosen.productIndex, color: cellColor });
+      grid.push({
+        col,
+        row,
+        productIndex: chosen.productIndex,
+        color: cellColor,
+        resolvedSrc: resolvedSrcByIndex.get(chosen.productIndex),
+      });
     }
 
     aboveRowChoices = thisRowChoices;

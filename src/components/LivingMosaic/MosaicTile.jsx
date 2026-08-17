@@ -23,7 +23,7 @@ export default function MosaicTile({ cell, product, active, onTap, showNames }) 
         style={{ backgroundColor: rgbToCss(cell.color) }}
       >
         {active && (
-          <img src={product.image} alt="" loading="lazy" decoding="async" aria-hidden="true" />
+          <img src={cell.resolvedSrc || product.image} alt="" loading="lazy" decoding="async" aria-hidden="true" />
         )}
       </div>
       <span className="mosaic-tile__name" aria-hidden="true">{product.name}</span>
