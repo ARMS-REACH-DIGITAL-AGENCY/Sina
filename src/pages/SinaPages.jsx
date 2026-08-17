@@ -35,7 +35,7 @@ const footerConnect = [
   { to: '/schedule', label: 'Schedule' },
 ];
 
-const heroHomeSlides = [1, 2, 3, 4, 5, 6].map((n) => `/images/hero/hero_home${n}`);
+const heroHomeSlides = [1, 2, 3, 4, 5, 6].map((n) => `/images/hero/hero_home${n}.jpg`);
 
 const pageHeroImages = {
   artist: '/images/hero/meet-sina-painted-portrait.jpg',
