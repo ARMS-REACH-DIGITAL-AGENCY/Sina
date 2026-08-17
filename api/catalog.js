@@ -109,26 +109,37 @@ function ensureImageExtension(value) {
   return /\.[a-z0-9]+$/i.test(value) ? value : `${value}.JPG`;
 }
 
-function buildImagePath(row) {
+// Returns every plausible image path for this row, most-trusted first, so
+// the client can fall back if the "correct" one turns out to be wrong --
+// e.g. a row's Final Image Filename column says "NKL-166" but the file
+// actually uploaded is "166.JPG" (the legacy shoot-number convention every
+// other row uses). Rather than silently show a broken image whenever a
+// sheet entry has a filename typo/mismatch, give the frontend both
+// candidates and let it try the second if the first 404s.
+function buildImageCandidates(row) {
+  const candidates = [];
+
   const finalFilename = normalizeText(row['Final Image Filename']);
   if (finalFilename) {
-    return `/images/products/${ensureImageExtension(finalFilename)}`;
+    candidates.push(`/images/products/${ensureImageExtension(finalFilename)}`);
   }
 
   const legacySku = normalizeText(row.SKU);
   if (legacySku) {
     const lastSegment = legacySku.split('-').filter(Boolean).pop();
     if (lastSegment) {
-      return `/images/products/${ensureImageExtension(lastSegment)}`;
+      candidates.push(`/images/products/${ensureImageExtension(lastSegment)}`);
     }
   }
 
   const legacyImageId = normalizeText(row['Legacy Image ID']);
   if (legacyImageId) {
-    return `/images/products/${ensureImageExtension(legacyImageId)}`;
+    candidates.push(`/images/products/${ensureImageExtension(legacyImageId)}`);
   }
 
-  return '/images/thomasina.jpg';
+  candidates.push('/images/thomasina.jpg');
+
+  return [...new Set(candidates)];
 }
 
 function normalizeSku(row) {
@@ -153,19 +164,37 @@ function normalizeStatus(row) {
   return 'available';
 }
 
+function normalizeDimension(value) {
+  const parsed = Number.parseFloat(normalizeText(value));
+  return Number.isFinite(parsed) && parsed > 0 ? parsed : null;
+}
+
+function readDimension(row, ...keys) {
+  for (const key of keys) {
+    const parsed = normalizeDimension(row[key]);
+    if (parsed !== null) return parsed;
+  }
+  return null;
+}
+
 function normalizeProduct(row) {
   const bodyHtml = normalizeText(row['Body (HTML)']);
   const description = stripHtml(bodyHtml);
+  const [image, ...imageFallbacks] = buildImageCandidates(row);
 
   return {
     sku: normalizeSku(row),
     name: normalizeText(row.Title),
     category: normalizeCategory(row),
     price: normalizePrice(row['Variant Price']),
-    image: buildImagePath(row),
+    image,
+    imageFallbacks,
     line: extractHeadline(bodyHtml) || 'One of one. Handcrafted by Thomasina Schnepf.',
     description,
     descriptionHtml: bodyHtml,
+    height: readDimension(row, 'H', 'Height'),
+    width: readDimension(row, 'W', 'Width'),
+    weight: readDimension(row, 'oz.', 'oz', 'Oz.', 'Oz', 'Weight'),
     tags: normalizeText(row.Tags),
     colors: normalizeText(row.Colors),
     shopifyUrl: normalizeText(row['Shopify Product URL']),

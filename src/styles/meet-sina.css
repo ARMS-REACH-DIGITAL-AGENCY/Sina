@@ -3,6 +3,11 @@
   grid-template-columns: minmax(0, .95fr) minmax(320px, .9fr);
   gap: clamp(32px, 4vw, 56px);
   align-items: start;
+  /* Home's hero links here (#message) so "A Message From The Artist"
+     jumps straight to this section instead of the top of the page. The
+     site header is sticky, so without this offset the section's top
+     would land right underneath it. */
+  scroll-margin-top: calc(var(--header-height) + 24px);
 }
 
 .meet-sina-message {
