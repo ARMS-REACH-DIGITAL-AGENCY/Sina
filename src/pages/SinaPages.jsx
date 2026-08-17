@@ -403,7 +403,7 @@ export function Story() {
     <Layout>
       <Hero
         eyebrow="Meet Sina"
-        title={<>The artist behind every <span className="nowrap">1-of-1</span> creation.</>}
+        title={<FitHeading lines={['The Artist Behind', 'Every 1-of-1 Creation.']} maxFontSize={78} minFontSize={18} />}
         copy="Thomasina Schnepf creates by touch, light, color, and close attention. Her work is personal, tactile, and made to be worn, displayed, gifted, and remembered one original at a time."
         primary="Adopt Sina's Creations"
         primaryTo="/shop"
@@ -613,9 +613,21 @@ function cleanProductHtml(value = '') {
     .trim();
 }
 
+// descriptionHtml's first paragraph is almost always `<p><strong>{headline}</strong></p>`
+// -- the exact same text already shown as product.line directly above it on the
+// card. Strip that lead paragraph so expanding a card doesn't show the short
+// description twice.
+function stripLeadingHeadline(html, headline) {
+  if (!headline) return html;
+  const escaped = headline.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  const pattern = new RegExp(`^\\s*<p>\\s*<strong>\\s*${escaped}\\s*<\\/strong>\\s*<\\/p>`, 'i');
+  return html.replace(pattern, '');
+}
+
 function ProductCardDescription({ product }) {
   if (product.descriptionHtml) {
-    return <div className="product-card__description" dangerouslySetInnerHTML={{ __html: cleanProductHtml(product.descriptionHtml) }} />;
+    const html = stripLeadingHeadline(cleanProductHtml(product.descriptionHtml), product.line);
+    return <div className="product-card__description" dangerouslySetInnerHTML={{ __html: html }} />;
   }
 
   // The short description (product.line) is already shown above this. Only
@@ -743,9 +755,8 @@ function ProductCard({ product, eyebrowOverride }) {
               </div>
             )}
             <div className="price-row"><span><span className="nowrap">1-of-1</span> Cost of Adoption</span><strong>${product.price}</strong></div>
-            <button type="button" className="button primary product-card__disabled-cta" disabled aria-disabled="true">Adopt Me</button>
-            <p className="product-card__disabled-note">Inventory is being updated, so adoption checkout is temporarily paused.</p>
-            <p className="product-card__flip-hint">Tap anywhere to flip back.</p>
+            <button type="button" className="button primary product-card__adopt-cta">Adopt Me</button>
+            <p className="product-card__close-hint">Close</p>
           </>
         )}
       </div>
