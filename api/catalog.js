@@ -153,6 +153,19 @@ function normalizeStatus(row) {
   return 'available';
 }
 
+function normalizeDimension(value) {
+  const parsed = Number.parseFloat(normalizeText(value));
+  return Number.isFinite(parsed) && parsed > 0 ? parsed : null;
+}
+
+function readDimension(row, ...keys) {
+  for (const key of keys) {
+    const parsed = normalizeDimension(row[key]);
+    if (parsed !== null) return parsed;
+  }
+  return null;
+}
+
 function normalizeProduct(row) {
   const bodyHtml = normalizeText(row['Body (HTML)']);
   const description = stripHtml(bodyHtml);
@@ -166,6 +179,9 @@ function normalizeProduct(row) {
     line: extractHeadline(bodyHtml) || 'One of one. Handcrafted by Thomasina Schnepf.',
     description,
     descriptionHtml: bodyHtml,
+    height: readDimension(row, 'H', 'Height'),
+    width: readDimension(row, 'W', 'Width'),
+    weight: readDimension(row, 'oz.', 'oz', 'Oz.', 'Oz', 'Weight'),
     tags: normalizeText(row.Tags),
     colors: normalizeText(row.Colors),
     shopifyUrl: normalizeText(row['Shopify Product URL']),
