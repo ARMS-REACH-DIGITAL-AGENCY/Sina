@@ -23,6 +23,25 @@
   min-width: 0;
 }
 
+.living-mosaic__hint {
+  margin: 10px 2px 0;
+  font-size: 12px;
+  line-height: 1.5;
+  letter-spacing: .01em;
+  color: var(--muted-olive);
+  text-align: center;
+}
+
+.living-mosaic__hint-desktop {
+  display: none;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .living-mosaic__hint-desktop {
+    display: inline;
+  }
+}
+
 .living-mosaic__frame {
   position: relative;
   width: 100%;

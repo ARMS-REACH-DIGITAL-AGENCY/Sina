@@ -378,6 +378,10 @@ export function Home() {
         <div className="living-mosaic__body">
           <div className="living-mosaic__visual">
             <LivingMosaic />
+            <p className="living-mosaic__hint">
+              Pinch and grab inside the portrait to explore the creations up close.
+              <span className="living-mosaic__hint-desktop"> On a computer: scroll to zoom in and out, then click and drag to look around.</span>
+            </p>
           </div>
           <div className="living-mosaic__story">
             <p className="living-mosaic__lead">Step back to see this amazing legally blind artist.</p>
