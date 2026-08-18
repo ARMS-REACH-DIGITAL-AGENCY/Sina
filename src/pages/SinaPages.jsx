@@ -553,6 +553,11 @@ export function Shop() {
     return shopCollections[0] || '';
   }, [location.search, shopCollections, sharedProduct]);
   const searchTerm = React.useMemo(() => readShopSearchTerm(location.search).toLowerCase(), [location.search]);
+  // /api/adopt sends someone back here with ?sold=1 when the piece they
+  // just tried to adopt sold out between page load and checkout click --
+  // real inventory only lives in Shopify, so this is the one place that
+  // race can actually surface.
+  const justMissed = React.useMemo(() => new URLSearchParams(location.search).get('sold') === '1', [location.search]);
 
   const scrollProductsToTop = React.useCallback(() => {
     if (typeof window === 'undefined') {
@@ -616,6 +621,11 @@ export function Shop() {
         </div>
       </section>
       <section className="shop-section shop-section--floating-controls">
+        {justMissed && (
+          <div className="shop-sold-notice">
+            <p>That one was just adopted by someone else &mdash; sorry! Here&rsquo;s the rest of the collection.</p>
+          </div>
+        )}
         <div className="product-grid" ref={productGridRef}>
           {visible.map((product) => <ProductCard product={product} sharedSku={sharedSku} key={product.sku} />)}
         </div>

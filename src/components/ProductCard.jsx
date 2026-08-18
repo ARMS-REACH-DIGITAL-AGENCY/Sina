@@ -260,7 +260,13 @@ export function ProductCard({ product, eyebrowOverride, sharedSku }) {
                 <ShareButton sku={product.sku} onShare={handleShare} shareStatus={shareStatus} />
               </div>
             </div>
-            <button type="button" className="button primary product-card__adopt-cta">Adopt Me</button>
+            <a
+              href={`/api/adopt?sku=${encodeURIComponent(product.sku)}`}
+              className="button primary product-card__adopt-cta"
+              onClick={(event) => event.stopPropagation()}
+            >
+              Adopt Me
+            </a>
             <p className="product-card__close-hint">Close</p>
           </>
         )}
