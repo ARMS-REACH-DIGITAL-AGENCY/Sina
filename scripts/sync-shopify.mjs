@@ -20,7 +20,10 @@ const API_VERSION = '2024-10';
 // stray Vercel "Shopify Sandbox" marketplace integration already claims
 // that name for an unrelated demo store -- using our own name sidesteps
 // the collision instead of fighting over it.
-const domain = process.env.SHOPIFY_ADMIN_STORE_DOMAIN;
+// Tolerate a pasted-in protocol/trailing slash/whitespace -- easy to
+// accidentally include when copying a domain out of a browser bar, and
+// it turns the API URL below into an unreachable, malformed one.
+const domain = (process.env.SHOPIFY_ADMIN_STORE_DOMAIN || '').trim().replace(/^https?:\/\//i, '').replace(/\/+$/, '');
 const token = process.env.SHOPIFY_ADMIN_TOKEN;
 
 if (!domain || !token) {

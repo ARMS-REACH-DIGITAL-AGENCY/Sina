@@ -9,9 +9,12 @@ function shopDomain() {
   // stray Vercel "Shopify Sandbox" marketplace integration already claims
   // that name for an unrelated demo store -- using our own name sidesteps
   // the collision instead of fighting over it.
-  const domain = process.env.SHOPIFY_ADMIN_STORE_DOMAIN;
-  if (!domain) throw new Error('SHOPIFY_ADMIN_STORE_DOMAIN is not configured.');
-  return domain;
+  const raw = process.env.SHOPIFY_ADMIN_STORE_DOMAIN;
+  if (!raw) throw new Error('SHOPIFY_ADMIN_STORE_DOMAIN is not configured.');
+  // Tolerate a pasted-in protocol/trailing slash/whitespace -- easy to
+  // accidentally include when copying a domain out of a browser bar, and
+  // it turns the API URL below into an unreachable, malformed one.
+  return raw.trim().replace(/^https?:\/\//i, '').replace(/\/+$/, '');
 }
 
 async function shopifyGraphql(query, variables) {
@@ -88,6 +91,15 @@ export default async function handler(req, res) {
     redirect(res, `https://${shopDomain()}/cart/${variantId}:1`);
   } catch (error) {
     res.statusCode = 500;
-    res.end(`Unable to start checkout: ${error.message}`);
+    // Include which domain we attempted (never the token) -- a bare
+    // "fetch failed" gives no way to tell a bad domain value apart from
+    // a real outage.
+    let attemptedDomain = 'unknown';
+    try {
+      attemptedDomain = shopDomain();
+    } catch (_) {
+      // shopDomain() itself threw -- its message already covers this case.
+    }
+    res.end(`Unable to start checkout (domain: ${attemptedDomain}): ${error.message}`);
   }
 }
