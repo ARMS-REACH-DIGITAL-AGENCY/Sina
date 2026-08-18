@@ -17,9 +17,53 @@ function shopDomain() {
   return raw.trim().replace(/^https?:\/\//i, '').replace(/\/+$/, '');
 }
 
+// Shopify retired static custom-app tokens in 2026 -- apps built through the
+// unified dev dashboard authenticate via the OAuth client credentials grant
+// instead: trade the app's Client ID/Secret for a short-lived (24h) access
+// token. Cached at module scope so a warm serverless container reuses it
+// instead of re-authenticating on every click; a cold container or an
+// expired cache just fetches a fresh one.
+let cachedToken = null;
+
+async function fetchAccessToken() {
+  const clientId = process.env.SHOPIFY_CLIENT_ID;
+  const clientSecret = process.env.SHOPIFY_CLIENT_SECRET;
+  if (!clientId || !clientSecret) {
+    throw new Error('SHOPIFY_CLIENT_ID / SHOPIFY_CLIENT_SECRET are not configured.');
+  }
+
+  const response = await fetch(`https://${shopDomain()}/admin/oauth/access_token`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    body: new URLSearchParams({
+      grant_type: 'client_credentials',
+      client_id: clientId,
+      client_secret: clientSecret,
+    }),
+  });
+
+  if (!response.ok) {
+    const text = await response.text();
+    throw new Error(`Token exchange failed (${response.status}): ${text}`);
+  }
+
+  const data = await response.json();
+  // expires_in is seconds; refresh a couple minutes early to avoid a request
+  // landing right on the boundary.
+  const expiresAt = Date.now() + (data.expires_in - 120) * 1000;
+  return { token: data.access_token, expiresAt };
+}
+
+async function getAccessToken() {
+  if (cachedToken && cachedToken.expiresAt > Date.now()) {
+    return cachedToken.token;
+  }
+  cachedToken = await fetchAccessToken();
+  return cachedToken.token;
+}
+
 async function shopifyGraphql(query, variables) {
-  const token = process.env.SHOPIFY_ADMIN_TOKEN;
-  if (!token) throw new Error('SHOPIFY_ADMIN_TOKEN is not configured.');
+  const token = await getAccessToken();
 
   const response = await fetch(`https://${shopDomain()}/admin/api/2024-10/graphql.json`, {
     method: 'POST',

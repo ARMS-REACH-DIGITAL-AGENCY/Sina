@@ -10,7 +10,7 @@
 // published rows (sold, pulled) gets its Shopify twin archived, not
 // deleted, so nothing is ever silently unrecoverable.
 //
-// Usage: SHOPIFY_ADMIN_STORE_DOMAIN=... SHOPIFY_ADMIN_TOKEN=... node scripts/sync-shopify.mjs
+// Usage: SHOPIFY_ADMIN_STORE_DOMAIN=... SHOPIFY_CLIENT_ID=... SHOPIFY_CLIENT_SECRET=... node scripts/sync-shopify.mjs
 
 const SHEET_CSV_URL = 'https://docs.google.com/spreadsheets/d/1yTKJUw-OjpI6V2wxUtfSVq61b3NV3g9EcaZxsUEbfBY/export?format=csv&gid=1901402257';
 const SYNC_TAG = 'sheet-sync';
@@ -24,12 +24,37 @@ const API_VERSION = '2024-10';
 // accidentally include when copying a domain out of a browser bar, and
 // it turns the API URL below into an unreachable, malformed one.
 const domain = (process.env.SHOPIFY_ADMIN_STORE_DOMAIN || '').trim().replace(/^https?:\/\//i, '').replace(/\/+$/, '');
-const token = process.env.SHOPIFY_ADMIN_TOKEN;
+const clientId = process.env.SHOPIFY_CLIENT_ID;
+const clientSecret = process.env.SHOPIFY_CLIENT_SECRET;
 
-if (!domain || !token) {
-  console.error('Set SHOPIFY_ADMIN_STORE_DOMAIN and SHOPIFY_ADMIN_TOKEN before running this script.');
+if (!domain || !clientId || !clientSecret) {
+  console.error('Set SHOPIFY_ADMIN_STORE_DOMAIN, SHOPIFY_CLIENT_ID and SHOPIFY_CLIENT_SECRET before running this script.');
   process.exit(1);
 }
+
+// Shopify retired static custom-app tokens in 2026 -- trade the app's
+// Client ID/Secret for a short-lived (24h) access token via the OAuth
+// client credentials grant. Fetched once and reused for the whole run,
+// since a sync takes minutes, not the full 24-hour window.
+async function fetchAccessToken() {
+  const response = await fetch(`https://${domain}/admin/oauth/access_token`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    body: new URLSearchParams({
+      grant_type: 'client_credentials',
+      client_id: clientId,
+      client_secret: clientSecret,
+    }),
+  });
+  if (!response.ok) {
+    const text = await response.text();
+    throw new Error(`Token exchange failed (${response.status}): ${text}`);
+  }
+  const data = await response.json();
+  return data.access_token;
+}
+
+let token;
 
 function normalizeText(value) {
   return typeof value === 'string' ? value.trim() : '';
@@ -273,6 +298,7 @@ async function archiveMissingProducts(syncedSkus) {
 }
 
 async function main() {
+  token = await fetchAccessToken();
   const rows = await fetchSheetRows();
   console.log(`Sheet has ${rows.length} published rows with a SKU.`);
 
