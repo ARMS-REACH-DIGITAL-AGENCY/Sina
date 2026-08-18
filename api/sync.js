@@ -173,11 +173,15 @@ async function setInventory(token, inventoryItemId, locationId, quantity) {
 }
 
 async function createProduct(token, row, locationId) {
+  // productCreate always auto-creates a "Default Title" variant, so
+  // productVariantsBulkCreate right after it collides ("variant already
+  // exists") -- the fix is to update that auto-created variant in place
+  // instead of trying to create a second one.
   const created = await shopifyGraphql(
     token,
     `mutation($input: ProductInput!) {
       productCreate(input: $input) {
-        product { id }
+        product { id variants(first: 1) { edges { node { id } } } }
         userErrors { field message }
       }
     }`,
@@ -195,11 +199,13 @@ async function createProduct(token, row, locationId) {
   const errors = created.productCreate.userErrors;
   if (errors.length) throw new Error(`productCreate failed for ${row.sku}: ${JSON.stringify(errors)}`);
   const productId = created.productCreate.product.id;
+  const defaultVariantId = created.productCreate.product.variants.edges[0]?.node.id;
+  if (!defaultVariantId) throw new Error(`productCreate for ${row.sku} returned no default variant.`);
 
   const variantResult = await shopifyGraphql(
     token,
     `mutation($productId: ID!, $variants: [ProductVariantsBulkInput!]!) {
-      productVariantsBulkCreate(productId: $productId, variants: $variants) {
+      productVariantsBulkUpdate(productId: $productId, variants: $variants) {
         productVariants { id inventoryItem { id } }
         userErrors { field message }
       }
@@ -208,6 +214,7 @@ async function createProduct(token, row, locationId) {
       productId,
       variants: [
         {
+          id: defaultVariantId,
           price: row.price,
           inventoryItem: { sku: row.sku, tracked: true },
         },
@@ -215,10 +222,10 @@ async function createProduct(token, row, locationId) {
     }
   );
 
-  const variantErrors = variantResult.productVariantsBulkCreate.userErrors;
-  if (variantErrors.length) throw new Error(`variant create failed for ${row.sku}: ${JSON.stringify(variantErrors)}`);
+  const variantErrors = variantResult.productVariantsBulkUpdate.userErrors;
+  if (variantErrors.length) throw new Error(`variant update failed for ${row.sku}: ${JSON.stringify(variantErrors)}`);
 
-  const inventoryItemId = variantResult.productVariantsBulkCreate.productVariants[0].inventoryItem.id;
+  const inventoryItemId = variantResult.productVariantsBulkUpdate.productVariants[0].inventoryItem.id;
   await setInventory(token, inventoryItemId, locationId, 1);
 
   return 'created';
