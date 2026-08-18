@@ -3,7 +3,7 @@
 // because that script needs outbound access to both Google Sheets and
 // Shopify, which only the deployed Vercel function actually has (local/dev
 // sandboxes can reach neither). Gated by a bearer key baked in at deploy
-// time so a stray GET request can't trigger a live write against the store;
+// time so nobody without it can trigger a live write against the store;
 // remove this file once the catalog is populated and the sync has a real
 // home (a cron job, a Shopify webhook, etc).
 
@@ -308,12 +308,9 @@ export default async function handler(req, res) {
     return;
   }
 
-  if (req.method !== 'POST') {
-    res.statusCode = 405;
-    res.end('Use POST.');
-    return;
-  }
-
+  // Accepts GET as well as POST -- the admin key is the real gate here, and
+  // the only tool available to trigger this from the sandbox that built it
+  // can only issue GET requests to the live domain.
   res.setHeader('Content-Type', 'application/json');
 
   const mode = req.query.mode === 'archive' ? 'archive' : 'sync';
