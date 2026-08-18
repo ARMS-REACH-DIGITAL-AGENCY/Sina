@@ -10,17 +10,21 @@
 // published rows (sold, pulled) gets its Shopify twin archived, not
 // deleted, so nothing is ever silently unrecoverable.
 //
-// Usage: SHOPIFY_STORE_DOMAIN=... SHOPIFY_ADMIN_TOKEN=... node scripts/sync-shopify.mjs
+// Usage: SHOPIFY_ADMIN_STORE_DOMAIN=... SHOPIFY_ADMIN_TOKEN=... node scripts/sync-shopify.mjs
 
 const SHEET_CSV_URL = 'https://docs.google.com/spreadsheets/d/1yTKJUw-OjpI6V2wxUtfSVq61b3NV3g9EcaZxsUEbfBY/export?format=csv&gid=1901402257';
 const SYNC_TAG = 'sheet-sync';
 const API_VERSION = '2024-10';
 
-const domain = process.env.SHOPIFY_STORE_DOMAIN;
+// Named distinctly from the generic SHOPIFY_STORE_DOMAIN name because a
+// stray Vercel "Shopify Sandbox" marketplace integration already claims
+// that name for an unrelated demo store -- using our own name sidesteps
+// the collision instead of fighting over it.
+const domain = process.env.SHOPIFY_ADMIN_STORE_DOMAIN;
 const token = process.env.SHOPIFY_ADMIN_TOKEN;
 
 if (!domain || !token) {
-  console.error('Set SHOPIFY_STORE_DOMAIN and SHOPIFY_ADMIN_TOKEN before running this script.');
+  console.error('Set SHOPIFY_ADMIN_STORE_DOMAIN and SHOPIFY_ADMIN_TOKEN before running this script.');
   process.exit(1);
 }
 

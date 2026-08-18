@@ -5,8 +5,12 @@
 // minute ago correctly shows sold out instead of double-selling it.
 
 function shopDomain() {
-  const domain = process.env.SHOPIFY_STORE_DOMAIN;
-  if (!domain) throw new Error('SHOPIFY_STORE_DOMAIN is not configured.');
+  // Named distinctly from the generic SHOPIFY_STORE_DOMAIN name because a
+  // stray Vercel "Shopify Sandbox" marketplace integration already claims
+  // that name for an unrelated demo store -- using our own name sidesteps
+  // the collision instead of fighting over it.
+  const domain = process.env.SHOPIFY_ADMIN_STORE_DOMAIN;
+  if (!domain) throw new Error('SHOPIFY_ADMIN_STORE_DOMAIN is not configured.');
   return domain;
 }
 
