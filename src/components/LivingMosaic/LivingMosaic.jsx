@@ -41,6 +41,7 @@ export default function LivingMosaic() {
   const zoomRef = useRef({ scale: 1, x: 0, y: 0 });
   const gestureRef = useRef({ type: 'idle' });
   const suppressTapRef = useRef(false);
+  const mouseDragRef = useRef({ active: false });
 
   const { cols: gridCols, rows: gridRows } = gridConfig;
 
@@ -248,16 +249,82 @@ export default function LivingMosaic() {
       }
     }
 
+    // Desktop has no touchscreen, so it gets its own input mapping onto the
+    // exact same zoom/pan state: scroll wheel zooms in and out (anchored to
+    // the cursor, same math as the pinch midpoint above), and click-drag
+    // pans once zoomed -- the mouse equivalent of the single-finger pan.
+    function pointFromMouse(event) {
+      const rect = viewport.getBoundingClientRect();
+      return { x: event.clientX - rect.left, y: event.clientY - rect.top };
+    }
+
+    function handleWheel(event) {
+      event.preventDefault();
+      const point = pointFromMouse(event);
+      const rect = viewport.getBoundingClientRect();
+      const center = { x: rect.width / 2, y: rect.height / 2 };
+      const current = zoomRef.current;
+      const contentPoint = {
+        x: (point.x - center.x - current.x) / current.scale,
+        y: (point.y - center.y - current.y) / current.scale,
+      };
+
+      const zoomFactor = Math.exp(-event.deltaY * 0.0015);
+      const nextScale = clamp(current.scale * zoomFactor, 1, MAX_ZOOM);
+      const nextX = point.x - center.x - contentPoint.x * nextScale;
+      const nextY = point.y - center.y - contentPoint.y * nextScale;
+
+      setZoomState(clampZoomState(nextScale, nextX, nextY));
+    }
+
+    function handleMouseDown(event) {
+      if (zoomRef.current.scale <= 1) return;
+      event.preventDefault();
+      const current = zoomRef.current;
+      mouseDragRef.current = {
+        active: true,
+        startPoint: pointFromMouse(event),
+        startX: current.x,
+        startY: current.y,
+      };
+    }
+
+    function handleMouseMove(event) {
+      const drag = mouseDragRef.current;
+      if (!drag.active) return;
+      const point = pointFromMouse(event);
+      const deltaX = point.x - drag.startPoint.x;
+      const deltaY = point.y - drag.startPoint.y;
+
+      if (Math.abs(deltaX) > 3 || Math.abs(deltaY) > 3) {
+        suppressTapRef.current = true;
+      }
+
+      setZoomState(clampZoomState(zoomRef.current.scale, drag.startX + deltaX, drag.startY + deltaY));
+    }
+
+    function handleMouseUp() {
+      mouseDragRef.current.active = false;
+    }
+
     viewport.addEventListener('touchstart', handleTouchStart, { passive: false });
     viewport.addEventListener('touchmove', handleTouchMove, { passive: false });
     viewport.addEventListener('touchend', handleTouchEnd, { passive: false });
     viewport.addEventListener('touchcancel', handleTouchEnd, { passive: false });
+    viewport.addEventListener('wheel', handleWheel, { passive: false });
+    viewport.addEventListener('mousedown', handleMouseDown);
+    window.addEventListener('mousemove', handleMouseMove);
+    window.addEventListener('mouseup', handleMouseUp);
 
     return () => {
       viewport.removeEventListener('touchstart', handleTouchStart);
       viewport.removeEventListener('touchmove', handleTouchMove);
       viewport.removeEventListener('touchend', handleTouchEnd);
       viewport.removeEventListener('touchcancel', handleTouchEnd);
+      viewport.removeEventListener('wheel', handleWheel);
+      viewport.removeEventListener('mousedown', handleMouseDown);
+      window.removeEventListener('mousemove', handleMouseMove);
+      window.removeEventListener('mouseup', handleMouseUp);
     };
   }, []);
 
@@ -325,7 +392,7 @@ export default function LivingMosaic() {
         {gridError
           ? 'The portrait is visible. The mosaic could not be assembled right now.'
           : mosaicReady
-            ? 'The mosaic is ready. Pinch and drag inside the frame to explore, or tap a creation to view its details.'
+            ? 'The mosaic is ready. Pinch and drag, or scroll to zoom and click and drag to pan, to explore -- or tap or click a creation to view its details.'
             : 'The portrait is visible while the mosaic is being assembled.'}
       </div>
 

@@ -52,10 +52,16 @@
   overscroll-behavior: contain;
   user-select: none;
   -webkit-user-select: none;
+  cursor: zoom-in;
 }
 
 .living-mosaic__viewport.is-zoomed {
   touch-action: none;
+  cursor: grab;
+}
+
+.living-mosaic__viewport.is-zoomed:active {
+  cursor: grabbing;
 }
 
 .living-mosaic__zoom-stage {
