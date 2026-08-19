@@ -94,6 +94,27 @@ async function commitToGithub(outputPath, buffer) {
   return data.commit?.sha || null;
 }
 
+async function processOne(filename) {
+  const buffer = await editWithPhotoroom(filename, {});
+  const outputPath = `${OUTPUT_PATH_PREFIX}/${filename}`;
+  const commitSha = await commitToGithub(outputPath, buffer);
+  return { filename, outputPath, commitSha, bytes: buffer.length };
+}
+
+async function fetchLiveFilenames() {
+  const response = await fetch('https://sinasglass.com/api/catalog');
+  if (!response.ok) throw new Error(`catalog fetch failed (${response.status})`);
+  const data = await response.json();
+  const filenames = new Set();
+  for (const product of data.products || []) {
+    const img = product.image || '';
+    if (img.startsWith('/images/products/')) {
+      filenames.add(img.split('/').pop());
+    }
+  }
+  return Array.from(filenames).sort();
+}
+
 export default async function handler(req, res) {
   const suppliedKey = req.headers['x-admin-key'] || req.query.key;
   if (suppliedKey !== ADMIN_KEY) {
@@ -104,6 +125,50 @@ export default async function handler(req, res) {
 
   res.setHeader('Content-Type', 'application/json');
 
+  if (req.query.mode === 'batch') {
+    const offset = Number.parseInt(req.query.offset, 10) || 0;
+    const limit = Number.parseInt(req.query.limit, 10) || 8;
+    const skip = new Set(
+      (typeof req.query.skip === 'string' ? req.query.skip.split(',') : []).map((s) => s.trim()).filter(Boolean)
+    );
+
+    try {
+      const allFilenames = await fetchLiveFilenames();
+      const eligible = allFilenames.filter((f) => !skip.has(f));
+      const batch = eligible.slice(offset, offset + limit);
+
+      const results = [];
+      for (const filename of batch) {
+        try {
+          results.push({ ...(await processOne(filename)), status: 'done' });
+        } catch (error) {
+          results.push({ filename, status: 'error', error: error.message });
+        }
+      }
+
+      const nextOffset = offset + limit;
+      res.statusCode = 200;
+      res.end(
+        JSON.stringify(
+          {
+            totalEligible: eligible.length,
+            batchStart: offset,
+            batchSize: batch.length,
+            results,
+            done: nextOffset >= eligible.length,
+            nextOffset: nextOffset < eligible.length ? nextOffset : null,
+          },
+          null,
+          2
+        )
+      );
+    } catch (error) {
+      res.statusCode = 500;
+      res.end(JSON.stringify({ error: error.message }));
+    }
+    return;
+  }
+
   const filename = typeof req.query.filename === 'string' ? req.query.filename.trim() : '';
   if (!filename) {
     res.statusCode = 400;
@@ -112,17 +177,9 @@ export default async function handler(req, res) {
   }
 
   try {
-    const buffer = await editWithPhotoroom(filename, {
-      bgPrompt: req.query.bgPrompt,
-      outputSize: req.query.outputSize,
-      padding: req.query.padding,
-    });
-
-    const outputPath = `${OUTPUT_PATH_PREFIX}/${filename}`;
-    const commitSha = await commitToGithub(outputPath, buffer);
-
+    const result = await processOne(filename);
     res.statusCode = 200;
-    res.end(JSON.stringify({ filename, outputPath, commitSha, bytes: buffer.length, status: 'done' }, null, 2));
+    res.end(JSON.stringify({ ...result, status: 'done' }, null, 2));
   } catch (error) {
     res.statusCode = 500;
     res.end(JSON.stringify({ filename, error: error.message }));
