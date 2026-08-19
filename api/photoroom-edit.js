@@ -26,6 +26,7 @@ async function editWithPhotoroom(filename, { bgColor, outputSize, padding }) {
     'background.color': bgColor || DEFAULT_BG_COLOR,
     outputSize: outputSize || DEFAULT_OUTPUT_SIZE,
     padding: padding || '0.12',
+    'export.format': 'jpeg',
   });
 
   const response = await fetch(`https://image-api.photoroom.com/v2/edit?${params.toString()}`, {
