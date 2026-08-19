@@ -12,10 +12,12 @@ const REPO_OWNER = 'ARMS-REACH-DIGITAL-AGENCY';
 const REPO_NAME = 'Sina';
 const IMAGE_BASE_URL = 'https://sinasglass.com/images/products';
 const OUTPUT_PATH_PREFIX = 'public/images/products';
-const DEFAULT_BG_COLOR = 'E7E7E5';
 const DEFAULT_OUTPUT_SIZE = '1200x1200';
+const DEFAULT_BG_PROMPT =
+  'seamless neutral light gray studio backdrop, infinity cove sweep, soft even studio lighting with gentle vignette, subtle paper grain texture, professional product photography background';
+const STUDIO_MODEL_VERSION = 'background-studio-beta-2025-03-17';
 
-async function editWithPhotoroom(filename, { bgColor, outputSize, padding }) {
+async function editWithPhotoroom(filename, { bgPrompt, outputSize, padding }) {
   const apiKey = process.env.PHOTOROOM_API_KEY;
   if (!apiKey) throw new Error('PHOTOROOM_API_KEY is not configured.');
 
@@ -23,7 +25,7 @@ async function editWithPhotoroom(filename, { bgColor, outputSize, padding }) {
   const params = new URLSearchParams({
     imageUrl,
     removeBackground: 'true',
-    'background.color': bgColor || DEFAULT_BG_COLOR,
+    'background.prompt': bgPrompt || DEFAULT_BG_PROMPT,
     outputSize: outputSize || DEFAULT_OUTPUT_SIZE,
     padding: padding || '0.12',
     'export.format': 'jpeg',
@@ -32,7 +34,10 @@ async function editWithPhotoroom(filename, { bgColor, outputSize, padding }) {
 
   const response = await fetch(`https://image-api.photoroom.com/v2/edit?${params.toString()}`, {
     method: 'GET',
-    headers: { 'x-api-key': apiKey },
+    headers: {
+      'x-api-key': apiKey,
+      'pr-ai-background-model-version': STUDIO_MODEL_VERSION,
+    },
   });
 
   if (!response.ok) {
@@ -108,7 +113,7 @@ export default async function handler(req, res) {
 
   try {
     const buffer = await editWithPhotoroom(filename, {
-      bgColor: req.query.bgColor,
+      bgPrompt: req.query.bgPrompt,
       outputSize: req.query.outputSize,
       padding: req.query.padding,
     });
