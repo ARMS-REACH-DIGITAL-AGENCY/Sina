@@ -14,7 +14,7 @@ const IMAGE_BASE_URL = 'https://sinasglass.com/images/products';
 const OUTPUT_PATH_PREFIX = 'public/images/products';
 const DEFAULT_OUTPUT_SIZE = '1200x1200';
 const DEFAULT_BG_PROMPT =
-  'seamless neutral light gray studio backdrop, infinity cove sweep, soft even studio lighting with gentle vignette, subtle paper grain texture, professional product photography background';
+  'a minimalist studio background with a subtle, smooth gradient of cool grey and muted teal. The surface is a clean, matte plaster with a slight texture that catches soft studio lighting, creating gentle highlights and shadows. The angle remains a direct front view, placing the product centrally, with a shallow depth of field blurring the gradient slightly to keep the focus sharply on the product. The overall mood is modern, clean, and elegant, allowing the intricate patterns of the glass to be the sole visual interest against a sophisticated, unobtrusive backdrop.';
 const STUDIO_MODEL_VERSION = 'background-studio-beta-2025-03-17';
 
 async function editWithPhotoroom(filename, { bgPrompt, outputSize, padding }) {
