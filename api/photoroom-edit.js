@@ -12,7 +12,7 @@ const REPO_OWNER = 'ARMS-REACH-DIGITAL-AGENCY';
 const REPO_NAME = 'Sina';
 const IMAGE_BASE_URL = 'https://sinasglass.com/images/products';
 const OUTPUT_PATH_PREFIX = 'public/images/products';
-const DEFAULT_BG_COLOR = '0C0C0C';
+const DEFAULT_BG_COLOR = 'E7E7E5';
 const DEFAULT_OUTPUT_SIZE = '1200x1200';
 
 async function editWithPhotoroom(filename, { bgColor, outputSize, padding }) {
@@ -27,6 +27,7 @@ async function editWithPhotoroom(filename, { bgColor, outputSize, padding }) {
     outputSize: outputSize || DEFAULT_OUTPUT_SIZE,
     padding: padding || '0.12',
     'export.format': 'jpeg',
+    'shadow.mode': 'ai.soft',
   });
 
   const response = await fetch(`https://image-api.photoroom.com/v2/edit?${params.toString()}`, {
