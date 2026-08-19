@@ -17,6 +17,33 @@ const DEFAULT_BG_PROMPT =
   'a minimalist studio background with a subtle, smooth gradient of cool grey and muted teal. The surface is a clean, matte plaster with a slight texture that catches soft studio lighting, creating gentle highlights and shadows. The angle remains a direct front view, placing the product centrally, with a shallow depth of field blurring the gradient slightly to keep the focus sharply on the product. The overall mood is modern, clean, and elegant, allowing the intricate patterns of the glass to be the sole visual interest against a sophisticated, unobtrusive backdrop.';
 const STUDIO_MODEL_VERSION = 'background-studio-beta-2025-03-17';
 
+const EXTENSION_CANDIDATES = ['JPG', 'jpg', 'jpeg', 'JPEG', 'png', 'PNG'];
+
+// The live catalog's stated filename extension doesn't always match what's
+// actually on disk (the frontend itself falls through several candidate
+// extensions for the same reason -- camera exports, case differences, etc).
+// Mirror that same resilience here instead of trusting the catalog blindly.
+async function resolveRealFilename(statedFilename) {
+  const dot = statedFilename.lastIndexOf('.');
+  const base = dot === -1 ? statedFilename : statedFilename.slice(0, dot);
+  const statedExt = dot === -1 ? '' : statedFilename.slice(dot + 1);
+
+  const candidates = [statedExt, ...EXTENSION_CANDIDATES].filter(Boolean);
+  const tried = new Set();
+
+  for (const ext of candidates) {
+    if (tried.has(ext.toLowerCase())) continue;
+    tried.add(ext.toLowerCase());
+    const candidateName = `${base}.${ext}`;
+    const response = await fetch(`${IMAGE_BASE_URL}/${encodeURIComponent(candidateName)}`, { method: 'HEAD' });
+    const contentType = response.headers.get('content-type') || '';
+    if (response.ok && contentType.startsWith('image/')) {
+      return candidateName;
+    }
+  }
+  throw new Error(`No real image file found on disk for ${statedFilename} (tried ${candidates.join(', ')})`);
+}
+
 async function editWithPhotoroom(filename, { bgPrompt, outputSize, padding }) {
   const apiKey = process.env.PHOTOROOM_API_KEY;
   if (!apiKey) throw new Error('PHOTOROOM_API_KEY is not configured.');
@@ -94,11 +121,12 @@ async function commitToGithub(outputPath, buffer) {
   return data.commit?.sha || null;
 }
 
-async function processOne(filename) {
-  const buffer = await editWithPhotoroom(filename, {});
-  const outputPath = `${OUTPUT_PATH_PREFIX}/${filename}`;
+async function processOne(statedFilename) {
+  const realFilename = await resolveRealFilename(statedFilename);
+  const buffer = await editWithPhotoroom(realFilename, {});
+  const outputPath = `${OUTPUT_PATH_PREFIX}/${realFilename}`;
   const commitSha = await commitToGithub(outputPath, buffer);
-  return { filename, outputPath, commitSha, bytes: buffer.length };
+  return { filename: realFilename, outputPath, commitSha, bytes: buffer.length };
 }
 
 async function fetchLiveFilenames() {
