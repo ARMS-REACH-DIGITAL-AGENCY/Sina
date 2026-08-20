@@ -168,7 +168,18 @@ function buildImageCandidates(row) {
 // case-mismatch tolerance as the primary photo) so the frontend can fall
 // through per-thumbnail instead of giving up on the whole gallery.
 function buildGalleryImages(row, primaryImageCandidates) {
-  const extraSlots = ['Image 2 Filename', 'Image 3 Filename', 'Image 4 Filename']
+  // "Image 1 Filename" normally just mirrors Final Image Filename (the
+  // primary shot), so it's skipped by default -- including it always would
+  // duplicate the primary thumbnail on every row that hasn't customized it.
+  // When a row does set it to something else (an alternate/on-model shot),
+  // treat it as a genuine extra slot like Image 2/3/4.
+  const image1 = normalizeText(row['Image 1 Filename']);
+  const primaryFilename = normalizeText(row['Final Image Filename']);
+  const slotKeys = image1 && image1.toLowerCase() !== primaryFilename.toLowerCase()
+    ? ['Image 1 Filename', 'Image 2 Filename', 'Image 3 Filename', 'Image 4 Filename']
+    : ['Image 2 Filename', 'Image 3 Filename', 'Image 4 Filename'];
+
+  const extraSlots = slotKeys
     .map((key) => normalizeText(row[key]))
     .filter(Boolean)
     .map((filename) => buildExtensionCandidates(filename));
