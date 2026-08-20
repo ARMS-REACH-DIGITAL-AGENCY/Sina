@@ -570,8 +570,12 @@ export default async function handler(req, res) {
       const response = await fetch(url);
       const buffer = Buffer.from(await response.arrayBuffer());
       res.statusCode = 200;
-      res.setHeader('Content-Type', response.headers.get('content-type') || 'image/jpeg');
-      res.end(buffer);
+      res.setHeader('Content-Type', 'application/json');
+      // Raw binary mangles when it round-trips through the calling tool's
+      // JSON transport (invalid-UTF-8 byte sequences get lossy-decoded and
+      // corrupted) -- base64 is plain ASCII, so it survives that transport
+      // intact, at the cost of being read back out via a decode step.
+      res.end(JSON.stringify({ contentType: response.headers.get('content-type') || 'image/jpeg', base64: buffer.toString('base64') }));
     } catch (error) {
       res.statusCode = 500;
       res.end(error.message);
