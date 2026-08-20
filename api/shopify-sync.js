@@ -357,6 +357,59 @@ async function archiveMissingProducts(token, syncedSkus) {
   return archived;
 }
 
+const REDIRECT_MARKER = 'sina-storefront-redirect';
+const REDIRECT_TARGET = 'https://sinasglass.com';
+
+// The raw *.myshopify.com storefront is reachable by anyone who stumbles on
+// it (shared link, search engine, typo) even though nothing ever links to
+// it on purpose -- it's Shopify's unstyled default theme, not the real
+// site. Rather than build and maintain a second themed storefront in sync
+// with the real one forever, this sends any such visitor straight to the
+// real site. Injected once into the active theme's layout/theme.liquid,
+// guarded by REDIRECT_MARKER so re-running this is a no-op if it's already
+// there.
+async function restAdminFetch(path, options = {}) {
+  const domain = shopDomain();
+  const token = await fetchAccessToken();
+  const response = await fetch(`https://${domain}/admin/api/${API_VERSION}${path}`, {
+    ...options,
+    headers: {
+      'Content-Type': 'application/json',
+      'X-Shopify-Access-Token': token,
+      ...(options.headers || {}),
+    },
+  });
+  const data = await response.json().catch(() => ({}));
+  if (!response.ok) throw new Error(`Shopify REST API failed (${response.status}): ${JSON.stringify(data)}`);
+  return data;
+}
+
+async function addStorefrontRedirect() {
+  const themesData = await restAdminFetch('/themes.json');
+  const mainTheme = themesData.themes.find((t) => t.role === 'main');
+  if (!mainTheme) throw new Error('No active (role=main) theme found.');
+
+  const assetData = await restAdminFetch(`/themes/${mainTheme.id}/assets.json?asset[key]=layout/theme.liquid`);
+  const currentValue = assetData.asset.value;
+
+  if (currentValue.includes(REDIRECT_MARKER)) {
+    return { themeId: mainTheme.id, themeName: mainTheme.name, status: 'already-present' };
+  }
+
+  const headCloseIndex = currentValue.indexOf('</head>');
+  if (headCloseIndex === -1) throw new Error('theme.liquid has no </head> tag to inject before.');
+
+  const script = `<script id="${REDIRECT_MARKER}">window.location.replace(${JSON.stringify(REDIRECT_TARGET)});</script>\n`;
+  const updatedValue = currentValue.slice(0, headCloseIndex) + script + currentValue.slice(headCloseIndex);
+
+  await restAdminFetch(`/themes/${mainTheme.id}/assets.json`, {
+    method: 'PUT',
+    body: JSON.stringify({ asset: { key: 'layout/theme.liquid', value: updatedValue } }),
+  });
+
+  return { themeId: mainTheme.id, themeName: mainTheme.name, status: 'added' };
+}
+
 // Finds Shopify products that are genuine leftover duplicates from before a
 // SKU got corrected in the Sheet -- not just "photo not synced yet" (those
 // are still current SKUs, just missing a file on disk). A product only
@@ -482,6 +535,20 @@ export default async function handler(req, res) {
   if (suppliedKey !== ADMIN_KEY) {
     res.statusCode = 401;
     res.end('Unauthorized.');
+    return;
+  }
+
+  if (req.query.mode === 'redirect-storefront') {
+    try {
+      const result = await addStorefrontRedirect();
+      res.setHeader('Content-Type', 'application/json');
+      res.statusCode = 200;
+      res.end(JSON.stringify(result, null, 2));
+    } catch (error) {
+      res.setHeader('Content-Type', 'application/json');
+      res.statusCode = 500;
+      res.end(JSON.stringify({ error: error.message }, null, 2));
+    }
     return;
   }
 
