@@ -645,6 +645,7 @@ export default async function handler(req, res) {
                   title
                   status
                   resourcePublicationsCount { count }
+                  media(first: 3) { edges { node { ... on MediaImage { image { url } } } } }
                 }
               }
             }
