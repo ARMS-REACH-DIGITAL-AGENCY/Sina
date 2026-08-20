@@ -159,15 +159,19 @@ export default async function handler(req, res) {
       res.end('Missing filename query param.');
       return;
     }
+    res.setHeader('Content-Type', 'application/json');
     try {
       const realFilename = await resolveRealFilename(filename);
       const buffer = await editWithPhotoroom(realFilename, { bgPrompt });
+      // Commit to a throwaway _preview path rather than streaming bytes back
+      // -- this endpoint is only reachable through a tool that mangles raw
+      // binary responses, but a git pull + local file read is lossless.
+      const outputPath = `${OUTPUT_PATH_PREFIX}/_preview_${realFilename}`;
+      const commitSha = await commitToGithub(outputPath, buffer);
       res.statusCode = 200;
-      res.setHeader('Content-Type', 'image/jpeg');
-      res.end(buffer);
+      res.end(JSON.stringify({ filename: realFilename, outputPath, commitSha, bytes: buffer.length }));
     } catch (error) {
       res.statusCode = 500;
-      res.setHeader('Content-Type', 'application/json');
       res.end(JSON.stringify({ error: error.message }));
     }
     return;
