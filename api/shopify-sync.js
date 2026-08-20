@@ -627,9 +627,11 @@ export default async function handler(req, res) {
             edges {
               node {
                 id
+                sku
                 availableForSale
                 product {
                   id
+                  title
                   status
                   resourcePublicationsCount { count }
                 }
