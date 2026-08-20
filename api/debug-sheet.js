@@ -113,7 +113,11 @@ export default async function handler(req, res) {
     if (req.query.mode === 'all-titles') {
       const all = mappedRows
         .filter((row) => normalizeText(row.Published).toUpperCase() === 'TRUE')
-        .map((row) => ({ sku: normalizeSku(row), title: normalizeText(row.Title) }))
+        .map((row) => ({
+          sku: normalizeSku(row),
+          title: normalizeText(row.Title),
+          category: normalizeText(row.Collection) || normalizeText(row.Type),
+        }))
         .filter((row) => row.sku && row.title);
       res.statusCode = 200;
       res.end(JSON.stringify({ totalRows: mappedRows.length, count: all.length, rows: all }, null, 2));
