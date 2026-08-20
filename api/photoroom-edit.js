@@ -45,7 +45,7 @@ async function resolveRealFilename(statedFilename) {
   throw new Error(`No real image file found on disk for ${statedFilename} (tried ${candidates.join(', ')})`);
 }
 
-async function editWithPhotoroom(filename, { bgPrompt, outputSize, padding, sourceUrl, expand }) {
+async function editWithPhotoroom(filename, { bgPrompt, backgroundImageUrl, outputSize, padding, sourceUrl, expand }) {
   const apiKey = process.env.PHOTOROOM_API_KEY;
   if (!apiKey) throw new Error('PHOTOROOM_API_KEY is not configured.');
 
@@ -62,7 +62,7 @@ async function editWithPhotoroom(filename, { bgPrompt, outputSize, padding, sour
     : new URLSearchParams({
         imageUrl,
         removeBackground: 'true',
-        'background.prompt': bgPrompt || DEFAULT_BG_PROMPT,
+        ...(backgroundImageUrl ? { 'background.imageUrl': backgroundImageUrl } : { 'background.prompt': bgPrompt || DEFAULT_BG_PROMPT }),
         outputSize: outputSize || DEFAULT_OUTPUT_SIZE,
         padding: padding || '0.12',
         'export.format': 'jpeg',
@@ -166,6 +166,7 @@ export default async function handler(req, res) {
     const bgPrompt = typeof req.query.bgPrompt === 'string' && req.query.bgPrompt.trim() ? req.query.bgPrompt : undefined;
     const padding = typeof req.query.padding === 'string' && req.query.padding.trim() ? req.query.padding : undefined;
     const sourceUrl = typeof req.query.sourceUrl === 'string' && req.query.sourceUrl.trim() ? req.query.sourceUrl.trim() : undefined;
+    const backgroundImageUrl = typeof req.query.backgroundImageUrl === 'string' && req.query.backgroundImageUrl.trim() ? req.query.backgroundImageUrl.trim() : undefined;
     const expand = req.query.expand === 'true';
     if (!filename) {
       res.statusCode = 400;
@@ -177,7 +178,7 @@ export default async function handler(req, res) {
       // sourceUrl bypasses the repo entirely (e.g. testing directly against
       // a Shopify-hosted image), so there's no repo file to resolve.
       const realFilename = sourceUrl ? filename : await resolveRealFilename(filename);
-      const buffer = await editWithPhotoroom(realFilename, { bgPrompt, padding, sourceUrl, expand });
+      const buffer = await editWithPhotoroom(realFilename, { bgPrompt, backgroundImageUrl, padding, sourceUrl, expand });
       // Commit to a throwaway _preview path rather than streaming bytes back
       // -- this endpoint is only reachable through a tool that mangles raw
       // binary responses, but a git pull + local file read is lossless.
