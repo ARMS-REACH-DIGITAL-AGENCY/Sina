@@ -7,6 +7,12 @@ function loadImage(src) {
   return new Promise((resolve) => {
     const img = new Image();
     img.decoding = 'async';
+    // Product photos now come from Shopify's CDN, not this site's own
+    // origin -- sampleColorGrid() draws them onto a canvas and reads pixel
+    // data back out, which the browser refuses (tainted canvas) unless the
+    // image was fetched in CORS mode. Shopify's CDN already sends a
+    // permissive Access-Control-Allow-Origin header, so this is enough.
+    img.crossOrigin = 'anonymous';
     img.onload = () => resolve(img);
     // Resolve with null rather than rejecting: the product catalog's real
     // photos are still being finalized, so a handful of missing files
@@ -42,13 +48,20 @@ function sampleColorGrid(img, cols, rows) {
   canvas.height = rows;
   const ctx = canvas.getContext('2d', { willReadFrequently: true });
   ctx.drawImage(img, 0, 0, cols, rows);
-  const { data } = ctx.getImageData(0, 0, cols, rows);
-  const cells = [];
-  for (let i = 0; i < cols * rows; i++) {
-    const o = i * 4;
-    cells.push([data[o], data[o + 1], data[o + 2]]);
+  try {
+    const { data } = ctx.getImageData(0, 0, cols, rows);
+    const cells = [];
+    for (let i = 0; i < cols * rows; i++) {
+      const o = i * 4;
+      cells.push([data[o], data[o + 1], data[o + 2]]);
+    }
+    return cells;
+  } catch (error) {
+    // A cross-origin image without a permissive CORS response taints the
+    // canvas and getImageData throws -- treat it the same as a failed
+    // image load (null) rather than crashing the whole mosaic build.
+    return null;
   }
-  return cells;
 }
 
 function distanceSq(a, b) {
@@ -90,12 +103,29 @@ export async function buildMosaicGrid({ portraitSrc, products, cols, rows }) {
   if (!available.length) return [];
 
   const cellColors = sampleColorGrid(portraitImg, cols, rows);
-  const productColors = available.map((entry) => sampleColorGrid(entry.img, 1, 1)[0]);
+  if (!cellColors) throw new Error(`Failed to sample colors from portrait image: ${portraitSrc}`);
+
+  // A loaded image can still fail color sampling (tainted canvas from a
+  // cross-origin source without a permissive CORS response) -- filter those
+  // out the same way a failed image load already is, rather than letting
+  // one bad entry crash the whole grid.
+  const sampled = available
+    .map((entry) => ({ ...entry, color: sampleColorGrid(entry.img, 1, 1)?.[0] }))
+    .filter((entry) => entry.color);
+
+  if (sampled.length < available.length) {
+    console.warn(
+      `Living Mosaic: ${available.length - sampled.length} product photo(s) failed color sampling and were skipped.`
+    );
+  }
+  if (!sampled.length) return [];
+
+  const productColors = sampled.map((entry) => entry.color);
   // `entry.img.src` is whichever candidate actually loaded (primary or a
   // fallback) -- hand it back per productIndex so the tile renders that
   // same verified-working image instead of re-guessing with the product's
   // (possibly wrong) primary filename and silently 404ing.
-  const resolvedSrcByIndex = new Map(available.map((entry) => [entry.productIndex, entry.img.src]));
+  const resolvedSrcByIndex = new Map(sampled.map((entry) => [entry.productIndex, entry.img.src]));
 
   const grid = [];
   let aboveRowChoices = new Array(cols).fill(-1);
@@ -109,7 +139,7 @@ export async function buildMosaicGrid({ portraitSrc, products, cols, rows }) {
       const cellColor = cellColors[idx];
 
       const ranked = productColors
-        .map((color, i) => ({ productIndex: available[i].productIndex, d: distanceSq(cellColor, color) }))
+        .map((color, i) => ({ productIndex: sampled[i].productIndex, d: distanceSq(cellColor, color) }))
         .sort((a, b) => a.d - b.d);
 
       // With a small catalog, the literal nearest match repeats constantly
@@ -119,7 +149,7 @@ export async function buildMosaicGrid({ portraitSrc, products, cols, rows }) {
       // of SKUs) is wired in and neighboring cells rarely share a best match.
       let chosen = ranked[0];
       const above = aboveRowChoices[col];
-      if (available.length > 3 && ranked[1]) {
+      if (sampled.length > 3 && ranked[1]) {
         const collides = chosen.productIndex === leftChoice || chosen.productIndex === above;
         const runnerUpIsClose = ranked[1].d <= chosen.d * 1.6;
         if (collides && runnerUpIsClose) chosen = ranked[1];
