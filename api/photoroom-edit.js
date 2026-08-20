@@ -151,6 +151,28 @@ export default async function handler(req, res) {
     return;
   }
 
+  if (req.query.mode === 'preview') {
+    const filename = typeof req.query.filename === 'string' ? req.query.filename.trim() : '';
+    const bgPrompt = typeof req.query.bgPrompt === 'string' && req.query.bgPrompt.trim() ? req.query.bgPrompt : undefined;
+    if (!filename) {
+      res.statusCode = 400;
+      res.end('Missing filename query param.');
+      return;
+    }
+    try {
+      const realFilename = await resolveRealFilename(filename);
+      const buffer = await editWithPhotoroom(realFilename, { bgPrompt });
+      res.statusCode = 200;
+      res.setHeader('Content-Type', 'image/jpeg');
+      res.end(buffer);
+    } catch (error) {
+      res.statusCode = 500;
+      res.setHeader('Content-Type', 'application/json');
+      res.end(JSON.stringify({ error: error.message }));
+    }
+    return;
+  }
+
   res.setHeader('Content-Type', 'application/json');
 
   if (req.query.mode === 'batch') {
