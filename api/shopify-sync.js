@@ -137,6 +137,156 @@ async function getProductMediaInfo(token, sku) {
   return { productId: node.product.id, hasMedia: node.product.media.edges.length > 0 };
 }
 
+// Approved via live preview against product 237 (Rachel): drops the
+// "matte plaster" texture language (was reading as a stucco wall) in favor
+// of a smooth, out-of-focus studio sweep with a soft horizon line, sized so
+// the piece reads large in frame (padding 0.20).
+const HORIZON_BG_PROMPT =
+  'a professional jewelry photography studio backdrop: a smooth, seamless paper sweep in soft warm grey, softly out of focus with gentle bokeh, curving from a vertical wall into a horizontal surface so a soft blurred horizon line is visible in the middle of the frame. The backdrop has NO visible texture, no wall pattern, no plaster or stucco grain -- it is smooth and creamy like an out-of-focus studio sweep, not a textured wall. Soft diffused lighting creates a gentle gradient, lighter near the horizon line and slightly darker toward the top and bottom edges. Shallow depth of field keeps the background soft while the product stays in sharp focus, direct front view, product centered.';
+const HORIZON_PADDING = '0.20';
+const STUDIO_MODEL_VERSION = 'background-studio-beta-2025-03-17';
+
+// Pendants (150) + Charms (4) + Plates (1) that still show a black or
+// unedited native background, per the owner's own product-by-product review
+// (everything else in those categories was confirmed already good).
+const NEEDS_HORIZON_BG_TITLES = [
+  'Antoinette', 'Aria', 'Arlene', 'Atlas', 'Augusta', 'Bernice', 'Blanche', 'Carmelita', 'Christina', 'Clarice',
+  'Clementine', 'Colette', 'Connie', 'Constance', 'Crystal', 'Daphne', 'Darlene', 'Delia', 'Emmeline', 'Evangeline',
+  'Faith', 'Felicia', 'Flora', 'Francine', 'Gabrielle', 'Gail', 'Genevieve', 'Georgia', 'Georgina', 'Gilda', 'Grace',
+  'Gwendolyn', 'Hattie', 'Hazel', 'Helena', 'Henrietta', 'Imogene', 'Irene', 'Isabel', 'Jane', 'Janine', 'Jeanne',
+  'Joan', 'Josephina', 'Josephine', 'Joyce', 'Julia', 'June', 'Kathleen', 'Kathryn', 'Laurie', 'Lena', 'Leona',
+  'Loretta', 'Lucille', 'Lucinda', 'Lucy', 'Luella', 'Lydia', 'Lynn', 'Mabel', 'Madeline', 'Marcella', 'Margaret',
+  'Margie', 'Maria', 'Marian', 'Marie', 'Marigold', 'Marilyn', 'Marion', 'Marjorie', 'Marsha', 'Mary', 'Maude',
+  'Maureen', 'Maxine', 'Melinda', 'Mildred', 'Millicent', 'Minerva', 'Miriam', 'Mona', 'Monica', 'Muriel', 'Myrna',
+  'Nanette', 'Natalie', 'Nellie', 'Norma', 'Olive', 'Opal', 'Pamela', 'Patsy', 'Paula', 'Paulette', 'Pauline',
+  'Peggy', 'Phyllis', 'Priscilla', 'Rachel', 'Ramona', 'Raven', 'Rebecca', 'Regina', 'Renee', 'Rhonda', 'Rita',
+  'Roberta', 'Rosalie', 'Rose', 'Rosemary', 'Rowan', 'Ruby', 'Ruth', 'Sally', 'Sandra', 'Sara', 'Sarah', 'Selena',
+  'Seraphina', 'Sheila', 'Shirley', 'Sophia', 'Stella', 'Sterling II', 'Susannah', 'Suzanne', 'Sylvia', 'Tabitha',
+  'Teresa', 'Thelma', 'Theresa', 'Tina', 'Trudy', 'Vera', 'Veronica', 'Victoria', 'Viola', 'Violet', 'Virginia',
+  'Vivian', 'Wendy', 'Wilma', 'Winifred', 'Winnie', 'Winona', 'Yolanda', 'Yvonne', 'Zelda',
+  'Lillian', 'Louise', 'Luna', 'Petra',
+  'Ola',
+];
+
+async function editWithPhotoroomFromUrl(sourceImageUrl) {
+  const apiKey = process.env.PHOTOROOM_API_KEY;
+  if (!apiKey) throw new Error('PHOTOROOM_API_KEY is not configured.');
+
+  const params = new URLSearchParams({
+    imageUrl: sourceImageUrl,
+    removeBackground: 'true',
+    'background.prompt': HORIZON_BG_PROMPT,
+    outputSize: '1200x1200',
+    padding: HORIZON_PADDING,
+    'export.format': 'jpeg',
+    'shadow.mode': 'ai.soft',
+  });
+
+  const response = await fetch(`https://image-api.photoroom.com/v2/edit?${params.toString()}`, {
+    method: 'GET',
+    headers: { 'x-api-key': apiKey, 'pr-ai-background-model-version': STUDIO_MODEL_VERSION },
+  });
+  if (!response.ok) throw new Error(`Photoroom API failed (${response.status}): ${await response.text()}`);
+  return Buffer.from(await response.arrayBuffer());
+}
+
+async function findProductBySkuWithMedia(token, sku) {
+  const data = await shopifyGraphql(
+    token,
+    `query($q: String!) {
+      productVariants(first: 1, query: $q) {
+        edges {
+          node {
+            product {
+              id
+              title
+              media(first: 5) { edges { node { id ... on MediaImage { image { url } } } } }
+            }
+          }
+        }
+      }
+    }`,
+    { q: `sku:${sku}` }
+  );
+  const node = data.productVariants.edges[0]?.node;
+  if (!node) return null;
+  const primary = node.product.media.edges[0]?.node;
+  return {
+    productId: node.product.id,
+    title: node.product.title,
+    oldMediaId: primary?.id || null,
+    oldImageUrl: primary?.image?.url || null,
+  };
+}
+
+async function uploadImageToShopify(token, buffer, filename) {
+  const stagedData = await shopifyGraphql(
+    token,
+    `mutation($input: [StagedUploadInput!]!) {
+      stagedUploadsCreate(input: $input) {
+        stagedTargets { url resourceUrl parameters { name value } }
+        userErrors { field message }
+      }
+    }`,
+    { input: [{ resource: 'IMAGE', filename, mimeType: 'image/jpeg', httpMethod: 'POST' }] }
+  );
+  const stagedErrors = stagedData.stagedUploadsCreate.userErrors;
+  if (stagedErrors.length) throw new Error(`stagedUploadsCreate failed: ${JSON.stringify(stagedErrors)}`);
+  const target = stagedData.stagedUploadsCreate.stagedTargets[0];
+
+  const form = new FormData();
+  for (const { name, value } of target.parameters) form.append(name, value);
+  form.append('file', new Blob([buffer], { type: 'image/jpeg' }), filename);
+
+  const uploadResponse = await fetch(target.url, { method: 'POST', body: form });
+  if (!uploadResponse.ok) throw new Error(`Staged upload failed (${uploadResponse.status}): ${await uploadResponse.text()}`);
+
+  return target.resourceUrl;
+}
+
+async function replaceProductImage(token, productId, oldMediaId, resourceUrl) {
+  const createResult = await shopifyGraphql(
+    token,
+    `mutation($productId: ID!, $media: [CreateMediaInput!]!) {
+      productCreateMedia(productId: $productId, media: $media) {
+        media { id }
+        mediaUserErrors { field message }
+      }
+    }`,
+    { productId, media: [{ originalSource: resourceUrl, mediaContentType: 'IMAGE' }] }
+  );
+  const createErrors = createResult.productCreateMedia.mediaUserErrors;
+  if (createErrors.length) throw new Error(`productCreateMedia failed: ${JSON.stringify(createErrors)}`);
+
+  if (oldMediaId) {
+    const deleteResult = await shopifyGraphql(
+      token,
+      `mutation($productId: ID!, $mediaIds: [ID!]!) {
+        productDeleteMedia(productId: $productId, mediaIds: $mediaIds) {
+          deletedMediaIds
+          mediaUserErrors { field message }
+        }
+      }`,
+      { productId, mediaIds: [oldMediaId] }
+    );
+    const deleteErrors = deleteResult.productDeleteMedia.mediaUserErrors;
+    if (deleteErrors.length) throw new Error(`productDeleteMedia failed: ${JSON.stringify(deleteErrors)}`);
+  }
+}
+
+async function processHorizonBgTitle(token, title, sheetRows) {
+  const row = sheetRows.find((r) => r.title === title);
+  if (!row) throw new Error(`No Sheet row found for title "${title}"`);
+  const product = await findProductBySkuWithMedia(token, row.sku);
+  if (!product) throw new Error(`No Shopify product found for SKU ${row.sku}`);
+  if (!product.oldImageUrl) throw new Error(`Product ${row.sku} has no existing image to source from`);
+
+  const buffer = await editWithPhotoroomFromUrl(product.oldImageUrl);
+  const resourceUrl = await uploadImageToShopify(token, buffer, `${row.sku}.jpg`);
+  await replaceProductImage(token, product.productId, product.oldMediaId, resourceUrl);
+  return { sku: row.sku, title, status: 'done', bytes: buffer.length };
+}
+
 async function attachProductImage(token, productId, imageUrl) {
   const result = await shopifyGraphql(
     token,
@@ -542,6 +692,47 @@ export default async function handler(req, res) {
   if (suppliedKey !== ADMIN_KEY) {
     res.statusCode = 401;
     res.end('Unauthorized.');
+    return;
+  }
+
+  if (req.query.mode === 'edit-images') {
+    res.setHeader('Content-Type', 'application/json');
+    const offset = Number.parseInt(req.query.offset, 10) || 0;
+    const limit = Number.parseInt(req.query.limit, 10) || 5;
+    const override = typeof req.query.titles === 'string' ? req.query.titles.split(',').map((t) => t.trim()).filter(Boolean) : null;
+    const list = override || NEEDS_HORIZON_BG_TITLES;
+    try {
+      const token = await fetchAccessToken();
+      const sheetRows = await fetchSheetRows();
+      const batch = list.slice(offset, offset + limit);
+      const results = [];
+      for (const title of batch) {
+        try {
+          results.push(await processHorizonBgTitle(token, title, sheetRows));
+        } catch (error) {
+          results.push({ title, status: 'error', error: error.message });
+        }
+      }
+      const nextOffset = offset + limit;
+      res.statusCode = 200;
+      res.end(
+        JSON.stringify(
+          {
+            total: list.length,
+            batchStart: offset,
+            batchSize: batch.length,
+            results,
+            done: nextOffset >= list.length,
+            nextOffset: nextOffset < list.length ? nextOffset : null,
+          },
+          null,
+          2
+        )
+      );
+    } catch (error) {
+      res.statusCode = 500;
+      res.end(JSON.stringify({ error: error.message }));
+    }
     return;
   }
 
