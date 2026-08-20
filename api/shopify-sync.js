@@ -333,6 +333,31 @@ export default async function handler(req, res) {
 
   res.setHeader('Content-Type', 'application/json');
 
+  if (req.query.mode === 'debug-image') {
+    const filename = typeof req.query.filename === 'string' ? req.query.filename : '';
+    const url = `${IMAGE_BASE_URL}/${encodeURIComponent(filename)}`;
+    try {
+      const response = await fetch(url, { headers: { Range: 'bytes=0-0' } });
+      res.statusCode = 200;
+      res.end(
+        JSON.stringify(
+          {
+            url,
+            status: response.status,
+            ok: response.ok,
+            headers: Object.fromEntries(response.headers.entries()),
+          },
+          null,
+          2
+        )
+      );
+    } catch (error) {
+      res.statusCode = 200;
+      res.end(JSON.stringify({ url, error: error.message }, null, 2));
+    }
+    return;
+  }
+
   try {
     if (req.query.mode === 'archive') {
       const token = await fetchAccessToken();
