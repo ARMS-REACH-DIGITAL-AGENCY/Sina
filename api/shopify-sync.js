@@ -196,7 +196,7 @@ async function findVariantBySku(token, sku) {
     token,
     `query($q: String!) {
       productVariants(first: 1, query: $q) {
-        edges { node { id price inventoryItem { id } product { id status } } }
+        edges { node { id price inventoryItem { id } product { id status title } } }
       }
     }`,
     { q: `sku:${sku}` }
@@ -297,11 +297,18 @@ async function createProduct(token, row, locationId) {
 }
 
 async function updateProduct(token, existing, row, locationId) {
-  if (existing.product.status !== 'ACTIVE') {
+  // Photoroom's own "Publish to Shopify" button pushes its own cached title
+  // back onto the product along with the image -- it doesn't know the Sheet
+  // is the source of truth, so it can silently overwrite a correct title
+  // with a stale one. Correcting it back here on every sync is the backstop
+  // for that, not just for a title that was never set correctly to begin
+  // with.
+  const titleDrifted = existing.product.status === 'ACTIVE' && existing.product.title !== row.title;
+  if (existing.product.status !== 'ACTIVE' || titleDrifted) {
     await shopifyGraphql(
       token,
       `mutation($input: ProductInput!) { productUpdate(input: $input) { userErrors { field message } } }`,
-      { input: { id: existing.product.id, status: 'ACTIVE' } }
+      { input: { id: existing.product.id, status: 'ACTIVE', title: row.title } }
     );
   }
 
