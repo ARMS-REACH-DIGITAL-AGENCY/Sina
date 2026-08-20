@@ -154,6 +154,7 @@ export default async function handler(req, res) {
   if (req.query.mode === 'preview') {
     const filename = typeof req.query.filename === 'string' ? req.query.filename.trim() : '';
     const bgPrompt = typeof req.query.bgPrompt === 'string' && req.query.bgPrompt.trim() ? req.query.bgPrompt : undefined;
+    const padding = typeof req.query.padding === 'string' && req.query.padding.trim() ? req.query.padding : undefined;
     if (!filename) {
       res.statusCode = 400;
       res.end('Missing filename query param.');
@@ -162,7 +163,7 @@ export default async function handler(req, res) {
     res.setHeader('Content-Type', 'application/json');
     try {
       const realFilename = await resolveRealFilename(filename);
-      const buffer = await editWithPhotoroom(realFilename, { bgPrompt });
+      const buffer = await editWithPhotoroom(realFilename, { bgPrompt, padding });
       // Commit to a throwaway _preview path rather than streaming bytes back
       // -- this endpoint is only reachable through a tool that mangles raw
       // binary responses, but a git pull + local file read is lossless.
