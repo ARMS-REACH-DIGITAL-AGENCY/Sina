@@ -165,16 +165,35 @@ function buildImageCandidates(row) {
   return [...new Set(candidates)];
 }
 
+// Same photo, different case/extension -- "100.PNG" and "100.jpg" both mean
+// "the shot named 100", so compare on that instead of the raw string.
+function galleryDedupeKey(filename) {
+  const dot = filename.lastIndexOf('.');
+  return (dot === -1 ? filename : filename.slice(0, dot)).toLowerCase();
+}
+
 // Extra gallery photos beyond the primary shot -- filled in only for pieces
 // where there's more than one angle worth showing. Optional columns, so
 // most rows simply won't have them and the card falls back to just the
-// primary image. Each slot carries its own extension-candidate chain (same
-// case-mismatch tolerance as the primary photo) so the frontend can fall
-// through per-thumbnail instead of giving up on the whole gallery.
+// primary image. Rows not yet given a real alternate photo have these
+// columns seeded with the same filename as the primary shot (a sheet
+// default, not a real second photo), so skip any slot that doesn't
+// actually point somewhere new. Each surviving slot carries its own
+// extension-candidate chain (same case-mismatch tolerance as the primary
+// photo) so the frontend can fall through per-thumbnail instead of giving
+// up on the whole gallery.
 function buildGalleryImages(row, primaryImageCandidates) {
+  const seen = new Set([galleryDedupeKey(normalizeText(row['Image 1 Filename']) || normalizeText(row['Final Image Filename']))]);
+
   const extraSlots = ['Image 2 Filename', 'Image 3 Filename', 'Image 4 Filename']
     .map((key) => normalizeText(row[key]))
     .filter(Boolean)
+    .filter((filename) => {
+      const key = galleryDedupeKey(filename);
+      if (seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    })
     .map((filename) => buildExtensionCandidates(filename));
 
   return [primaryImageCandidates, ...extraSlots];
