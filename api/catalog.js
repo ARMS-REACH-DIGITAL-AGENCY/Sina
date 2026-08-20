@@ -130,7 +130,7 @@ function buildExtensionCandidates(rawFilename) {
 
 // Returns every plausible image path for this row, most-trusted first, so
 // the client can fall back if the "correct" one turns out to be wrong --
-// e.g. a row's Final Image Filename column says "NKL-166" but the file
+// e.g. a row's Image 1 Filename column says "NKL-166" but the file
 // actually uploaded is "166.JPG" (the legacy shoot-number convention every
 // other row uses). Rather than silently show a broken image whenever a
 // sheet entry has a filename typo/mismatch, give the frontend both
@@ -138,9 +138,13 @@ function buildExtensionCandidates(rawFilename) {
 function buildImageCandidates(row) {
   const candidates = [];
 
-  const finalFilename = normalizeText(row['Final Image Filename']);
-  if (finalFilename) {
-    candidates.push(...buildExtensionCandidates(finalFilename));
+  // Image 1 Filename is the primary shot under the clean 1/2/3/4 gallery
+  // scheme. Final Image Filename is the old column being retired -- kept
+  // here only as a fallback so nothing breaks for any row that hasn't been
+  // migrated yet; safe to remove once every row has Image 1 Filename set.
+  const primaryFilename = normalizeText(row['Image 1 Filename']) || normalizeText(row['Final Image Filename']);
+  if (primaryFilename) {
+    candidates.push(...buildExtensionCandidates(primaryFilename));
   }
 
   const legacySku = normalizeText(row.SKU);
@@ -168,18 +172,7 @@ function buildImageCandidates(row) {
 // case-mismatch tolerance as the primary photo) so the frontend can fall
 // through per-thumbnail instead of giving up on the whole gallery.
 function buildGalleryImages(row, primaryImageCandidates) {
-  // "Image 1 Filename" normally just mirrors Final Image Filename (the
-  // primary shot), so it's skipped by default -- including it always would
-  // duplicate the primary thumbnail on every row that hasn't customized it.
-  // When a row does set it to something else (an alternate/on-model shot),
-  // treat it as a genuine extra slot like Image 2/3/4.
-  const image1 = normalizeText(row['Image 1 Filename']);
-  const primaryFilename = normalizeText(row['Final Image Filename']);
-  const slotKeys = image1 && image1.toLowerCase() !== primaryFilename.toLowerCase()
-    ? ['Image 1 Filename', 'Image 2 Filename', 'Image 3 Filename', 'Image 4 Filename']
-    : ['Image 2 Filename', 'Image 3 Filename', 'Image 4 Filename'];
-
-  const extraSlots = slotKeys
+  const extraSlots = ['Image 2 Filename', 'Image 3 Filename', 'Image 4 Filename']
     .map((key) => normalizeText(row[key]))
     .filter(Boolean)
     .map((filename) => buildExtensionCandidates(filename));
