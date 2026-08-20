@@ -6,6 +6,7 @@ import WholesaleApplicationForm from '../components/WholesaleApplicationForm.jsx
 import SearchEyebrow from '../components/SearchEyebrow.jsx';
 import { SiteSearchProvider } from '../components/SiteSearchContext.jsx';
 import useCatalogProducts from '../hooks/useCatalogProducts.js';
+import usePageMeta from '../hooks/usePageMeta.js';
 import '../styles/hero-image-overrides.css';
 
 const headerLogoPath = '/assets/brand/sinas-creations-black-logo.png';
@@ -352,6 +353,10 @@ function CategoryIcon({ type }) {
 
 export function Home() {
   const { products } = useCatalogProducts();
+  usePageMeta(
+    "Sina's Creations — Handcrafted Fused Glass Jewelry & Art",
+    'One-of-one fused-glass jewelry and art, handmade by Thomasina Schnepf. Every creation is named, photographed, and offered to one person.'
+  );
 
   return (
     <Layout>
@@ -404,6 +409,10 @@ export function Home() {
 }
 
 export function Story() {
+  usePageMeta(
+    "Meet Sina — The Artist Behind Every 1-of-1 Creation | Sina's Creations",
+    "Meet Thomasina Schnepf, the artist behind Sina's Creations. Legally blind, she works by touch, light, and color to hand-make every fused-glass piece."
+  );
   return (
     <Layout>
       <Hero
@@ -482,6 +491,10 @@ export function Collections() {
 }
 
 export function Collaborate() {
+  usePageMeta(
+    "Commission Sina — Custom Fused Glass Art | Sina's Creations",
+    'Commission a custom fused-glass piece from Thomasina Schnepf, shaped around a person, memory, color story, or meaning.'
+  );
   return (
     <Layout>
       <Hero
@@ -502,6 +515,10 @@ export function Collaborate() {
 }
 
 export function Wholesale() {
+  usePageMeta(
+    "Wholesale Partners — Sell Sina's Creations | Sina's Creations",
+    'Wholesale applications for boutiques, galleries, and retailers who want one-of-one fused-glass jewelry and art with a personal story behind every piece.'
+  );
   return (
     <Layout>
       <Hero
@@ -542,6 +559,18 @@ export function Shop() {
   const sharedProduct = React.useMemo(
     () => (sharedSku ? products.find((product) => product.sku === sharedSku) : null),
     [products, sharedSku]
+  );
+  // The middleware handles the initial server-rendered response for a
+  // shared product link; this keeps the tab title in sync too once React
+  // Router takes over (a client-side nav between products never re-hits
+  // the middleware, only the first full page load does).
+  usePageMeta(
+    sharedProduct
+      ? `${sharedProduct.name} — ${sharedProduct.category} | Sina's Creations`
+      : "Shop All Creations | Sina's Creations",
+    sharedProduct
+      ? sharedProduct.description
+      : 'Browse every available one-of-one fused-glass creation by Thomasina Schnepf -- pendants, necklaces, plaques, plates, and more.'
   );
   const queryFilter = React.useMemo(() => {
     const requested = new URLSearchParams(location.search).get('collection');
@@ -699,6 +728,10 @@ function FeaturedProducts({ products }) {
 }
 
 export function Schedule() {
+  usePageMeta(
+    "Contact Sina's Creations — Ask, Commission, or Adopt a Piece",
+    "Ask about an available piece, request a commission, explore wholesale, or reach out to Sina's Creations directly."
+  );
   return (
     <Layout>
       <Hero
@@ -913,6 +946,7 @@ function LegalPage({ eyebrow, title, children }) {
 }
 
 export function Privacy() {
+  usePageMeta("Privacy Policy | Sina's Creations", "Sina's Creations' privacy policy.");
   return (
     <LegalPage eyebrow="Privacy" title="Privacy Policy">
       <h2>Information we collect</h2>
@@ -934,6 +968,7 @@ export function Privacy() {
 }
 
 export function Terms() {
+  usePageMeta("Terms & Messaging Terms | Sina's Creations", "Sina's Creations' terms and messaging terms.");
   return (
     <LegalPage eyebrow="Terms" title="Terms &amp; Messaging Terms">
       <h2>Website information</h2>
