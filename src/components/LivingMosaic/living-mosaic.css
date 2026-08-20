@@ -71,6 +71,14 @@
   will-change: transform;
 }
 
+/* Only present while the initial zoomed-in-to-zoomed-out reveal plays --
+   gesture-driven zoom/pan needs the transform to track the finger/cursor
+   with zero lag, so this eased transition is added just for the reveal and
+   removed the moment it finishes. */
+.living-mosaic__zoom-stage.is-auto-revealing {
+  transition: transform 2.4s cubic-bezier(.16, .8, .3, 1);
+}
+
 .living-mosaic__loading {
   aspect-ratio: 13 / 23;
   max-height: 78vh;

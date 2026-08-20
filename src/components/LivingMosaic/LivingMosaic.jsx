@@ -12,6 +12,13 @@ const MOBILE_GRID = { cols: 30, rows: 40 };
 const MOBILE_BREAKPOINT = 767;
 const MAX_ZOOM = 10;
 const ZOOM_RESET_THRESHOLD = 1.02;
+// The page loads zoomed into the product grid, then auto-zooms out to
+// reveal the full portrait once the section scrolls into view -- telling
+// the "the creations are all part of her" story without requiring a
+// visitor to think to zoom out on their own (see is-auto-revealing below).
+const INITIAL_ZOOM_STATE = { scale: 4, x: 0, y: 0 };
+const AUTO_REVEAL_DELAY_MS = 500;
+const AUTO_REVEAL_DURATION_MS = 2400;
 
 function clamp(value, min, max) {
   return Math.min(Math.max(value, min), max);
@@ -33,15 +40,17 @@ export default function LivingMosaic() {
   const [portraitLoaded, setPortraitLoaded] = useState(false);
   const [modalProduct, setModalProduct] = useState(null);
   const [active, setActive] = useState(false);
-  const [zoomState, setZoomState] = useState({ scale: 1, x: 0, y: 0 });
+  const [zoomState, setZoomState] = useState(INITIAL_ZOOM_STATE);
+  const [autoRevealing, setAutoRevealing] = useState(false);
   const [gridConfig, setGridConfig] = useState(getGridConfig);
 
   const sectionRef = useRef(null);
   const viewportRef = useRef(null);
-  const zoomRef = useRef({ scale: 1, x: 0, y: 0 });
+  const zoomRef = useRef(INITIAL_ZOOM_STATE);
   const gestureRef = useRef({ type: 'idle' });
   const suppressTapRef = useRef(false);
   const mouseDragRef = useRef({ active: false });
+  const hasAutoRevealedRef = useRef(false);
 
   const { cols: gridCols, rows: gridRows } = gridConfig;
 
@@ -334,6 +343,25 @@ export default function LivingMosaic() {
 
   const mosaicReady = portraitLoaded && !productsLoading && !gridLoading && !gridError && grid.length > 0;
 
+  useEffect(() => {
+    if (!active || !mosaicReady || hasAutoRevealedRef.current) return undefined;
+    hasAutoRevealedRef.current = true;
+
+    const startTimer = window.setTimeout(() => {
+      setAutoRevealing(true);
+      setZoomState({ scale: 1, x: 0, y: 0 });
+    }, AUTO_REVEAL_DELAY_MS);
+
+    const endTimer = window.setTimeout(() => {
+      setAutoRevealing(false);
+    }, AUTO_REVEAL_DELAY_MS + AUTO_REVEAL_DURATION_MS);
+
+    return () => {
+      window.clearTimeout(startTimer);
+      window.clearTimeout(endTimer);
+    };
+  }, [active, mosaicReady]);
+
   function handleTap(cell) {
     setModalProduct(cellProduct(cell));
   }
@@ -354,7 +382,7 @@ export default function LivingMosaic() {
         aria-label="Interactive mosaic portrait"
       >
         <div
-          className="living-mosaic__zoom-stage"
+          className={`living-mosaic__zoom-stage${autoRevealing ? ' is-auto-revealing' : ''}`}
           style={{
             transform: `translate3d(${zoomState.x}px, ${zoomState.y}px, 0) scale(${zoomState.scale})`,
           }}
