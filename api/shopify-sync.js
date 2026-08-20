@@ -583,6 +583,53 @@ export default async function handler(req, res) {
     return;
   }
 
+  if (req.query.mode === 'audit') {
+    res.setHeader('Content-Type', 'application/json');
+    try {
+      const token = await fetchAccessToken();
+      const all = [];
+      let cursor = null;
+      // eslint-disable-next-line no-constant-condition
+      while (true) {
+        const data = await shopifyGraphql(
+          token,
+          `query($cursor: String) {
+            products(first: 100, after: $cursor) {
+              edges {
+                cursor
+                node {
+                  title
+                  status
+                  bodyHtml
+                  variants(first: 1) { edges { node { sku } } }
+                }
+              }
+              pageInfo { hasNextPage }
+            }
+          }`,
+          { cursor }
+        );
+        const edges = data.products.edges;
+        for (const edge of edges) {
+          all.push({
+            sku: edge.node.variants.edges[0]?.node.sku || '',
+            title: edge.node.title,
+            status: edge.node.status,
+            hasBody: Boolean(edge.node.bodyHtml && edge.node.bodyHtml.trim()),
+          });
+        }
+        if (!data.products.pageInfo.hasNextPage || edges.length === 0) break;
+        cursor = edges[edges.length - 1].cursor;
+      }
+      res.statusCode = 200;
+      res.end(JSON.stringify({ total: all.length, products: all }));
+    } catch (error) {
+      res.statusCode = 500;
+      res.end(JSON.stringify({ error: error.message }));
+    }
+    return;
+  }
+
   res.setHeader('Content-Type', 'application/json');
 
   if (req.query.mode === 'find-duplicates') {
