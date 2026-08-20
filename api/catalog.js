@@ -1,4 +1,5 @@
 const SHEET_CSV_URL = 'https://docs.google.com/spreadsheets/d/1yTKJUw-OjpI6V2wxUtfSVq61b3NV3g9EcaZxsUEbfBY/export?format=csv&gid=1901402257';
+const SHOPIFY_API_VERSION = '2024-10';
 
 const CATEGORY_MAP = {
   Pendants: 'Pendants',
@@ -128,6 +129,100 @@ function buildExtensionCandidates(rawFilename) {
   return [...new Set(orderedExtensions)].map((ext) => `/images/products/${base}.${ext}`);
 }
 
+// Images now live in Shopify -- editing a photo there (via Photoroom's
+// Shopify integration, or by hand) shows up on the site automatically, with
+// no GitHub commit and no filename to remember. This looks products up by
+// SKU in one bulk paginated query rather than one request per product, and
+// is designed to fail soft: any Shopify hiccup (missing creds, network
+// error, a SKU that was never synced) falls through to the repo-hosted
+// image logic below instead of breaking the storefront.
+function shopifyDomain() {
+  const raw = process.env.SHOPIFY_ADMIN_STORE_DOMAIN;
+  if (!raw) return null;
+  return raw.trim().replace(/^https?:\/\//i, '').replace(/\/+$/, '');
+}
+
+let cachedShopifyToken = null;
+
+async function getShopifyToken() {
+  const domain = shopifyDomain();
+  const clientId = process.env.SHOPIFY_CLIENT_ID;
+  const clientSecret = process.env.SHOPIFY_CLIENT_SECRET;
+  if (!domain || !clientId || !clientSecret) return null;
+
+  if (cachedShopifyToken && cachedShopifyToken.expiresAt > Date.now()) {
+    return cachedShopifyToken.token;
+  }
+
+  const response = await fetch(`https://${domain}/admin/oauth/access_token`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    body: new URLSearchParams({ grant_type: 'client_credentials', client_id: clientId, client_secret: clientSecret }),
+  });
+  if (!response.ok) return null;
+
+  const data = await response.json();
+  cachedShopifyToken = { token: data.access_token, expiresAt: Date.now() + (data.expires_in - 120) * 1000 };
+  return cachedShopifyToken.token;
+}
+
+// Returns a Map<SKU, imageUrl[]> -- Shopify's own media order is the
+// gallery order, first image is the featured one, so no extra ordering
+// logic is needed once the data is in hand.
+async function fetchShopifyImagesBySku() {
+  const domain = shopifyDomain();
+  const images = new Map();
+
+  try {
+    const token = await getShopifyToken();
+    if (!domain || !token) return images;
+
+    let cursor = null;
+    // eslint-disable-next-line no-constant-condition
+    while (true) {
+      const response = await fetch(`https://${domain}/admin/api/${SHOPIFY_API_VERSION}/graphql.json`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'X-Shopify-Access-Token': token },
+        body: JSON.stringify({
+          query: `query($cursor: String) {
+            products(first: 250, after: $cursor, query: "tag:sheet-sync") {
+              edges {
+                cursor
+                node {
+                  variants(first: 1) { edges { node { sku } } }
+                  media(first: 10) {
+                    edges { node { ... on MediaImage { image { url } } } }
+                  }
+                }
+              }
+              pageInfo { hasNextPage }
+            }
+          }`,
+          variables: { cursor },
+        }),
+      });
+
+      const payload = await response.json();
+      if (payload.errors) break;
+
+      const edges = payload.data?.products?.edges || [];
+      for (const edge of edges) {
+        const sku = edge.node.variants.edges[0]?.node.sku?.trim().toUpperCase();
+        if (!sku) continue;
+        const urls = edge.node.media.edges.map((m) => m.node.image?.url).filter(Boolean);
+        if (urls.length) images.set(sku, urls);
+      }
+
+      if (!payload.data?.products?.pageInfo?.hasNextPage || edges.length === 0) break;
+      cursor = edges[edges.length - 1].cursor;
+    }
+  } catch (error) {
+    return new Map();
+  }
+
+  return images;
+}
+
 // Returns every plausible image path for this row, most-trusted first, so
 // the client can fall back if the "correct" one turns out to be wrong --
 // e.g. a row's Image 1 Filename column says "NKL-166" but the file
@@ -215,20 +310,37 @@ function readDimension(row, ...keys) {
   return null;
 }
 
-function normalizeProduct(row) {
+function normalizeProduct(row, shopifyImages) {
   const bodyHtml = normalizeText(row['Body (HTML)']);
   const description = stripHtml(bodyHtml);
-  const imageCandidates = buildImageCandidates(row);
-  const [image, ...imageFallbacks] = imageCandidates;
+  const sku = normalizeSku(row);
+
+  // Shopify is the live source for photos now -- an edit made there (via
+  // Photoroom or by hand) shows up here with nothing else to touch. Only
+  // fall back to guessing a repo-hosted filename when this SKU has no
+  // Shopify images yet (never synced, or Shopify was unreachable).
+  const shopifyUrls = shopifyImages.get(sku);
+  let image;
+  let imageFallbacks;
+  let gallery;
+
+  if (shopifyUrls && shopifyUrls.length) {
+    [image, ...imageFallbacks] = shopifyUrls;
+    gallery = shopifyUrls.map((url) => [url]);
+  } else {
+    const imageCandidates = buildImageCandidates(row);
+    [image, ...imageFallbacks] = imageCandidates;
+    gallery = buildGalleryImages(row, imageCandidates);
+  }
 
   return {
-    sku: normalizeSku(row),
+    sku,
     name: normalizeText(row.Title),
     category: normalizeCategory(row),
     price: normalizePrice(row['Variant Price']),
     image,
     imageFallbacks,
-    gallery: buildGalleryImages(row, imageCandidates),
+    gallery,
     line: extractHeadline(bodyHtml) || 'One of one. Handcrafted by Thomasina Schnepf.',
     description,
     descriptionHtml: bodyHtml,
@@ -271,11 +383,14 @@ export default async function handler(req, res) {
   }
 
   try {
-    const response = await fetch(SHEET_CSV_URL, {
-      headers: {
-        Accept: 'text/csv',
-      },
-    });
+    const [response, shopifyImages] = await Promise.all([
+      fetch(SHEET_CSV_URL, {
+        headers: {
+          Accept: 'text/csv',
+        },
+      }),
+      fetchShopifyImagesBySku(),
+    ]);
 
     if (!response.ok) {
       throw new Error(`Google Sheet returned ${response.status}`);
@@ -293,7 +408,7 @@ export default async function handler(req, res) {
       mappedRows
         .filter((row) => normalizeText(row.Published).toUpperCase() === 'TRUE')
         .filter((row) => normalizeSku(row) && normalizeText(row.Title))
-        .map(normalizeProduct)
+        .map((row) => normalizeProduct(row, shopifyImages))
     );
 
     return sendJson(res, 200, {
