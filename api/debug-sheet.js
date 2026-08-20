@@ -110,6 +110,16 @@ export default async function handler(req, res) {
       return;
     }
 
+    if (req.query.mode === 'all-titles') {
+      const all = mappedRows
+        .filter((row) => normalizeText(row.Published).toUpperCase() === 'TRUE')
+        .map((row) => ({ sku: normalizeSku(row), title: normalizeText(row.Title) }))
+        .filter((row) => row.sku && row.title);
+      res.statusCode = 200;
+      res.end(JSON.stringify({ totalRows: mappedRows.length, count: all.length, rows: all }, null, 2));
+      return;
+    }
+
     const wantedSkus = new Set(
       (typeof req.query.skus === 'string' ? req.query.skus.split(',') : []).map((s) => s.trim().toUpperCase()).filter(Boolean)
     );
