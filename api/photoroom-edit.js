@@ -50,6 +50,33 @@ async function editWithPhotoroom(filename, { bgPrompt, backgroundImageUrl, outpu
   if (!apiKey) throw new Error('PHOTOROOM_API_KEY is not configured.');
 
   const imageUrl = sourceUrl || `${IMAGE_BASE_URL}/${encodeURIComponent(filename)}`;
+
+  // background.imageUrl (static background compositing) is documented for
+  // the POST/multipart endpoint, not GET query strings -- GET rejected it
+  // and silently fell back to a transparent background, which then
+  // conflicted with jpeg export. Everything else still goes through GET.
+  if (backgroundImageUrl) {
+    const form = new FormData();
+    form.append('imageUrl', imageUrl);
+    form.append('removeBackground', 'true');
+    form.append('background.imageUrl', backgroundImageUrl);
+    form.append('outputSize', outputSize || DEFAULT_OUTPUT_SIZE);
+    form.append('padding', padding || '0.12');
+    form.append('export.format', 'jpeg');
+    form.append('shadow.mode', 'ai.soft');
+
+    const response = await fetch('https://image-api.photoroom.com/v2/edit', {
+      method: 'POST',
+      headers: { 'x-api-key': apiKey, 'pr-ai-background-model-version': STUDIO_MODEL_VERSION },
+      body: form,
+    });
+    if (!response.ok) {
+      const text = await response.text();
+      throw new Error(`Photoroom API failed (${response.status}): ${text}`);
+    }
+    return Buffer.from(await response.arrayBuffer());
+  }
+
   const params = expand
     ? new URLSearchParams({
         imageUrl,
@@ -62,7 +89,7 @@ async function editWithPhotoroom(filename, { bgPrompt, backgroundImageUrl, outpu
     : new URLSearchParams({
         imageUrl,
         removeBackground: 'true',
-        ...(backgroundImageUrl ? { 'background.imageUrl': backgroundImageUrl } : { 'background.prompt': bgPrompt || DEFAULT_BG_PROMPT }),
+        'background.prompt': bgPrompt || DEFAULT_BG_PROMPT,
         outputSize: outputSize || DEFAULT_OUTPUT_SIZE,
         padding: padding || '0.12',
         'export.format': 'jpeg',
