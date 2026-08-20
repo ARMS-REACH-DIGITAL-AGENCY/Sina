@@ -168,6 +168,37 @@ async function findVariantBySku(sku) {
   return data.productVariants.edges[0]?.node || null;
 }
 
+let cachedOnlineStorePublicationId = null;
+
+// A freshly created product is ACTIVE but published to zero sales channels
+// by default -- that's a separate step from productCreate in this API
+// version. Without it, the product looks fine in the admin but the
+// storefront cart can't add it ("Link no longer exists"). Look the
+// channel's id up by name once and cache it, rather than hardcoding a
+// store-specific id.
+async function getOnlineStorePublicationId() {
+  if (cachedOnlineStorePublicationId) return cachedOnlineStorePublicationId;
+  const data = await shopifyGraphql(`query { publications(first: 10) { edges { node { id name } } } }`);
+  const match = data.publications.edges.find((edge) => edge.node.name === 'Online Store');
+  if (!match) throw new Error('No "Online Store" sales channel found on this Shopify store.');
+  cachedOnlineStorePublicationId = match.node.id;
+  return cachedOnlineStorePublicationId;
+}
+
+async function publishToOnlineStore(productId) {
+  const publicationId = await getOnlineStorePublicationId();
+  const result = await shopifyGraphql(
+    `mutation($id: ID!, $input: [PublicationInput!]!) {
+      publishablePublish(id: $id, input: $input) {
+        userErrors { field message }
+      }
+    }`,
+    { id: productId, input: [{ publicationId }] }
+  );
+  const errors = result.publishablePublish.userErrors;
+  if (errors.length) throw new Error(`publishablePublish failed for ${productId}: ${JSON.stringify(errors)}`);
+}
+
 async function setInventory(inventoryItemId, locationId, quantity) {
   await shopifyGraphql(
     `mutation($input: InventorySetOnHandQuantitiesInput!) {
@@ -212,6 +243,8 @@ async function createProduct(row, locationId) {
   const productId = created.productCreate.product.id;
   const defaultVariantId = created.productCreate.product.variants.edges[0]?.node.id;
   if (!defaultVariantId) throw new Error(`productCreate for ${row.sku} returned no default variant.`);
+
+  await publishToOnlineStore(productId);
 
   const variantResult = await shopifyGraphql(
     `mutation($productId: ID!, $variants: [ProductVariantsBulkInput!]!) {

@@ -204,6 +204,38 @@ async function findVariantBySku(token, sku) {
   return data.productVariants.edges[0]?.node || null;
 }
 
+let cachedOnlineStorePublicationId = null;
+
+// A freshly created product is ACTIVE but published to zero sales channels
+// by default -- that's a separate step from productCreate in this API
+// version. Without it, the product looks fine in the admin but the
+// storefront cart can't add it ("Link no longer exists"). Look the
+// channel's id up by name once and cache it, rather than hardcoding a
+// store-specific id.
+async function getOnlineStorePublicationId(token) {
+  if (cachedOnlineStorePublicationId) return cachedOnlineStorePublicationId;
+  const data = await shopifyGraphql(token, `query { publications(first: 10) { edges { node { id name } } } }`);
+  const match = data.publications.edges.find((edge) => edge.node.name === 'Online Store');
+  if (!match) throw new Error('No "Online Store" sales channel found on this Shopify store.');
+  cachedOnlineStorePublicationId = match.node.id;
+  return cachedOnlineStorePublicationId;
+}
+
+async function publishToOnlineStore(token, productId) {
+  const publicationId = await getOnlineStorePublicationId(token);
+  const result = await shopifyGraphql(
+    token,
+    `mutation($id: ID!, $input: [PublicationInput!]!) {
+      publishablePublish(id: $id, input: $input) {
+        userErrors { field message }
+      }
+    }`,
+    { id: productId, input: [{ publicationId }] }
+  );
+  const errors = result.publishablePublish.userErrors;
+  if (errors.length) throw new Error(`publishablePublish failed for ${productId}: ${JSON.stringify(errors)}`);
+}
+
 async function setInventory(token, inventoryItemId, locationId, quantity) {
   await shopifyGraphql(
     token,
@@ -239,6 +271,8 @@ async function createProduct(token, row, locationId) {
   const productId = created.productCreate.product.id;
   const defaultVariantId = created.productCreate.product.variants.edges[0]?.node.id;
   if (!defaultVariantId) throw new Error(`productCreate for ${row.sku} returned no default variant.`);
+
+  await publishToOnlineStore(token, productId);
 
   const variantResult = await shopifyGraphql(
     token,
@@ -323,6 +357,63 @@ async function archiveMissingProducts(token, syncedSkus) {
   return archived;
 }
 
+// One-time repair for products that were created before publishToOnlineStore
+// existed in createProduct() -- they're ACTIVE but published to zero sales
+// channels, so checkout silently fails ("Link no longer exists"). Finds
+// every tag:sheet-sync product with resourcePublicationsCount 0 and
+// publishes it. Safe to re-run: already-published products are skipped.
+async function fixUnpublishedProducts(token) {
+  const publicationId = await getOnlineStorePublicationId(token);
+  const fixed = [];
+  let cursor = null;
+
+  // eslint-disable-next-line no-constant-condition
+  while (true) {
+    const data = await shopifyGraphql(
+      token,
+      `query($cursor: String) {
+        products(first: 100, after: $cursor, query: "tag:sheet-sync") {
+          edges {
+            cursor
+            node {
+              id
+              resourcePublicationsCount { count }
+              variants(first: 1) { edges { node { sku } } }
+            }
+          }
+          pageInfo { hasNextPage }
+        }
+      }`,
+      { cursor }
+    );
+
+    const edges = data.products.edges;
+    for (const edge of edges) {
+      if (edge.node.resourcePublicationsCount.count > 0) continue;
+      const sku = edge.node.variants.edges[0]?.node.sku || '(no sku)';
+      try {
+        const result = await shopifyGraphql(
+          token,
+          `mutation($id: ID!, $input: [PublicationInput!]!) {
+            publishablePublish(id: $id, input: $input) { userErrors { field message } }
+          }`,
+          { id: edge.node.id, input: [{ publicationId }] }
+        );
+        const errors = result.publishablePublish.userErrors;
+        if (errors.length) throw new Error(JSON.stringify(errors));
+        fixed.push({ sku, status: 'published' });
+      } catch (error) {
+        fixed.push({ sku, status: 'error', error: error.message });
+      }
+    }
+
+    if (!data.products.pageInfo.hasNextPage || edges.length === 0) break;
+    cursor = edges[edges.length - 1].cursor;
+  }
+
+  return fixed;
+}
+
 export default async function handler(req, res) {
   const suppliedKey = req.headers['x-admin-key'] || req.query.key;
   if (suppliedKey !== ADMIN_KEY) {
@@ -332,6 +423,19 @@ export default async function handler(req, res) {
   }
 
   res.setHeader('Content-Type', 'application/json');
+
+  if (req.query.mode === 'fix-publications') {
+    try {
+      const token = await fetchAccessToken();
+      const results = await fixUnpublishedProducts(token);
+      res.statusCode = 200;
+      res.end(JSON.stringify({ totalFixed: results.filter((r) => r.status === 'published').length, results }, null, 2));
+    } catch (error) {
+      res.statusCode = 500;
+      res.end(JSON.stringify({ error: error.message }, null, 2));
+    }
+    return;
+  }
 
   if (req.query.mode === 'debug-publication') {
     const sku = typeof req.query.sku === 'string' ? req.query.sku.trim().toUpperCase() : '';
