@@ -67,6 +67,7 @@ async function editWithPhotoroom(filename, { bgPrompt, outputSize, padding, sour
         padding: padding || '0.12',
         'export.format': 'jpeg',
         'shadow.mode': 'ai.soft',
+        colorSpace: 'original',
       });
 
   const response = await fetch(`https://image-api.photoroom.com/v2/edit?${params.toString()}`, {
