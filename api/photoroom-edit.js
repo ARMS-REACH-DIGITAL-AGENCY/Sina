@@ -45,20 +45,28 @@ async function resolveRealFilename(statedFilename) {
   throw new Error(`No real image file found on disk for ${statedFilename} (tried ${candidates.join(', ')})`);
 }
 
-async function editWithPhotoroom(filename, { bgPrompt, outputSize, padding }) {
+async function editWithPhotoroom(filename, { bgPrompt, outputSize, padding, sourceUrl, expand }) {
   const apiKey = process.env.PHOTOROOM_API_KEY;
   if (!apiKey) throw new Error('PHOTOROOM_API_KEY is not configured.');
 
-  const imageUrl = `${IMAGE_BASE_URL}/${encodeURIComponent(filename)}`;
-  const params = new URLSearchParams({
-    imageUrl,
-    removeBackground: 'true',
-    'background.prompt': bgPrompt || DEFAULT_BG_PROMPT,
-    outputSize: outputSize || DEFAULT_OUTPUT_SIZE,
-    padding: padding || '0.12',
-    'export.format': 'jpeg',
-    'shadow.mode': 'ai.soft',
-  });
+  const imageUrl = sourceUrl || `${IMAGE_BASE_URL}/${encodeURIComponent(filename)}`;
+  const params = expand
+    ? new URLSearchParams({
+        imageUrl,
+        removeBackground: 'false',
+        'expand.mode': 'ai.auto',
+        outputSize: outputSize || DEFAULT_OUTPUT_SIZE,
+        'export.format': 'jpeg',
+      })
+    : new URLSearchParams({
+        imageUrl,
+        removeBackground: 'true',
+        'background.prompt': bgPrompt || DEFAULT_BG_PROMPT,
+        outputSize: outputSize || DEFAULT_OUTPUT_SIZE,
+        padding: padding || '0.12',
+        'export.format': 'jpeg',
+        'shadow.mode': 'ai.soft',
+      });
 
   const response = await fetch(`https://image-api.photoroom.com/v2/edit?${params.toString()}`, {
     method: 'GET',
@@ -156,6 +164,8 @@ export default async function handler(req, res) {
     const filename = typeof req.query.filename === 'string' ? req.query.filename.trim() : '';
     const bgPrompt = typeof req.query.bgPrompt === 'string' && req.query.bgPrompt.trim() ? req.query.bgPrompt : undefined;
     const padding = typeof req.query.padding === 'string' && req.query.padding.trim() ? req.query.padding : undefined;
+    const sourceUrl = typeof req.query.sourceUrl === 'string' && req.query.sourceUrl.trim() ? req.query.sourceUrl.trim() : undefined;
+    const expand = req.query.expand === 'true';
     if (!filename) {
       res.statusCode = 400;
       res.end('Missing filename query param.');
@@ -163,8 +173,10 @@ export default async function handler(req, res) {
     }
     res.setHeader('Content-Type', 'application/json');
     try {
-      const realFilename = await resolveRealFilename(filename);
-      const buffer = await editWithPhotoroom(realFilename, { bgPrompt, padding });
+      // sourceUrl bypasses the repo entirely (e.g. testing directly against
+      // a Shopify-hosted image), so there's no repo file to resolve.
+      const realFilename = sourceUrl ? filename : await resolveRealFilename(filename);
+      const buffer = await editWithPhotoroom(realFilename, { bgPrompt, padding, sourceUrl, expand });
       // Commit to a throwaway _preview path rather than streaming bytes back
       // -- this endpoint is only reachable through a tool that mangles raw
       // binary responses, but a git pull + local file read is lossless.
