@@ -11,6 +11,8 @@ const ADMIN_KEY = 'ce4dbfc3c446ba331b5dda0b4cea3bd7726a7f59c7c8a8e0';
 const SHEET_CSV_URL = 'https://docs.google.com/spreadsheets/d/1yTKJUw-OjpI6V2wxUtfSVq61b3NV3g9EcaZxsUEbfBY/export?format=csv&gid=1901402257';
 const SYNC_TAG = 'sheet-sync';
 const API_VERSION = '2024-10';
+const IMAGE_BASE_URL = 'https://sinasglass.com/images/products';
+const EXTENSION_CANDIDATES = ['JPG', 'jpg', 'jpeg', 'JPEG', 'png', 'PNG'];
 
 function normalizeText(value) {
   return typeof value === 'string' ? value.trim() : '';
@@ -89,7 +91,61 @@ async function fetchSheetRows() {
       title: normalizeText(row.Title),
       price: normalizePrice(row['Variant Price']),
       category: normalizeText(row.Collection) || normalizeText(row.Type) || 'Creations',
+      imageFilename: normalizeText(row['Image 1 Filename']) || normalizeText(row['Final Image Filename']),
     }));
+}
+
+// Same case/extension resilience as api/catalog.js and api/photoroom-edit.js
+// -- the Sheet's stated extension often doesn't match what's actually on
+// disk, so try every common candidate via HEAD before trusting it.
+async function resolveImageUrl(statedFilename) {
+  if (!statedFilename) return null;
+  const dot = statedFilename.lastIndexOf('.');
+  const base = dot === -1 ? statedFilename : statedFilename.slice(0, dot);
+  const statedExt = dot === -1 ? '' : statedFilename.slice(dot + 1);
+
+  const candidates = [statedExt, ...EXTENSION_CANDIDATES].filter(Boolean);
+  const tried = new Set();
+
+  for (const ext of candidates) {
+    if (tried.has(ext.toLowerCase())) continue;
+    tried.add(ext.toLowerCase());
+    const url = `${IMAGE_BASE_URL}/${encodeURIComponent(`${base}.${ext}`)}`;
+    const response = await fetch(url, { method: 'HEAD' });
+    const contentType = response.headers.get('content-type') || '';
+    if (response.ok && contentType.startsWith('image/')) return url;
+  }
+  return null;
+}
+
+async function getProductMediaInfo(token, sku) {
+  const data = await shopifyGraphql(
+    token,
+    `query($q: String!) {
+      productVariants(first: 1, query: $q) {
+        edges { node { product { id media(first: 1) { edges { node { id } } } } } }
+      }
+    }`,
+    { q: `sku:${sku}` }
+  );
+  const node = data.productVariants.edges[0]?.node;
+  if (!node) return null;
+  return { productId: node.product.id, hasMedia: node.product.media.edges.length > 0 };
+}
+
+async function attachProductImage(token, productId, imageUrl) {
+  const result = await shopifyGraphql(
+    token,
+    `mutation($productId: ID!, $media: [CreateMediaInput!]!) {
+      productCreateMedia(productId: $productId, media: $media) {
+        media { id }
+        mediaUserErrors { field message }
+      }
+    }`,
+    { productId, media: [{ originalSource: imageUrl, mediaContentType: 'IMAGE' }] }
+  );
+  const errors = result.productCreateMedia.mediaUserErrors;
+  if (errors.length) throw new Error(`productCreateMedia failed: ${JSON.stringify(errors)}`);
 }
 
 function shopDomain() {
@@ -281,6 +337,58 @@ export default async function handler(req, res) {
       const archived = await archiveMissingProducts(token, syncedSkus);
       res.statusCode = 200;
       res.end(JSON.stringify({ archived }, null, 2));
+      return;
+    }
+
+    if (req.query.mode === 'images') {
+      const offset = Number.parseInt(req.query.offset, 10) || 0;
+      const limit = Number.parseInt(req.query.limit, 10) || 15;
+      const force = req.query.force === '1';
+
+      const token = await fetchAccessToken();
+      const rows = await fetchSheetRows();
+      const batch = rows.slice(offset, offset + limit);
+
+      const results = [];
+      for (const row of batch) {
+        try {
+          const info = await getProductMediaInfo(token, row.sku);
+          if (!info) {
+            results.push({ sku: row.sku, title: row.title, status: 'no-shopify-product' });
+            continue;
+          }
+          if (info.hasMedia && !force) {
+            results.push({ sku: row.sku, title: row.title, status: 'skipped-has-media' });
+            continue;
+          }
+          const imageUrl = await resolveImageUrl(row.imageFilename);
+          if (!imageUrl) {
+            results.push({ sku: row.sku, title: row.title, status: 'no-image-found', imageFilename: row.imageFilename });
+            continue;
+          }
+          await attachProductImage(token, info.productId, imageUrl);
+          results.push({ sku: row.sku, title: row.title, status: 'attached', imageUrl });
+        } catch (error) {
+          results.push({ sku: row.sku, title: row.title, status: 'error', error: error.message });
+        }
+      }
+
+      const nextOffset = offset + limit;
+      res.statusCode = 200;
+      res.end(
+        JSON.stringify(
+          {
+            totalRows: rows.length,
+            batchStart: offset,
+            batchSize: batch.length,
+            results,
+            done: nextOffset >= rows.length,
+            nextOffset: nextOffset < rows.length ? nextOffset : null,
+          },
+          null,
+          2
+        )
+      );
       return;
     }
 
