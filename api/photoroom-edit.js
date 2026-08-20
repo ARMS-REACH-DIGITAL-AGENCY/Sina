@@ -45,11 +45,35 @@ async function resolveRealFilename(statedFilename) {
   throw new Error(`No real image file found on disk for ${statedFilename} (tried ${candidates.join(', ')})`);
 }
 
-async function editWithPhotoroom(filename, { bgPrompt, backgroundImageUrl, outputSize, padding, sourceUrl, expand }) {
+async function editWithPhotoroom(filename, { bgPrompt, backgroundImageUrl, outputSize, padding, sourceUrl, expand, cutout }) {
   const apiKey = process.env.PHOTOROOM_API_KEY;
   if (!apiKey) throw new Error('PHOTOROOM_API_KEY is not configured.');
 
   const imageUrl = sourceUrl || `${IMAGE_BASE_URL}/${encodeURIComponent(filename)}`;
+
+  // Transparent cutout only -- no background compositing at all. Used when
+  // background.imageUrl (Photoroom's own static-background compositing)
+  // turned out to be plan-gated; we composite onto our own background
+  // ourselves instead of relying on Photoroom for that step.
+  if (cutout) {
+    const params = new URLSearchParams({
+      imageUrl,
+      removeBackground: 'true',
+      'background.color': 'transparent',
+      outputSize: outputSize || DEFAULT_OUTPUT_SIZE,
+      padding: padding || '0.12',
+      'export.format': 'png',
+    });
+    const response = await fetch(`https://image-api.photoroom.com/v2/edit?${params.toString()}`, {
+      method: 'GET',
+      headers: { 'x-api-key': apiKey },
+    });
+    if (!response.ok) {
+      const text = await response.text();
+      throw new Error(`Photoroom API failed (${response.status}): ${text}`);
+    }
+    return Buffer.from(await response.arrayBuffer());
+  }
 
   // background.imageUrl (static background compositing) is documented for
   // the POST/multipart endpoint, not GET query strings -- GET rejected it
@@ -195,6 +219,7 @@ export default async function handler(req, res) {
     const sourceUrl = typeof req.query.sourceUrl === 'string' && req.query.sourceUrl.trim() ? req.query.sourceUrl.trim() : undefined;
     const backgroundImageUrl = typeof req.query.backgroundImageUrl === 'string' && req.query.backgroundImageUrl.trim() ? req.query.backgroundImageUrl.trim() : undefined;
     const expand = req.query.expand === 'true';
+    const cutout = req.query.cutout === 'true';
     if (!filename) {
       res.statusCode = 400;
       res.end('Missing filename query param.');
@@ -205,11 +230,11 @@ export default async function handler(req, res) {
       // sourceUrl bypasses the repo entirely (e.g. testing directly against
       // a Shopify-hosted image), so there's no repo file to resolve.
       const realFilename = sourceUrl ? filename : await resolveRealFilename(filename);
-      const buffer = await editWithPhotoroom(realFilename, { bgPrompt, backgroundImageUrl, padding, sourceUrl, expand });
+      const buffer = await editWithPhotoroom(realFilename, { bgPrompt, backgroundImageUrl, padding, sourceUrl, expand, cutout });
       // Commit to a throwaway _preview path rather than streaming bytes back
       // -- this endpoint is only reachable through a tool that mangles raw
       // binary responses, but a git pull + local file read is lossless.
-      const outputPath = `${OUTPUT_PATH_PREFIX}/_preview_${realFilename}`;
+      const outputPath = `${OUTPUT_PATH_PREFIX}/_preview_${cutout ? `${realFilename}.cutout.png` : realFilename}`;
       const commitSha = await commitToGithub(outputPath, buffer);
       res.statusCode = 200;
       res.end(JSON.stringify({ filename: realFilename, outputPath, commitSha, bytes: buffer.length }));
