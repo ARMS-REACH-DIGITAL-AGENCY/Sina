@@ -108,12 +108,12 @@ async function resolveImageUrl(statedFilename) {
   const base = dot === -1 ? statedFilename : statedFilename.slice(0, dot);
   const statedExt = dot === -1 ? '' : statedFilename.slice(dot + 1);
 
-  const candidates = [statedExt, ...EXTENSION_CANDIDATES].filter(Boolean);
-  const tried = new Set();
+  // Dedupe by exact string, not lowercased -- the filesystem is
+  // case-sensitive, so "JPG" and "jpg" are genuinely different candidates
+  // that both need a real attempt, not one standing in for the other.
+  const candidates = [...new Set([statedExt, ...EXTENSION_CANDIDATES].filter(Boolean))];
 
   for (const ext of candidates) {
-    if (tried.has(ext.toLowerCase())) continue;
-    tried.add(ext.toLowerCase());
     const url = `${IMAGE_BASE_URL}/${encodeURIComponent(`${base}.${ext}`)}`;
     const response = await fetch(url, { headers: { Range: 'bytes=0-0' } });
     const contentType = response.headers.get('content-type') || '';
