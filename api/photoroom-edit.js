@@ -55,6 +55,7 @@ async function editWithPhotoroom(filename, { bgPrompt, outputSize, padding, sour
         imageUrl,
         removeBackground: 'false',
         'expand.mode': 'ai.auto',
+        referenceBox: 'originalImage',
         outputSize: outputSize || DEFAULT_OUTPUT_SIZE,
         'export.format': 'jpeg',
       })
