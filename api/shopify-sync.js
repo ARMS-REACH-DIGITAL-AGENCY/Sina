@@ -333,6 +333,39 @@ export default async function handler(req, res) {
 
   res.setHeader('Content-Type', 'application/json');
 
+  if (req.query.mode === 'debug-publication') {
+    const sku = typeof req.query.sku === 'string' ? req.query.sku.trim().toUpperCase() : '';
+    try {
+      const token = await fetchAccessToken();
+      const data = await shopifyGraphql(
+        token,
+        `query($q: String!) {
+          productVariants(first: 1, query: $q) {
+            edges {
+              node {
+                id
+                availableForSale
+                product {
+                  id
+                  status
+                  resourcePublicationsCount { count }
+                }
+              }
+            }
+          }
+          publications(first: 10) { edges { node { id name } } }
+        }`,
+        { q: `sku:${sku}` }
+      );
+      res.statusCode = 200;
+      res.end(JSON.stringify(data, null, 2));
+    } catch (error) {
+      res.statusCode = 200;
+      res.end(JSON.stringify({ error: error.message }, null, 2));
+    }
+    return;
+  }
+
   if (req.query.mode === 'debug-image') {
     const filename = typeof req.query.filename === 'string' ? req.query.filename : '';
     const url = `${IMAGE_BASE_URL}/${encodeURIComponent(filename)}`;
