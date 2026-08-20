@@ -602,6 +602,7 @@ export default async function handler(req, res) {
                   status
                   bodyHtml
                   variants(first: 1) { edges { node { sku } } }
+                  media(first: 1) { edges { node { ... on MediaImage { image { url } } } } }
                 }
               }
               pageInfo { hasNextPage }
@@ -611,8 +612,11 @@ export default async function handler(req, res) {
         );
         const edges = data.products.edges;
         for (const edge of edges) {
+          const imageUrl = edge.node.media.edges[0]?.node.image?.url || '';
           all.push({
             sku: edge.node.variants.edges[0]?.node.sku || '',
+            imageUrl,
+            imageFilename: imageUrl ? decodeURIComponent(imageUrl.split('/').pop().split('?')[0]) : '',
             title: edge.node.title,
             status: edge.node.status,
             hasBody: Boolean(edge.node.bodyHtml && edge.node.bodyHtml.trim()),
