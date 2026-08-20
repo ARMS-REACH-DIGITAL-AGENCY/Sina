@@ -97,7 +97,11 @@ async function fetchSheetRows() {
 
 // Same case/extension resilience as api/catalog.js and api/photoroom-edit.js
 // -- the Sheet's stated extension often doesn't match what's actually on
-// disk, so try every common candidate via HEAD before trusting it.
+// disk, so try every common candidate before trusting it. Uses a ranged GET
+// rather than HEAD -- Vercel's static file serving doesn't reliably answer
+// HEAD requests with a real content-type (confirmed: files that GET fine
+// were coming back false-negative on HEAD), so a 1-byte GET is the only
+// reliable existence check here.
 async function resolveImageUrl(statedFilename) {
   if (!statedFilename) return null;
   const dot = statedFilename.lastIndexOf('.');
@@ -111,9 +115,9 @@ async function resolveImageUrl(statedFilename) {
     if (tried.has(ext.toLowerCase())) continue;
     tried.add(ext.toLowerCase());
     const url = `${IMAGE_BASE_URL}/${encodeURIComponent(`${base}.${ext}`)}`;
-    const response = await fetch(url, { method: 'HEAD' });
+    const response = await fetch(url, { headers: { Range: 'bytes=0-0' } });
     const contentType = response.headers.get('content-type') || '';
-    if (response.ok && contentType.startsWith('image/')) return url;
+    if ((response.ok || response.status === 206) && contentType.startsWith('image/')) return url;
   }
   return null;
 }
