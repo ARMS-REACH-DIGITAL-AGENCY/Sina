@@ -357,6 +357,69 @@ async function archiveMissingProducts(token, syncedSkus) {
   return archived;
 }
 
+// Finds Shopify products that are genuine leftover duplicates from before a
+// SKU got corrected in the Sheet -- not just "photo not synced yet" (those
+// are still current SKUs, just missing a file on disk). A product only
+// qualifies here if BOTH: it has zero media (the visible tell) AND its SKU
+// doesn't match any row currently in the Sheet at all (the safety check, so
+// a real current product that just hasn't gotten a photo yet is never
+// caught by this).
+async function findDuplicateProducts(token) {
+  const rows = await fetchSheetRows();
+  const currentSkus = new Set(rows.map((r) => r.sku));
+
+  const candidates = [];
+  let cursor = null;
+
+  // eslint-disable-next-line no-constant-condition
+  while (true) {
+    const data = await shopifyGraphql(
+      token,
+      `query($cursor: String) {
+        products(first: 100, after: $cursor, query: "tag:sheet-sync") {
+          edges {
+            cursor
+            node {
+              id
+              title
+              media(first: 1) { edges { node { id } } }
+              variants(first: 1) { edges { node { sku } } }
+            }
+          }
+          pageInfo { hasNextPage }
+        }
+      }`,
+      { cursor }
+    );
+
+    const edges = data.products.edges;
+    for (const edge of edges) {
+      const sku = edge.node.variants.edges[0]?.node.sku?.trim().toUpperCase() || '';
+      const hasMedia = edge.node.media.edges.length > 0;
+      if (!hasMedia && !currentSkus.has(sku)) {
+        candidates.push({ id: edge.node.id, sku, title: edge.node.title });
+      }
+    }
+
+    if (!data.products.pageInfo.hasNextPage || edges.length === 0) break;
+    cursor = edges[edges.length - 1].cursor;
+  }
+
+  return candidates;
+}
+
+async function deleteProduct(token, productId) {
+  const result = await shopifyGraphql(
+    token,
+    `mutation($input: ProductDeleteInput!) {
+      productDelete(input: $input) { deletedProductId userErrors { field message } }
+    }`,
+    { input: { id: productId } }
+  );
+  const errors = result.productDelete.userErrors;
+  if (errors.length) throw new Error(JSON.stringify(errors));
+}
+
 // One-time repair for products that were created before publishToOnlineStore
 // existed in createProduct() -- they're ACTIVE but published to zero sales
 // channels, so checkout silently fails ("Link no longer exists"). Finds
@@ -423,6 +486,35 @@ export default async function handler(req, res) {
   }
 
   res.setHeader('Content-Type', 'application/json');
+
+  if (req.query.mode === 'find-duplicates') {
+    try {
+      const token = await fetchAccessToken();
+      const candidates = await findDuplicateProducts(token);
+
+      if (req.query.confirm === '1') {
+        const results = [];
+        for (const candidate of candidates) {
+          try {
+            await deleteProduct(token, candidate.id);
+            results.push({ ...candidate, status: 'deleted' });
+          } catch (error) {
+            results.push({ ...candidate, status: 'error', error: error.message });
+          }
+        }
+        res.statusCode = 200;
+        res.end(JSON.stringify({ deleted: results.filter((r) => r.status === 'deleted').length, results }, null, 2));
+        return;
+      }
+
+      res.statusCode = 200;
+      res.end(JSON.stringify({ dryRun: true, count: candidates.length, candidates }, null, 2));
+    } catch (error) {
+      res.statusCode = 500;
+      res.end(JSON.stringify({ error: error.message }, null, 2));
+    }
+    return;
+  }
 
   if (req.query.mode === 'fix-publications') {
     try {
