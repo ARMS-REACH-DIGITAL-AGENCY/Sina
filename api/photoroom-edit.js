@@ -28,14 +28,15 @@ async function resolveRealFilename(statedFilename) {
   const base = dot === -1 ? statedFilename : statedFilename.slice(0, dot);
   const statedExt = dot === -1 ? '' : statedFilename.slice(dot + 1);
 
-  const candidates = [statedExt, ...EXTENSION_CANDIDATES].filter(Boolean);
-  const tried = new Set();
+  const candidates = [...new Set([statedExt, ...EXTENSION_CANDIDATES].filter(Boolean))];
 
   for (const ext of candidates) {
-    if (tried.has(ext.toLowerCase())) continue;
-    tried.add(ext.toLowerCase());
     const candidateName = `${base}.${ext}`;
-    const response = await fetch(`${IMAGE_BASE_URL}/${encodeURIComponent(candidateName)}`, { method: 'HEAD' });
+    // HEAD requests don't reliably get correct content-type from Vercel's
+    // static file serving -- use a ranged GET instead.
+    const response = await fetch(`${IMAGE_BASE_URL}/${encodeURIComponent(candidateName)}`, {
+      headers: { Range: 'bytes=0-0' },
+    });
     const contentType = response.headers.get('content-type') || '';
     if (response.ok && contentType.startsWith('image/')) {
       return candidateName;
