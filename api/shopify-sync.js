@@ -485,6 +485,26 @@ export default async function handler(req, res) {
     return;
   }
 
+  if (req.query.mode === 'proxy-image') {
+    const url = typeof req.query.url === 'string' ? req.query.url : '';
+    if (!url.startsWith('https://cdn.shopify.com/')) {
+      res.statusCode = 400;
+      res.end('url must be a cdn.shopify.com image.');
+      return;
+    }
+    try {
+      const response = await fetch(url);
+      const buffer = Buffer.from(await response.arrayBuffer());
+      res.statusCode = 200;
+      res.setHeader('Content-Type', response.headers.get('content-type') || 'image/jpeg');
+      res.end(buffer);
+    } catch (error) {
+      res.statusCode = 500;
+      res.end(error.message);
+    }
+    return;
+  }
+
   res.setHeader('Content-Type', 'application/json');
 
   if (req.query.mode === 'find-duplicates') {
