@@ -736,6 +736,38 @@ export default async function handler(req, res) {
     return;
   }
 
+  if (req.query.mode === 'upload-image') {
+    res.setHeader('Content-Type', 'application/json');
+    const title = typeof req.query.title === 'string' ? req.query.title.trim() : '';
+    const imageSourceUrl = typeof req.query.sourceUrl === 'string' ? req.query.sourceUrl.trim() : '';
+    if (!title || !imageSourceUrl) {
+      res.statusCode = 400;
+      res.end(JSON.stringify({ error: 'title and sourceUrl are both required.' }));
+      return;
+    }
+    try {
+      const token = await fetchAccessToken();
+      const sheetRows = await fetchSheetRows();
+      const row = sheetRows.find((r) => r.title === title);
+      if (!row) throw new Error(`No Sheet row found for title "${title}"`);
+      const product = await findProductBySkuWithMedia(token, row.sku);
+      if (!product) throw new Error(`No Shopify product found for SKU ${row.sku}`);
+
+      const imageResponse = await fetch(imageSourceUrl);
+      if (!imageResponse.ok) throw new Error(`Failed to fetch source image (${imageResponse.status})`);
+      const buffer = Buffer.from(await imageResponse.arrayBuffer());
+
+      const resourceUrl = await uploadImageToShopify(token, buffer, `${row.sku}.jpg`);
+      await replaceProductImage(token, product.productId, product.oldMediaId, resourceUrl);
+      res.statusCode = 200;
+      res.end(JSON.stringify({ sku: row.sku, title, status: 'done', bytes: buffer.length }));
+    } catch (error) {
+      res.statusCode = 500;
+      res.end(JSON.stringify({ error: error.message }));
+    }
+    return;
+  }
+
   if (req.query.mode === 'redirect-storefront') {
     try {
       const result = await addStorefrontRedirect();
