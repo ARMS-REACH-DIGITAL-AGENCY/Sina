@@ -117,6 +117,8 @@ export default async function handler(req, res) {
           sku: normalizeSku(row),
           title: normalizeText(row.Title),
           category: normalizeText(row.Collection) || normalizeText(row.Type),
+          price: normalizeText(row['Variant Price']),
+          rowNumber: row.__rowNumber,
         }))
         .filter((row) => row.sku && row.title);
       res.statusCode = 200;

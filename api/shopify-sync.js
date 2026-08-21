@@ -867,7 +867,8 @@ export default async function handler(req, res) {
                   title
                   status
                   bodyHtml
-                  variants(first: 1) { edges { node { sku } } }
+                  resourcePublicationsCount { count }
+                  variants(first: 1) { edges { node { sku price availableForSale inventoryQuantity } } }
                   media(first: 1) { edges { node { ... on MediaImage { image { url } } } } }
                 }
               }
@@ -879,8 +880,13 @@ export default async function handler(req, res) {
         const edges = data.products.edges;
         for (const edge of edges) {
           const imageUrl = edge.node.media.edges[0]?.node.image?.url || '';
+          const variant = edge.node.variants.edges[0]?.node || {};
           all.push({
-            sku: edge.node.variants.edges[0]?.node.sku || '',
+            sku: variant.sku || '',
+            price: variant.price || '',
+            availableForSale: Boolean(variant.availableForSale),
+            inventoryQuantity: variant.inventoryQuantity,
+            publicationsCount: edge.node.resourcePublicationsCount?.count ?? 0,
             imageUrl,
             imageFilename: imageUrl ? decodeURIComponent(imageUrl.split('/').pop().split('?')[0]) : '',
             title: edge.node.title,
