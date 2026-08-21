@@ -168,26 +168,60 @@ const NEEDS_HORIZON_BG_TITLES = [
   'Ola',
 ];
 
-async function editWithPhotoroomFromUrl(sourceImageUrl) {
+// Photoroom's own background compositing (background.imageUrl / background.prompt)
+// turned out either plan-gated or prone to hallucinated artifacts and color
+// drift, and text-prompted approximations kept missing the owner's actual
+// reference photo. Instead: get a clean transparent cutout from Photoroom
+// (the one piece that reliably works), then composite it ourselves onto an
+// exact background plate sampled from the owner's own approved photo.
+const TEAL_VIGNETTE_BG_URL = 'https://sinasglass.com/images/products/_bg_teal_vignette.jpg';
+
+async function getTransparentCutout(sourceImageUrl) {
   const apiKey = process.env.PHOTOROOM_API_KEY;
   if (!apiKey) throw new Error('PHOTOROOM_API_KEY is not configured.');
 
   const params = new URLSearchParams({
     imageUrl: sourceImageUrl,
     removeBackground: 'true',
-    'background.prompt': HORIZON_BG_PROMPT,
+    'background.color': 'transparent',
     outputSize: '1200x1200',
     padding: HORIZON_PADDING,
-    'export.format': 'jpeg',
-    'shadow.mode': 'ai.soft',
+    'export.format': 'png',
   });
 
   const response = await fetch(`https://image-api.photoroom.com/v2/edit?${params.toString()}`, {
     method: 'GET',
-    headers: { 'x-api-key': apiKey, 'pr-ai-background-model-version': STUDIO_MODEL_VERSION },
+    headers: { 'x-api-key': apiKey },
   });
   if (!response.ok) throw new Error(`Photoroom API failed (${response.status}): ${await response.text()}`);
   return Buffer.from(await response.arrayBuffer());
+}
+
+let cachedBgPlate = null;
+async function getBackgroundPlate() {
+  if (cachedBgPlate) return cachedBgPlate;
+  const response = await fetch(TEAL_VIGNETTE_BG_URL);
+  if (!response.ok) throw new Error(`Failed to fetch background plate (${response.status})`);
+  cachedBgPlate = Buffer.from(await response.arrayBuffer());
+  return cachedBgPlate;
+}
+
+async function compositeOntoBackground(cutoutBuffer) {
+  const sharp = (await import('sharp')).default;
+  const bgPlate = await getBackgroundPlate();
+  const cutoutMeta = await sharp(cutoutBuffer).metadata();
+  const bgResized = await sharp(bgPlate)
+    .resize(cutoutMeta.width, cutoutMeta.height, { fit: 'cover' })
+    .toBuffer();
+  return sharp(bgResized)
+    .composite([{ input: cutoutBuffer }])
+    .jpeg({ quality: 92 })
+    .toBuffer();
+}
+
+async function editWithPhotoroomFromUrl(sourceImageUrl) {
+  const cutout = await getTransparentCutout(sourceImageUrl);
+  return compositeOntoBackground(cutout);
 }
 
 async function findProductBySkuWithMedia(token, sku) {
