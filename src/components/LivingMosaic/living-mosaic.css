@@ -160,6 +160,13 @@
   object-fit: cover;
   display: block;
   -webkit-user-drag: none;
+  /* Product shots have a lot of studio backdrop around the piece --
+     object-fit: cover only crops to the tile's aspect ratio, it doesn't
+     zoom past what the photo already frames. Scaling the image up (from
+     its own center) crops that backdrop away so each tile reads as the
+     piece itself, not the grey background around it. */
+  transform: scale(1.7);
+  transform-origin: center center;
 }
 
 .mosaic-tile__face--back {
