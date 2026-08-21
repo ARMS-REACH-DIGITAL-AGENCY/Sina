@@ -72,7 +72,12 @@
   z-index: 3;
   object-fit: cover;
   object-position: center center;
-  opacity: 1;
+  /* Hidden until the tile grid is actually ready (see is-mosaic-ready
+     below). While the mosaic is loading -- and initially zoomed in 4x --
+     this used to be the only visible layer, so visitors landed on a tight,
+     unflattering crop of the raw portrait instead of the product tiles.
+     The dark frame background shows through until tiles are in. */
+  opacity: 0;
   filter: saturate(.96) contrast(1.02) brightness(.92);
   transition: opacity 1.15s ease, filter 1.15s ease;
   pointer-events: none;
@@ -106,6 +111,12 @@
 .living-mosaic__frame.is-mosaic-ready .living-mosaic__portrait-reveal {
   opacity: .42;
   filter: saturate(.78) contrast(1.12) brightness(1.02);
+}
+
+/* If the tile grid can't be assembled at all, fall back to showing the
+   plain portrait rather than an empty dark frame. */
+.living-mosaic__frame.has-grid-error .living-mosaic__portrait-reveal {
+  opacity: 1;
 }
 
 .mosaic-tile__face--front {

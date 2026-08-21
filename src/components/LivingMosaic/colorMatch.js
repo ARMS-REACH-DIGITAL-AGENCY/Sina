@@ -169,6 +169,40 @@ export async function buildMosaicGrid({ portraitSrc, products, cols, rows }) {
     aboveRowChoices = thisRowChoices;
   }
 
+  // Pure nearest-color assignment above can leave some products' colors
+  // never winning a single cell, so the collage silently drops a chunk of
+  // the catalog even though there are far more cells (thousands) than
+  // products (hundreds). Give every successfully-loaded product at least
+  // one placement: for each one that never got picked, hand it whichever
+  // already-placed cell's color it matches best (that cell keeps its own
+  // portrait-sampled `color`, so the swap only changes which photo fills
+  // it, not the color it was chosen for).
+  const usedProductIndexes = new Set(grid.map((cell) => cell.productIndex));
+  const unusedEntries = sampled.filter((entry) => !usedProductIndexes.has(entry.productIndex));
+
+  if (unusedEntries.length && grid.length) {
+    const claimedCellIndexes = new Set();
+    for (const entry of unusedEntries) {
+      let bestCellIndex = -1;
+      let bestDistance = Infinity;
+      for (let i = 0; i < grid.length; i++) {
+        if (claimedCellIndexes.has(i)) continue;
+        const d = distanceSq(entry.color, grid[i].color);
+        if (d < bestDistance) {
+          bestDistance = d;
+          bestCellIndex = i;
+        }
+      }
+      if (bestCellIndex === -1) break;
+      claimedCellIndexes.add(bestCellIndex);
+      grid[bestCellIndex] = {
+        ...grid[bestCellIndex],
+        productIndex: entry.productIndex,
+        resolvedSrc: resolvedSrcByIndex.get(entry.productIndex),
+      };
+    }
+  }
+
   return grid;
 }
 

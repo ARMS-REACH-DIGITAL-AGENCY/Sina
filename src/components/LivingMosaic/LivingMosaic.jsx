@@ -374,7 +374,10 @@ export default function LivingMosaic() {
   }
 
   return (
-    <div className={`living-mosaic__frame${mosaicReady ? ' is-mosaic-ready' : ''}`} ref={sectionRef}>
+    <div
+      className={`living-mosaic__frame${mosaicReady ? ' is-mosaic-ready' : ''}${gridError ? ' has-grid-error' : ''}`}
+      ref={sectionRef}
+    >
       <div
         ref={viewportRef}
         className={`living-mosaic__viewport${zoomState.scale > 1 ? ' is-zoomed' : ''}`}
