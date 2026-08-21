@@ -165,7 +165,7 @@
      zoom past what the photo already frames. Scaling the image up (from
      its own center) crops that backdrop away so each tile reads as the
      piece itself, not the grey background around it. */
-  transform: scale(1.7);
+  transform: scale(2.2);
   transform-origin: center center;
 }
 
