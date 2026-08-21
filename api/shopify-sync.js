@@ -811,6 +811,40 @@ export default async function handler(req, res) {
     return;
   }
 
+  if (req.query.mode === 'rename-sku') {
+    res.setHeader('Content-Type', 'application/json');
+    const oldSku = typeof req.query.oldSku === 'string' ? req.query.oldSku.trim() : '';
+    const newSku = typeof req.query.newSku === 'string' ? req.query.newSku.trim() : '';
+    if (!oldSku || !newSku) {
+      res.statusCode = 400;
+      res.end(JSON.stringify({ error: 'oldSku and newSku are both required.' }));
+      return;
+    }
+    try {
+      const token = await fetchAccessToken();
+      const existing = await findVariantBySku(token, oldSku);
+      if (!existing) throw new Error(`No Shopify product found for SKU ${oldSku}`);
+      const result = await shopifyGraphql(
+        token,
+        `mutation($productId: ID!, $variants: [ProductVariantsBulkInput!]!) {
+          productVariantsBulkUpdate(productId: $productId, variants: $variants) {
+            productVariants { id sku }
+            userErrors { field message }
+          }
+        }`,
+        { productId: existing.product.id, variants: [{ id: existing.id, inventoryItem: { sku: newSku } }] }
+      );
+      const errors = result.productVariantsBulkUpdate.userErrors;
+      if (errors.length) throw new Error(JSON.stringify(errors));
+      res.statusCode = 200;
+      res.end(JSON.stringify({ oldSku, newSku, title: existing.product.title, status: 'renamed' }));
+    } catch (error) {
+      res.statusCode = 500;
+      res.end(JSON.stringify({ error: error.message }));
+    }
+    return;
+  }
+
   if (req.query.mode === 'redirect-storefront') {
     try {
       const result = await addStorefrontRedirect();
