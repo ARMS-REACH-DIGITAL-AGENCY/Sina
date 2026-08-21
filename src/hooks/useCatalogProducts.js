@@ -42,11 +42,17 @@ const normalizedLocalProducts = localProducts.map(normalizeProduct);
 const fallbackCollections = deriveCollections(normalizedLocalProducts);
 
 export default function useCatalogProducts() {
+  // Don't seed the first paint with the bundled local snapshot -- its image
+  // paths point at the old repo-hosted photos, which briefly flash on
+  // screen before the live /api/catalog fetch (Shopify-hosted images)
+  // replaces them a moment later. Starting empty means nothing renders
+  // until either real data arrives or the fetch actually fails; the local
+  // snapshot is still used, but only as the catch-block's last resort.
   const [state, setState] = useState({
-    products: normalizedLocalProducts,
-    collections: fallbackCollections,
+    products: [],
+    collections: [],
     loading: true,
-    source: 'fallback',
+    source: 'loading',
   });
 
   useEffect(() => {

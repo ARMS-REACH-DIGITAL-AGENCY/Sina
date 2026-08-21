@@ -544,7 +544,7 @@ export function ProductShortLink() {
 }
 
 export function Shop() {
-  const { products, collections } = useCatalogProducts();
+  const { products, collections, loading } = useCatalogProducts();
   const location = useLocation();
   const navigate = useNavigate();
   const productGridRef = React.useRef(null);
@@ -662,7 +662,12 @@ export function Shop() {
         <div className="product-grid" ref={productGridRef}>
           {visible.map((product) => <ProductCard product={product} sharedSku={sharedSku} key={product.sku} />)}
         </div>
-        {!visible.length && (
+        {!visible.length && loading && (
+          <div className="shop-empty-state">
+            <h3>Loading the collection&hellip;</h3>
+          </div>
+        )}
+        {!visible.length && !loading && (
           <div className="shop-empty-state">
             <h3>No matching pieces yet.</h3>
             <p>Try a different SKU or product name to keep searching the full catalog.</p>
