@@ -42,6 +42,7 @@ export default function LivingMosaic() {
   const [active, setActive] = useState(false);
   const [zoomState, setZoomState] = useState(INITIAL_ZOOM_STATE);
   const [autoRevealing, setAutoRevealing] = useState(false);
+  const [portraitRevealed, setPortraitRevealed] = useState(false);
   const [gridConfig, setGridConfig] = useState(getGridConfig);
 
   const sectionRef = useRef(null);
@@ -354,6 +355,12 @@ export default function LivingMosaic() {
 
     const endTimer = window.setTimeout(() => {
       setAutoRevealing(false);
+      // The portrait overlay only fades in once the zoom-out has fully
+      // played and the grid is completely loaded -- fading it in the
+      // moment the grid is ready (while still zoomed in tight) tinted the
+      // close-up tiles with a blurry portrait wash, which read the same as
+      // the original "just a picture of Sina" problem this was meant to fix.
+      setPortraitRevealed(true);
     }, AUTO_REVEAL_DELAY_MS + AUTO_REVEAL_DURATION_MS);
 
     return () => {
@@ -375,7 +382,7 @@ export default function LivingMosaic() {
 
   return (
     <div
-      className={`living-mosaic__frame${mosaicReady ? ' is-mosaic-ready' : ''}${gridError ? ' has-grid-error' : ''}`}
+      className={`living-mosaic__frame${mosaicReady ? ' is-mosaic-ready' : ''}${gridError ? ' has-grid-error' : ''}${portraitRevealed ? ' is-portrait-revealed' : ''}`}
       ref={sectionRef}
     >
       <div

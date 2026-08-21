@@ -83,7 +83,11 @@ export async function buildMosaicGrid({ portraitSrc, products, cols, rows }) {
 
   const [portraitImg, ...productImgs] = await Promise.all([
     loadImage(portraitSrc),
-    ...products.map((p) => loadImageWithFallbacks([p.image, ...(p.imageFallbacks || [])])),
+    // A product's dedicated mosaicImage (uploaded in Shopify with alt text
+    // "mosaic" -- see fetchShopifyImagesBySku in api/catalog.js) is a
+    // tighter, purpose-cropped shot meant only for this grid, so it's tried
+    // before the regular listing photo and its fallbacks.
+    ...products.map((p) => loadImageWithFallbacks([p.mosaicImage, p.image, ...(p.imageFallbacks || [])])),
   ]);
 
   if (!portraitImg) throw new Error(`Failed to load portrait image: ${portraitSrc}`);
@@ -126,6 +130,13 @@ export async function buildMosaicGrid({ portraitSrc, products, cols, rows }) {
   // same verified-working image instead of re-guessing with the product's
   // (possibly wrong) primary filename and silently 404ing.
   const resolvedSrcByIndex = new Map(sampled.map((entry) => [entry.productIndex, entry.img.src]));
+  // A cell whose resolved image is the product's dedicated mosaicImage is
+  // already a purpose-made tight crop -- the tile shouldn't also apply the
+  // generic zoom-in-on-the-piece CSS transform meant for full listing
+  // photos, or it'll crop an already-tight image too far.
+  const isCustomCropByIndex = new Map(
+    sampled.map((entry) => [entry.productIndex, Boolean(products[entry.productIndex]?.mosaicImage) && entry.img.src === products[entry.productIndex].mosaicImage])
+  );
 
   const grid = [];
   let aboveRowChoices = new Array(cols).fill(-1);
@@ -163,6 +174,7 @@ export async function buildMosaicGrid({ portraitSrc, products, cols, rows }) {
         productIndex: chosen.productIndex,
         color: cellColor,
         resolvedSrc: resolvedSrcByIndex.get(chosen.productIndex),
+        isCustomCrop: isCustomCropByIndex.get(chosen.productIndex),
       });
     }
 
@@ -199,6 +211,7 @@ export async function buildMosaicGrid({ portraitSrc, products, cols, rows }) {
         ...grid[bestCellIndex],
         productIndex: entry.productIndex,
         resolvedSrc: resolvedSrcByIndex.get(entry.productIndex),
+        isCustomCrop: isCustomCropByIndex.get(entry.productIndex),
       };
     }
   }

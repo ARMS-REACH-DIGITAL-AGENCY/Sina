@@ -166,9 +166,14 @@ async function getShopifyToken() {
   return cachedShopifyToken.token;
 }
 
-// Returns a Map<SKU, imageUrl[]> -- Shopify's own media order is the
-// gallery order, first image is the featured one, so no extra ordering
-// logic is needed once the data is in hand.
+// Returns a Map<SKU, {urls: string[], mosaicUrl: string|null}> -- Shopify's
+// own media order is the gallery order, first image is the featured one, so
+// no extra ordering logic is needed once the data is in hand. mosaicUrl is
+// whichever image (if any) on that product has its alt text set to
+// "mosaic" -- a way to upload a tighter, background-free crop specifically
+// for the Living Mosaic's tiles without disturbing the listing photos
+// everywhere else on the site (see buildMosaicGrid in colorMatch.js, which
+// prefers this over the regular listing image when it's present).
 async function fetchShopifyImagesBySku() {
   const domain = shopifyDomain();
   const images = new Map();
@@ -191,7 +196,7 @@ async function fetchShopifyImagesBySku() {
                 node {
                   variants(first: 1) { edges { node { sku } } }
                   media(first: 10) {
-                    edges { node { ... on MediaImage { image { url } } } }
+                    edges { node { ... on MediaImage { image { url altText } } } }
                   }
                 }
               }
@@ -209,8 +214,10 @@ async function fetchShopifyImagesBySku() {
       for (const edge of edges) {
         const sku = edge.node.variants.edges[0]?.node.sku?.trim().toUpperCase();
         if (!sku) continue;
-        const urls = edge.node.media.edges.map((m) => m.node.image?.url).filter(Boolean);
-        if (urls.length) images.set(sku, urls);
+        const mediaImages = edge.node.media.edges.map((m) => m.node.image).filter(Boolean);
+        const urls = mediaImages.map((img) => img.url).filter(Boolean);
+        const mosaicUrl = mediaImages.find((img) => normalizeText(img.altText).toLowerCase() === 'mosaic')?.url || null;
+        if (urls.length) images.set(sku, { urls, mosaicUrl });
       }
 
       if (!payload.data?.products?.pageInfo?.hasNextPage || edges.length === 0) break;
@@ -319,7 +326,8 @@ function normalizeProduct(row, shopifyImages) {
   // Photoroom or by hand) shows up here with nothing else to touch. Only
   // fall back to guessing a repo-hosted filename when this SKU has no
   // Shopify images yet (never synced, or Shopify was unreachable).
-  const shopifyUrls = shopifyImages.get(sku);
+  const shopifyEntry = shopifyImages.get(sku);
+  const shopifyUrls = shopifyEntry?.urls;
   let image;
   let imageFallbacks;
   let gallery;
@@ -341,6 +349,7 @@ function normalizeProduct(row, shopifyImages) {
     image,
     imageFallbacks,
     gallery,
+    mosaicImage: shopifyEntry?.mosaicUrl || null,
     line: extractHeadline(bodyHtml) || 'One of one. Handcrafted by Thomasina Schnepf.',
     description,
     descriptionHtml: bodyHtml,

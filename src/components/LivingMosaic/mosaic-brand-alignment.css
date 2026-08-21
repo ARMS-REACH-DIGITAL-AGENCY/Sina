@@ -108,7 +108,11 @@
   opacity: 1;
 }
 
-.living-mosaic__frame.is-mosaic-ready .living-mosaic__portrait-reveal {
+/* The portrait only fades in as an overlay once the zoom-out reveal has
+   fully played and the grid is loaded (is-portrait-revealed, set on a
+   timer in LivingMosaic.jsx) -- not the moment the grid itself is ready,
+   which is still while the view is zoomed in tight. */
+.living-mosaic__frame.is-portrait-revealed .living-mosaic__portrait-reveal {
   opacity: .42;
   filter: saturate(.78) contrast(1.12) brightness(1.02);
 }

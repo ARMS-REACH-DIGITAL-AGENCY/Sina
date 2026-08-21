@@ -6,10 +6,11 @@ export default function MosaicTile({ cell, product, active, onTap, showNames }) 
 
   const categoryClass =
     product.category === 'Necklaces' || product.category === 'Lanyards' ? ' mosaic-tile--necklace' : '';
+  const customCropClass = cell.isCustomCrop ? ' mosaic-tile--custom-crop' : '';
 
   return (
     <div
-      className={`mosaic-tile${showNames ? ' has-name-overlay' : ''}${categoryClass}`}
+      className={`mosaic-tile${showNames ? ' has-name-overlay' : ''}${categoryClass}${customCropClass}`}
       role="button"
       tabIndex={0}
       aria-label={`Open ${product.name}, ${product.category}`}

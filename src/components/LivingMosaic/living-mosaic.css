@@ -179,6 +179,15 @@
   transform-origin: 50% 76%;
 }
 
+/* A tile using a dedicated mosaic crop (uploaded in Shopify with alt text
+   "mosaic") is already framed exactly how it should look -- skip the
+   automatic zoom above so an already-tight crop doesn't get cropped a
+   second time. Same specificity as the rules above, so this only wins
+   because it's declared after them. */
+.mosaic-tile--custom-crop .mosaic-tile__face--front img {
+  transform: none;
+}
+
 .mosaic-tile__face--back {
   background: var(--charcoal);
   transform: rotateY(180deg);
