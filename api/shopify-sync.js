@@ -313,9 +313,18 @@ async function processHorizonBgTitle(token, title, sheetRows) {
   if (!row) throw new Error(`No Sheet row found for title "${title}"`);
   const product = await findProductBySkuWithMedia(token, row.sku);
   if (!product) throw new Error(`No Shopify product found for SKU ${row.sku}`);
-  if (!product.oldImageUrl) throw new Error(`Product ${row.sku} has no existing image to source from`);
 
-  const buffer = await editWithPhotoroomFromUrl(product.oldImageUrl);
+  // Source from the original native repo photo, not Shopify's current image
+  // -- for any title already run through the first (rejected) AI-background
+  // pass, Shopify's current image is itself an AI-generated composite, and
+  // cutting a subject out of a non-solid, already-generated background
+  // produces color fringing and halos. The native repo file is the clean,
+  // untouched original.
+  const nativeUrl = await resolveImageUrl(row.imageFilename);
+  const sourceUrl = nativeUrl || product.oldImageUrl;
+  if (!sourceUrl) throw new Error(`Product ${row.sku} has no source image to work from`);
+
+  const buffer = await editWithPhotoroomFromUrl(sourceUrl);
   const resourceUrl = await uploadImageToShopify(token, buffer, `${row.sku}.jpg`);
   await replaceProductImage(token, product.productId, product.oldMediaId, resourceUrl);
   return { sku: row.sku, title, status: 'done', bytes: buffer.length };
