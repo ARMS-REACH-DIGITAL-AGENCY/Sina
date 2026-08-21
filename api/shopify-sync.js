@@ -811,6 +811,29 @@ export default async function handler(req, res) {
     return;
   }
 
+  if (req.query.mode === 'delete-sku') {
+    res.setHeader('Content-Type', 'application/json');
+    const sku = typeof req.query.sku === 'string' ? req.query.sku.trim() : '';
+    if (!sku) {
+      res.statusCode = 400;
+      res.end(JSON.stringify({ error: 'sku is required.' }));
+      return;
+    }
+    try {
+      const token = await fetchAccessToken();
+      const existing = await findVariantBySku(token, sku);
+      if (!existing) throw new Error(`No Shopify product found for SKU ${sku}`);
+      const title = existing.product.title;
+      await deleteProduct(token, existing.product.id);
+      res.statusCode = 200;
+      res.end(JSON.stringify({ sku, title, status: 'deleted' }));
+    } catch (error) {
+      res.statusCode = 500;
+      res.end(JSON.stringify({ error: error.message }));
+    }
+    return;
+  }
+
   if (req.query.mode === 'rename-sku') {
     res.setHeader('Content-Type', 'application/json');
     const oldSku = typeof req.query.oldSku === 'string' ? req.query.oldSku.trim() : '';
