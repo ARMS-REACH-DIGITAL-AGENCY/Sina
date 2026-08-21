@@ -4,7 +4,8 @@ import { rgbToCss } from './colorMatch.js';
 export default function MosaicTile({ cell, product, active, onTap, showNames }) {
   if (!product) return <div className="mosaic-tile mosaic-tile--empty" aria-hidden="true" />;
 
-  const categoryClass = product.category === 'Necklaces' ? ' mosaic-tile--necklace' : '';
+  const categoryClass =
+    product.category === 'Necklaces' || product.category === 'Lanyards' ? ' mosaic-tile--necklace' : '';
 
   return (
     <div

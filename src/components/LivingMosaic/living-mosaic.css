@@ -169,10 +169,11 @@
   transform-origin: center center;
 }
 
-/* Necklace shots lay the full chain out in a wide loop with the glass
-   pendant sitting low in the frame, not centered -- a center-anchored zoom
-   just magnifies chain and backdrop and never reaches the piece. Zooming
-   in further from a point lower in the frame lands on the pendant instead. */
+/* Necklace and lanyard shots lay the full chain/cord out in a wide loop
+   with the glass pendant sitting low in the frame, not centered -- a
+   center-anchored zoom just magnifies chain and backdrop and never
+   reaches the piece. Zooming in further from a point lower in the frame
+   lands on the pendant instead. */
 .mosaic-tile--necklace .mosaic-tile__face--front img {
   transform: scale(3.4);
   transform-origin: 50% 76%;
