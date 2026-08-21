@@ -212,6 +212,30 @@ export default async function handler(req, res) {
     return;
   }
 
+  if (req.query.mode === 'account') {
+    res.setHeader('Content-Type', 'application/json');
+    const apiKey = process.env.PHOTOROOM_API_KEY;
+    const candidates = [
+      'https://api.photoroom.com/v1/account',
+      'https://api.photoroom.com/account',
+      'https://image-api.photoroom.com/v1/account',
+      'https://image-api.photoroom.com/account',
+      'https://api.photoroom.com/v1/credits',
+    ];
+    const results = {};
+    for (const url of candidates) {
+      try {
+        const r = await fetch(url, { headers: { 'x-api-key': apiKey } });
+        results[url] = { status: r.status, body: await r.text() };
+      } catch (error) {
+        results[url] = { error: error.message };
+      }
+    }
+    res.statusCode = 200;
+    res.end(JSON.stringify(results, null, 2));
+    return;
+  }
+
   if (req.query.mode === 'preview') {
     const filename = typeof req.query.filename === 'string' ? req.query.filename.trim() : '';
     const bgPrompt = typeof req.query.bgPrompt === 'string' && req.query.bgPrompt.trim() ? req.query.bgPrompt : undefined;
