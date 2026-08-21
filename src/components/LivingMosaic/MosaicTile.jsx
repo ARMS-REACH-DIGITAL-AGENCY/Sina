@@ -4,9 +4,11 @@ import { rgbToCss } from './colorMatch.js';
 export default function MosaicTile({ cell, product, active, onTap, showNames }) {
   if (!product) return <div className="mosaic-tile mosaic-tile--empty" aria-hidden="true" />;
 
+  const categoryClass = product.category === 'Necklaces' ? ' mosaic-tile--necklace' : '';
+
   return (
     <div
-      className={`mosaic-tile${showNames ? ' has-name-overlay' : ''}`}
+      className={`mosaic-tile${showNames ? ' has-name-overlay' : ''}${categoryClass}`}
       role="button"
       tabIndex={0}
       aria-label={`Open ${product.name}, ${product.category}`}
