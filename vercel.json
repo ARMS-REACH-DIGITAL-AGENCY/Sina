@@ -1,5 +1,8 @@
 {
   "rewrites": [
     { "source": "/(.*)", "destination": "/index.html" }
+  ],
+  "crons": [
+    { "path": "/api/shopify-sync?mode=sync-catalog&apply=true&createMissing=true", "schedule": "0 * * * *" }
   ]
 }
