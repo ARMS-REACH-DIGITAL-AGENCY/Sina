@@ -868,6 +868,153 @@ export default async function handler(req, res) {
     return;
   }
 
+  // Reconciles every Shopify product's SKU against the Sheet in one pass,
+  // instead of needing a one-off rename-sku call every time a piece gets
+  // recategorized (which is how Mercedes, Sophia, Sandra, Donna, and
+  // several others silently broke: the Sheet's SKU changed, Shopify's
+  // didn't, and the image lookup -- keyed by SKU -- fell back to a broken
+  // repo-guessed image). Matches products to Sheet rows by exact Title,
+  // since a title survives a recategorization edit while the SKU doesn't.
+  // Defaults to a dry run (report only) -- pass apply=true to actually
+  // rename the mismatched SKUs in Shopify.
+  if (req.query.mode === 'sync-skus') {
+    res.setHeader('Content-Type', 'application/json');
+    const apply = req.query.apply === 'true';
+    try {
+      const token = await fetchAccessToken();
+      const sheetRows = await fetchSheetRows();
+
+      const sheetByTitle = new Map();
+      const ambiguousTitles = new Set();
+      for (const row of sheetRows) {
+        const key = row.title.trim().toUpperCase();
+        if (sheetByTitle.has(key)) {
+          ambiguousTitles.add(key);
+        } else {
+          sheetByTitle.set(key, row);
+        }
+      }
+
+      const shopifyProducts = [];
+      let cursor = null;
+      // eslint-disable-next-line no-constant-condition
+      while (true) {
+        const data = await shopifyGraphql(
+          token,
+          `query($cursor: String) {
+            products(first: 100, after: $cursor, query: "tag:sheet-sync") {
+              edges {
+                cursor
+                node {
+                  id
+                  title
+                  variants(first: 1) { edges { node { id sku } } }
+                }
+              }
+              pageInfo { hasNextPage }
+            }
+          }`,
+          { cursor }
+        );
+        const edges = data.products.edges;
+        for (const edge of edges) {
+          const variant = edge.node.variants.edges[0]?.node;
+          if (!variant) continue;
+          shopifyProducts.push({
+            productId: edge.node.id,
+            variantId: variant.id,
+            title: edge.node.title,
+            sku: (variant.sku || '').trim().toUpperCase(),
+          });
+        }
+        if (!data.products.pageInfo.hasNextPage || edges.length === 0) break;
+        cursor = edges[edges.length - 1].cursor;
+      }
+
+      const shopifyTitleCounts = new Map();
+      for (const product of shopifyProducts) {
+        const key = product.title.trim().toUpperCase();
+        shopifyTitleCounts.set(key, (shopifyTitleCounts.get(key) || 0) + 1);
+      }
+
+      const mismatches = [];
+      const skippedAmbiguous = [];
+      const unmatchedShopify = [];
+
+      for (const product of shopifyProducts) {
+        const key = product.title.trim().toUpperCase();
+        if (ambiguousTitles.has(key) || shopifyTitleCounts.get(key) > 1) {
+          skippedAmbiguous.push({ title: product.title, shopifySku: product.sku });
+          continue;
+        }
+        const sheetRow = sheetByTitle.get(key);
+        if (!sheetRow) {
+          unmatchedShopify.push({ title: product.title, shopifySku: product.sku });
+          continue;
+        }
+        if (sheetRow.sku !== product.sku) {
+          mismatches.push({
+            title: product.title,
+            shopifySku: product.sku,
+            sheetSku: sheetRow.sku,
+            productId: product.productId,
+            variantId: product.variantId,
+          });
+        }
+      }
+
+      const applied = [];
+      const failed = [];
+      if (apply) {
+        for (const mismatch of mismatches) {
+          try {
+            const result = await shopifyGraphql(
+              token,
+              `mutation($productId: ID!, $variants: [ProductVariantsBulkInput!]!) {
+                productVariantsBulkUpdate(productId: $productId, variants: $variants) {
+                  productVariants { id sku }
+                  userErrors { field message }
+                }
+              }`,
+              {
+                productId: mismatch.productId,
+                variants: [{ id: mismatch.variantId, inventoryItem: { sku: mismatch.sheetSku } }],
+              }
+            );
+            const errors = result.productVariantsBulkUpdate.userErrors;
+            if (errors.length) throw new Error(JSON.stringify(errors));
+            applied.push({ title: mismatch.title, oldSku: mismatch.shopifySku, newSku: mismatch.sheetSku });
+          } catch (error) {
+            failed.push({ title: mismatch.title, oldSku: mismatch.shopifySku, newSku: mismatch.sheetSku, error: error.message });
+          }
+        }
+      }
+
+      res.statusCode = 200;
+      res.end(
+        JSON.stringify(
+          {
+            mode: apply ? 'applied' : 'dry-run',
+            shopifyProductCount: shopifyProducts.length,
+            sheetRowCount: sheetRows.length,
+            mismatchCount: mismatches.length,
+            mismatches: apply ? undefined : mismatches,
+            applied: apply ? applied : undefined,
+            failed: apply ? failed : undefined,
+            skippedAmbiguous,
+            unmatchedShopify,
+          },
+          null,
+          2
+        )
+      );
+    } catch (error) {
+      res.statusCode = 500;
+      res.end(JSON.stringify({ error: error.message }));
+    }
+    return;
+  }
+
   if (req.query.mode === 'redirect-storefront') {
     try {
       const result = await addStorefrontRedirect();
