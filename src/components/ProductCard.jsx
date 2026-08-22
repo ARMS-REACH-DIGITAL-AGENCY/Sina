@@ -182,7 +182,7 @@ export function ProductCard({ product, eyebrowOverride, sharedSku }) {
   return (
     <article
       ref={articleRef}
-      className={`product-card${showBack ? ' is-back' : ''}`}
+      className={`product-card${showBack ? ' is-back' : ''}${product.status === 'sold-out' ? ' is-sold' : ''}`}
       role="button"
       tabIndex={0}
       aria-pressed={showBack}
@@ -260,13 +260,19 @@ export function ProductCard({ product, eyebrowOverride, sharedSku }) {
                 <ShareButton sku={product.sku} onShare={handleShare} shareStatus={shareStatus} />
               </div>
             </div>
-            <a
-              href={`/api/adopt?sku=${encodeURIComponent(product.sku)}`}
-              className="button primary product-card__adopt-cta"
-              onClick={(event) => event.stopPropagation()}
-            >
-              Adopt Me
-            </a>
+            {product.status === 'sold-out' ? (
+              <span className="button primary product-card__adopt-cta product-card__adopt-cta--sold" aria-disabled="true">
+                {product.name} Found a Home!
+              </span>
+            ) : (
+              <a
+                href={`/api/adopt?sku=${encodeURIComponent(product.sku)}`}
+                className="button primary product-card__adopt-cta"
+                onClick={(event) => event.stopPropagation()}
+              >
+                Adopt Me
+              </a>
+            )}
             <p className="product-card__close-hint">Close</p>
           </>
         )}

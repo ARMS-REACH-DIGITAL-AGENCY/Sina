@@ -92,6 +92,11 @@ async function fetchSheetRows() {
       price: normalizePrice(row['Variant Price']),
       category: normalizeText(row.Collection) || normalizeText(row.Type) || 'Creations',
       imageFilename: normalizeText(row['Image 1 Filename']) || normalizeText(row['Final Image Filename']),
+      // The owner's actual convention: this column is a one-time "ready to
+      // list" flag, not a live stock count -- 0/empty means the row isn't
+      // ready to become a real Shopify product yet, 1 means go. Used by
+      // mode=sync-catalog to gate automatic product creation.
+      qty: Number.parseInt(normalizeText(row['Variant Inventory Qty']), 10) || 0,
     }));
 }
 
@@ -489,7 +494,13 @@ async function createProduct(token, row, locationId) {
   return 'created';
 }
 
-async function updateProduct(token, existing, row, locationId) {
+// Pure diff -- no mutation, no network call -- so a dry-run report
+// (mode=sync-catalog without apply) and the real mutations below can never
+// silently drift apart by keeping two separate copies of these conditions.
+// `existing` is either a findVariantBySku() result ({price, product:
+// {status, title}}) or the equivalent shape assembled from the bulk
+// sync-catalog product-list query; `row` is a fetchSheetRows() row.
+function diffAndBuildUpdate(existing, row) {
   // Photoroom's own "Publish to Shopify" button pushes its own cached title
   // back onto the product along with the image -- it doesn't know the Sheet
   // is the source of truth, so it can silently overwrite a correct title
@@ -497,7 +508,16 @@ async function updateProduct(token, existing, row, locationId) {
   // for that, not just for a title that was never set correctly to begin
   // with.
   const titleDrifted = existing.product.status === 'ACTIVE' && existing.product.title !== row.title;
-  if (existing.product.status !== 'ACTIVE' || titleDrifted) {
+  return {
+    needsTitleUpdate: existing.product.status !== 'ACTIVE' || titleDrifted,
+    needsPriceUpdate: existing.price !== row.price,
+  };
+}
+
+async function updateProduct(token, existing, row, locationId) {
+  const diff = diffAndBuildUpdate(existing, row);
+
+  if (diff.needsTitleUpdate) {
     await shopifyGraphql(
       token,
       `mutation($input: ProductInput!) { productUpdate(input: $input) { userErrors { field message } } }`,
@@ -505,7 +525,7 @@ async function updateProduct(token, existing, row, locationId) {
     );
   }
 
-  if (existing.price !== row.price) {
+  if (diff.needsPriceUpdate) {
     await shopifyGraphql(
       token,
       `mutation($productId: ID!, $variants: [ProductVariantsBulkInput!]!) {
@@ -732,7 +752,16 @@ async function fixUnpublishedProducts(token) {
 
 export default async function handler(req, res) {
   const suppliedKey = req.headers['x-admin-key'] || req.query.key;
-  if (suppliedKey !== ADMIN_KEY) {
+  const authHeader = req.headers['authorization'] || '';
+  const bearerToken = authHeader.startsWith('Bearer ') ? authHeader.slice(7) : '';
+  const isAdminKeyValid = suppliedKey === ADMIN_KEY;
+  // Vercel's Cron Jobs invoke this endpoint directly, sending
+  // Authorization: Bearer <CRON_SECRET> (set as a Production env var) rather
+  // than the human-facing x-admin-key -- accept either credential so the
+  // scheduled mode=sync-catalog run doesn't need the hardcoded admin key
+  // baked into vercel.json.
+  const isCronSecretValid = Boolean(process.env.CRON_SECRET) && bearerToken === process.env.CRON_SECRET;
+  if (!isAdminKeyValid && !isCronSecretValid) {
     res.statusCode = 401;
     res.end('Unauthorized.');
     return;
@@ -1003,6 +1032,256 @@ export default async function handler(req, res) {
             failed: apply ? failed : undefined,
             skippedAmbiguous,
             unmatchedShopify,
+          },
+          null,
+          2
+        )
+      );
+    } catch (error) {
+      res.statusCode = 500;
+      res.end(JSON.stringify({ error: error.message }));
+    }
+    return;
+  }
+
+  // The full automated sync: reconciles SKU drift (same title-fallback
+  // matching as mode=sync-skus, in the same bulk pass) AND price/title
+  // drift AND missing-product creation, in one invocation -- this is what
+  // runs on the hourly cron so a Sheet edit (a price, a recategorization)
+  // reaches Shopify without anyone remembering to trigger a sync by hand.
+  // Dry run by default (apply=true actually mutates); createMissing=true
+  // additionally creates brand-new Shopify products, but ONLY for Sheet
+  // rows whose Variant Inventory Qty is >= 1 -- the owner's explicit
+  // "not ready yet" gate, checked per-row regardless of createMissing.
+  if (req.query.mode === 'sync-catalog') {
+    res.setHeader('Content-Type', 'application/json');
+    const apply = req.query.apply === 'true';
+    const createMissing = req.query.createMissing === 'true';
+    try {
+      const token = await fetchAccessToken();
+      const sheetRows = await fetchSheetRows();
+      const locationId = apply && createMissing ? await getPrimaryLocationId(token) : null;
+
+      const sheetBySku = new Map(sheetRows.map((row) => [row.sku, row]));
+      const sheetByTitle = new Map();
+      const ambiguousTitles = new Set();
+      for (const row of sheetRows) {
+        const key = row.title.trim().toUpperCase();
+        if (sheetByTitle.has(key)) {
+          ambiguousTitles.add(key);
+        } else {
+          sheetByTitle.set(key, row);
+        }
+      }
+
+      const shopifyProducts = [];
+      let cursor = null;
+      // eslint-disable-next-line no-constant-condition
+      while (true) {
+        const data = await shopifyGraphql(
+          token,
+          `query($cursor: String) {
+            products(first: 100, after: $cursor, query: "tag:sheet-sync") {
+              edges {
+                cursor
+                node {
+                  id
+                  title
+                  status
+                  variants(first: 1) {
+                    edges { node { id sku price availableForSale inventoryItem { id } } }
+                  }
+                }
+              }
+              pageInfo { hasNextPage }
+            }
+          }`,
+          { cursor }
+        );
+        const edges = data.products.edges;
+        for (const edge of edges) {
+          const variant = edge.node.variants.edges[0]?.node;
+          if (!variant) continue;
+          shopifyProducts.push({
+            productId: edge.node.id,
+            variantId: variant.id,
+            inventoryItemId: variant.inventoryItem.id,
+            title: edge.node.title,
+            status: edge.node.status,
+            sku: (variant.sku || '').trim().toUpperCase(),
+            price: variant.price,
+          });
+        }
+        if (!data.products.pageInfo.hasNextPage || edges.length === 0) break;
+        cursor = edges[edges.length - 1].cursor;
+      }
+
+      const shopifyTitleCounts = new Map();
+      for (const product of shopifyProducts) {
+        const key = product.title.trim().toUpperCase();
+        shopifyTitleCounts.set(key, (shopifyTitleCounts.get(key) || 0) + 1);
+      }
+
+      const skuMismatches = [];
+      const priceMismatches = [];
+      const titleMismatches = [];
+      const skippedAmbiguous = [];
+      const unmatchedShopifyProducts = [];
+      const skippedSold = [];
+      const matchedSheetSkus = new Set();
+
+      for (const product of shopifyProducts) {
+        let sheetRow = sheetBySku.get(product.sku);
+        let needsSkuUpdate = false;
+
+        if (!sheetRow) {
+          const key = product.title.trim().toUpperCase();
+          if (ambiguousTitles.has(key) || shopifyTitleCounts.get(key) > 1) {
+            skippedAmbiguous.push({ title: product.title, shopifySku: product.sku });
+            continue;
+          }
+          sheetRow = sheetByTitle.get(key);
+          if (!sheetRow) {
+            unmatchedShopifyProducts.push({ title: product.title, shopifySku: product.sku });
+            continue;
+          }
+          // Found only by title, not by SKU -- the Sheet's SKU has drifted
+          // from Shopify's (e.g. a recategorization), the exact case that
+          // used to silently break price syncing too since the old
+          // per-SKU lookup would never find this product at all.
+          needsSkuUpdate = true;
+        }
+
+        matchedSheetSkus.add(sheetRow.sku);
+
+        if (needsSkuUpdate) {
+          skuMismatches.push({
+            title: product.title,
+            shopifySku: product.sku,
+            sheetSku: sheetRow.sku,
+            productId: product.productId,
+            variantId: product.variantId,
+          });
+        }
+
+        // Never touch title/price on a sold (archived) product -- Shopify's
+        // own auto-archive-on-sale already governs this, and updating it
+        // here would risk implying it should be reactivated. SKU cleanup
+        // above still applies (harmless metadata), but that's the only
+        // thing sync-catalog ever does to a sold piece.
+        if (product.status !== 'ACTIVE') {
+          skippedSold.push({ title: product.title, sku: product.sku });
+          continue;
+        }
+
+        if (product.title !== sheetRow.title) {
+          titleMismatches.push({ title: sheetRow.title, shopifyTitle: product.title, productId: product.productId });
+        }
+        if (product.price !== sheetRow.price) {
+          priceMismatches.push({
+            title: sheetRow.title,
+            sku: sheetRow.sku,
+            shopifyPrice: product.price,
+            sheetPrice: sheetRow.price,
+            productId: product.productId,
+            variantId: product.variantId,
+          });
+        }
+      }
+
+      const pendingCreation = sheetRows
+        .filter((row) => !matchedSheetSkus.has(row.sku))
+        .map((row) => ({ sku: row.sku, title: row.title, qty: row.qty, readyToCreate: row.qty >= 1 }));
+
+      const applied = { skuRenames: [], titleUpdates: [], priceUpdates: [], created: [] };
+      const failed = [];
+
+      if (apply) {
+        for (const mismatch of skuMismatches) {
+          try {
+            const result = await shopifyGraphql(
+              token,
+              `mutation($productId: ID!, $variants: [ProductVariantsBulkInput!]!) {
+                productVariantsBulkUpdate(productId: $productId, variants: $variants) {
+                  productVariants { id sku }
+                  userErrors { field message }
+                }
+              }`,
+              { productId: mismatch.productId, variants: [{ id: mismatch.variantId, inventoryItem: { sku: mismatch.sheetSku } }] }
+            );
+            const errors = result.productVariantsBulkUpdate.userErrors;
+            if (errors.length) throw new Error(JSON.stringify(errors));
+            applied.skuRenames.push({ title: mismatch.title, oldSku: mismatch.shopifySku, newSku: mismatch.sheetSku });
+          } catch (error) {
+            failed.push({ type: 'sku', title: mismatch.title, error: error.message });
+          }
+        }
+
+        for (const mismatch of titleMismatches) {
+          try {
+            const result = await shopifyGraphql(
+              token,
+              `mutation($input: ProductInput!) { productUpdate(input: $input) { userErrors { field message } } }`,
+              { input: { id: mismatch.productId, title: mismatch.title } }
+            );
+            const errors = result.productUpdate.userErrors;
+            if (errors.length) throw new Error(JSON.stringify(errors));
+            applied.titleUpdates.push(mismatch);
+          } catch (error) {
+            failed.push({ type: 'title', title: mismatch.title, error: error.message });
+          }
+        }
+
+        for (const mismatch of priceMismatches) {
+          try {
+            const result = await shopifyGraphql(
+              token,
+              `mutation($productId: ID!, $variants: [ProductVariantsBulkInput!]!) {
+                productVariantsBulkUpdate(productId: $productId, variants: $variants) { userErrors { field message } }
+              }`,
+              { productId: mismatch.productId, variants: [{ id: mismatch.variantId, price: mismatch.sheetPrice }] }
+            );
+            const errors = result.productVariantsBulkUpdate.userErrors;
+            if (errors.length) throw new Error(JSON.stringify(errors));
+            applied.priceUpdates.push(mismatch);
+          } catch (error) {
+            failed.push({ type: 'price', title: mismatch.title, error: error.message });
+          }
+        }
+
+        if (createMissing) {
+          for (const candidate of pendingCreation) {
+            if (!candidate.readyToCreate) continue;
+            try {
+              const fullRow = sheetBySku.get(candidate.sku);
+              await createProduct(token, fullRow, locationId);
+              applied.created.push({ sku: candidate.sku, title: candidate.title });
+            } catch (error) {
+              failed.push({ type: 'create', title: candidate.title, error: error.message });
+            }
+          }
+        }
+      }
+
+      res.statusCode = 200;
+      res.end(
+        JSON.stringify(
+          {
+            mode: apply ? 'applied' : 'dry-run',
+            shopifyProductCount: shopifyProducts.length,
+            sheetRowCount: sheetRows.length,
+            skuMismatchCount: skuMismatches.length,
+            priceMismatchCount: priceMismatches.length,
+            titleMismatchCount: titleMismatches.length,
+            skuMismatches: apply ? undefined : skuMismatches,
+            priceMismatches: apply ? undefined : priceMismatches,
+            titleMismatches: apply ? undefined : titleMismatches,
+            skippedAmbiguous,
+            skippedSold,
+            unmatchedShopifyProducts,
+            pendingCreation,
+            applied: apply ? applied : undefined,
+            failed: apply ? failed : undefined,
           },
           null,
           2

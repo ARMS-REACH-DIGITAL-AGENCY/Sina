@@ -166,14 +166,19 @@ async function getShopifyToken() {
   return cachedShopifyToken.token;
 }
 
-// Returns a Map<SKU, {urls: string[], mosaicUrl: string|null}> -- Shopify's
+// Returns a Map<SKU, {urls, mosaicUrl, status, availableForSale}> -- Shopify's
 // own media order is the gallery order, first image is the featured one, so
 // no extra ordering logic is needed once the data is in hand. mosaicUrl is
 // whichever image (if any) on that product has its alt text set to
 // "mosaic" -- a way to upload a tighter, background-free crop specifically
 // for the Living Mosaic's tiles without disturbing the listing photos
 // everywhere else on the site (see buildMosaicGrid in colorMatch.js, which
-// prefers this over the regular listing image when it's present).
+// prefers this over the regular listing image when it's present). status
+// and availableForSale are Shopify's live "has this actually sold" signal
+// -- Shopify auto-archives a product when its inventory hits zero (and
+// un-archives it on a refund), so this is more trustworthy than the
+// Sheet's Variant Inventory Qty column, which the owner never touches
+// again after a piece is first listed (see normalizeStatus below).
 async function fetchShopifyImagesBySku() {
   const domain = shopifyDomain();
   const images = new Map();
@@ -194,7 +199,8 @@ async function fetchShopifyImagesBySku() {
               edges {
                 cursor
                 node {
-                  variants(first: 1) { edges { node { sku } } }
+                  status
+                  variants(first: 1) { edges { node { sku availableForSale } } }
                   media(first: 10) {
                     edges { node { ... on MediaImage { image { url altText } } } }
                   }
@@ -212,12 +218,20 @@ async function fetchShopifyImagesBySku() {
 
       const edges = payload.data?.products?.edges || [];
       for (const edge of edges) {
-        const sku = edge.node.variants.edges[0]?.node.sku?.trim().toUpperCase();
+        const variant = edge.node.variants.edges[0]?.node;
+        const sku = variant?.sku?.trim().toUpperCase();
         if (!sku) continue;
         const mediaImages = edge.node.media.edges.map((m) => m.node.image).filter(Boolean);
         const urls = mediaImages.map((img) => img.url).filter(Boolean);
         const mosaicUrl = mediaImages.find((img) => normalizeText(img.altText).toLowerCase() === 'mosaic')?.url || null;
-        if (urls.length) images.set(sku, { urls, mosaicUrl });
+        if (urls.length) {
+          images.set(sku, {
+            urls,
+            mosaicUrl,
+            status: edge.node.status,
+            availableForSale: Boolean(variant?.availableForSale),
+          });
+        }
       }
 
       if (!payload.data?.products?.pageInfo?.hasNextPage || edges.length === 0) break;
@@ -295,7 +309,19 @@ function normalizePrice(value) {
   return Number.isFinite(parsed) ? parsed : 0;
 }
 
-function normalizeStatus(row) {
+// Prefers Shopify's own live status when this SKU exists there -- Shopify
+// auto-archives a product when its inventory hits zero (and un-archives it
+// automatically on a refund/return), so that's a real live signal. The
+// Sheet's Variant Inventory Qty column only means "ready to list" in the
+// owner's workflow (0/empty = not ready, 1 = go) and is never touched
+// again after a piece is first created in Shopify, so it's only trustworthy
+// as a *pre-creation* fallback, not an ongoing sold/available signal.
+function normalizeStatus(row, shopifyEntry) {
+  if (shopifyEntry) {
+    const soldOut = shopifyEntry.status === 'ARCHIVED' || shopifyEntry.availableForSale === false;
+    return soldOut ? 'sold-out' : 'available';
+  }
+
   const qty = Number.parseInt(normalizeText(row['Variant Inventory Qty']), 10);
   if (Number.isFinite(qty) && qty <= 0) {
     return 'sold-out';
@@ -359,7 +385,7 @@ function normalizeProduct(row, shopifyImages) {
     tags: normalizeText(row.Tags),
     colors: normalizeText(row.Colors),
     shopifyUrl: normalizeText(row['Shopify Product URL']),
-    status: normalizeStatus(row),
+    status: normalizeStatus(row, shopifyEntry),
     // A "Featured" column in the sheet lets Featured Pieces on the home page
     // be managed by marking a cell, not by editing FEATURED_SKUS in code
     // every time a featured piece sells and drops out of the published rows.
