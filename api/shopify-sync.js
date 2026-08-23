@@ -1060,7 +1060,10 @@ export default async function handler(req, res) {
     try {
       const token = await fetchAccessToken();
       const sheetRows = await fetchSheetRows();
-      const locationId = apply && createMissing ? await getPrimaryLocationId(token) : null;
+      // Needed both for creating new products (createMissing) and for
+      // zeroing out an existing product's inventory -- fetch it any time
+      // this run might actually write something.
+      const locationId = apply ? await getPrimaryLocationId(token) : null;
 
       const sheetBySku = new Map(sheetRows.map((row) => [row.sku, row]));
       const sheetByTitle = new Map();
@@ -1128,6 +1131,7 @@ export default async function handler(req, res) {
       const skippedAmbiguous = [];
       const unmatchedShopifyProducts = [];
       const skippedSold = [];
+      const zeroOutCandidates = [];
       const matchedSheetSkus = new Set();
 
       for (const product of shopifyProducts) {
@@ -1174,6 +1178,24 @@ export default async function handler(req, res) {
           continue;
         }
 
+        // The owner's own signal for "pull this off the site" -- the Sheet's
+        // Variant Inventory Qty column drops to 0 on a product that's
+        // already live (e.g. the physical piece can't be found). Zeroing
+        // Shopify's inventory is enough on its own: Shopify auto-archives a
+        // product at 0 inventory (confirmed by the owner's own test order),
+        // and the storefront's sold-status display already treats a zero-
+        // inventory/unavailable variant as sold, so no separate archive
+        // call or title/price sync is needed here.
+        if (sheetRow.qty <= 0) {
+          zeroOutCandidates.push({
+            title: sheetRow.title,
+            sku: sheetRow.sku,
+            productId: product.productId,
+            inventoryItemId: product.inventoryItemId,
+          });
+          continue;
+        }
+
         if (product.title !== sheetRow.title) {
           titleMismatches.push({ title: sheetRow.title, shopifyTitle: product.title, productId: product.productId });
         }
@@ -1193,7 +1215,7 @@ export default async function handler(req, res) {
         .filter((row) => !matchedSheetSkus.has(row.sku))
         .map((row) => ({ sku: row.sku, title: row.title, qty: row.qty, readyToCreate: row.qty >= 1 }));
 
-      const applied = { skuRenames: [], titleUpdates: [], priceUpdates: [], created: [] };
+      const applied = { skuRenames: [], titleUpdates: [], priceUpdates: [], zeroedOut: [], created: [] };
       const failed = [];
 
       if (apply) {
@@ -1249,6 +1271,15 @@ export default async function handler(req, res) {
           }
         }
 
+        for (const candidate of zeroOutCandidates) {
+          try {
+            await setInventory(token, candidate.inventoryItemId, locationId, 0);
+            applied.zeroedOut.push({ title: candidate.title, sku: candidate.sku });
+          } catch (error) {
+            failed.push({ type: 'zero-inventory', title: candidate.title, error: error.message });
+          }
+        }
+
         if (createMissing) {
           for (const candidate of pendingCreation) {
             if (!candidate.readyToCreate) continue;
@@ -1276,6 +1307,8 @@ export default async function handler(req, res) {
             skuMismatches: apply ? undefined : skuMismatches,
             priceMismatches: apply ? undefined : priceMismatches,
             titleMismatches: apply ? undefined : titleMismatches,
+            zeroOutCount: zeroOutCandidates.length,
+            zeroOutCandidates: apply ? undefined : zeroOutCandidates,
             skippedAmbiguous,
             skippedSold,
             unmatchedShopifyProducts,
