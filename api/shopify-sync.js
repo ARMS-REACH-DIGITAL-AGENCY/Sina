@@ -1146,7 +1146,7 @@ export default async function handler(req, res) {
           }
           sheetRow = sheetByTitle.get(key);
           if (!sheetRow) {
-            unmatchedShopifyProducts.push({ title: product.title, shopifySku: product.sku });
+            unmatchedShopifyProducts.push({ title: product.title, shopifySku: product.sku, productId: product.productId });
             continue;
           }
           // Found only by title, not by SKU -- the Sheet's SKU has drifted
@@ -1215,7 +1215,7 @@ export default async function handler(req, res) {
         .filter((row) => !matchedSheetSkus.has(row.sku))
         .map((row) => ({ sku: row.sku, title: row.title, qty: row.qty, readyToCreate: row.qty >= 1 }));
 
-      const applied = { skuRenames: [], titleUpdates: [], priceUpdates: [], zeroedOut: [], created: [] };
+      const applied = { skuRenames: [], titleUpdates: [], priceUpdates: [], zeroedOut: [], created: [], deleted: [] };
       const failed = [];
 
       if (apply) {
@@ -1290,6 +1290,21 @@ export default async function handler(req, res) {
             } catch (error) {
               failed.push({ type: 'create', title: candidate.title, error: error.message });
             }
+          }
+        }
+
+        // The owner's explicit definition of "sync": the two catalogs must
+        // be identical, not just reconciled where they happen to overlap.
+        // A Shopify product with no Sheet row at all (not even a matching
+        // title) means the Sheet no longer wants it to exist -- delete it
+        // outright rather than archiving, so a stale/renamed-away listing
+        // can never keep serving traffic or a stale image.
+        for (const candidate of unmatchedShopifyProducts) {
+          try {
+            await deleteProduct(token, candidate.productId);
+            applied.deleted.push({ title: candidate.title, sku: candidate.shopifySku });
+          } catch (error) {
+            failed.push({ type: 'delete', title: candidate.title, error: error.message });
           }
         }
       }
