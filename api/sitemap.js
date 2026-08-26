@@ -3,7 +3,7 @@
 // the live, current set of products instead of going stale the moment a
 // piece is added, sold, or renamed.
 
-const SITE_ORIGIN = 'https://sinasglass.com';
+const SITE_ORIGIN = 'https://sinascreations.com';
 
 const STATIC_PATHS = ['/', '/meet-sina', '/commission', '/wholesale', '/shop', '/schedule'];
 

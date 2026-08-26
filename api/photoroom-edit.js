@@ -10,7 +10,7 @@
 const ADMIN_KEY = 'ce4dbfc3c446ba331b5dda0b4cea3bd7726a7f59c7c8a8e0';
 const REPO_OWNER = 'ARMS-REACH-DIGITAL-AGENCY';
 const REPO_NAME = 'Sina';
-const IMAGE_BASE_URL = 'https://sinasglass.com/images/products';
+const IMAGE_BASE_URL = 'https://www.sinascreations.com/images/products';
 const OUTPUT_PATH_PREFIX = 'public/images/products';
 const DEFAULT_OUTPUT_SIZE = '1200x1200';
 const DEFAULT_BG_PROMPT =
@@ -191,7 +191,7 @@ async function processOne(statedFilename) {
 }
 
 async function fetchLiveFilenames() {
-  const response = await fetch('https://sinasglass.com/api/catalog');
+  const response = await fetch('https://www.sinascreations.com/api/catalog');
   if (!response.ok) throw new Error(`catalog fetch failed (${response.status})`);
   const data = await response.json();
   const filenames = new Set();

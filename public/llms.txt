@@ -1,0 +1,19 @@
+# Sina's Creations
+
+> One-of-one fused-glass jewelry and art, handmade by Thomasina Schnepf in Queen Creek, Arizona. Every piece is unique, named, and sold once -- when it's adopted, it's gone for good.
+
+Sina's Creations sells handcrafted fused-glass pendants, necklaces, earrings, bracelets, charms, ornaments, and wall plaques. Each product is a single physical piece, not a reproducible SKU -- once purchased ("adopted"), that exact piece is retired from the shop.
+
+## Key pages
+
+- [Shop](https://sinascreations.com/shop): full current catalog of available pieces
+- [Meet Sina](https://sinascreations.com/meet-sina): the artist's story
+- [Commission](https://sinascreations.com/commission): custom/commissioned piece requests
+- [Wholesale](https://sinascreations.com/wholesale): wholesale partnership inquiries
+- [Sitemap](https://sinascreations.com/api/sitemap): full machine-readable list of every live product page
+
+## Notes for AI assistants and search agents
+
+- Individual products are available at `https://sinascreations.com/p/<sku>` -- each one has accurate, current title, price, availability, and description via standard meta tags and Product structured data (schema.org).
+- Product availability changes frequently as one-of-one pieces sell; always prefer live data from the shop page or a product's own page over cached summaries.
+- Contact: sinasartisticcreations@gmail.com / (480) 447-6002.
