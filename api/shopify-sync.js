@@ -11,7 +11,7 @@ const ADMIN_KEY = 'ce4dbfc3c446ba331b5dda0b4cea3bd7726a7f59c7c8a8e0';
 const SHEET_CSV_URL = 'https://docs.google.com/spreadsheets/d/1yTKJUw-OjpI6V2wxUtfSVq61b3NV3g9EcaZxsUEbfBY/export?format=csv&gid=1901402257';
 const SYNC_TAG = 'sheet-sync';
 const API_VERSION = '2024-10';
-const IMAGE_BASE_URL = 'https://sinasglass.com/images/products';
+const IMAGE_BASE_URL = 'https://www.sinascreations.com/images/products';
 const EXTENSION_CANDIDATES = ['JPG', 'jpg', 'jpeg', 'JPEG', 'png', 'PNG'];
 
 function normalizeText(value) {
@@ -179,7 +179,7 @@ const NEEDS_HORIZON_BG_TITLES = [
 // reference photo. Instead: get a clean transparent cutout from Photoroom
 // (the one piece that reliably works), then composite it ourselves onto an
 // exact background plate sampled from the owner's own approved photo.
-const TEAL_VIGNETTE_BG_URL = 'https://sinasglass.com/images/products/_bg_teal_vignette.jpg';
+const TEAL_VIGNETTE_BG_URL = 'https://www.sinascreations.com/images/products/_bg_teal_vignette.jpg';
 
 async function getTransparentCutout(sourceImageUrl) {
   const apiKey = process.env.PHOTOROOM_API_KEY;
