@@ -102,7 +102,10 @@ function extractHeadline(bodyHtml) {
 }
 
 function normalizeCategory(row) {
-  const rawCategory = normalizeText(row.Collection) || normalizeText(row.Type);
+  // Type used to be read here too as a fallback, but it's actually a
+  // freeform keyword-tag column (e.g. "small, ocean, wire wrapped") rather
+  // than a category name -- Collection is the real source of truth.
+  const rawCategory = normalizeText(row.Collection);
   return CATEGORY_MAP[rawCategory] || rawCategory || 'Creations';
 }
 
@@ -382,6 +385,7 @@ function normalizeProduct(row, shopifyImages) {
     height: readDimension(row, 'H', 'Height'),
     width: readDimension(row, 'W', 'Width'),
     weight: readDimension(row, 'oz.', 'oz', 'Oz.', 'Oz', 'Weight'),
+    type: normalizeText(row.Type),
     tags: normalizeText(row.Tags),
     colors: normalizeText(row.Colors),
     shopifyUrl: normalizeText(row['Shopify Product URL']),

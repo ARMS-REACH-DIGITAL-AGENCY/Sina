@@ -617,7 +617,19 @@ export function Shop() {
       return products.filter((product) => {
         const sku = String(product.sku ?? '').toLowerCase();
         const name = String(product.name ?? '').toLowerCase();
-        return sku.includes(searchTerm) || name.includes(searchTerm);
+        const type = String(product.type ?? '').toLowerCase();
+        const colors = String(product.colors ?? '').toLowerCase();
+        // Sold pieces aren't tagged "adopted" in the Sheet -- their sold
+        // status already says that -- but searching "adopted" should still
+        // surface them, since browsing past adoptions is a real use case.
+        const adopted = product.status === 'sold-out' ? 'adopted' : '';
+        return (
+          sku.includes(searchTerm) ||
+          name.includes(searchTerm) ||
+          type.includes(searchTerm) ||
+          colors.includes(searchTerm) ||
+          adopted.includes(searchTerm)
+        );
       });
     }
 
