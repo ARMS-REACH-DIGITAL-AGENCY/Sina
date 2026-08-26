@@ -887,7 +887,7 @@ function TikTokIcon() {
 const footerSocialLinks = [
   { label: 'Instagram', href: 'https://www.instagram.com/sinascreations?igsh=bThtdGtrbzNmOG9m&igsi=bThtdGtrbzNmOG9m', Icon: InstagramIcon },
   { label: 'Facebook', href: 'https://www.facebook.com/share/1CvzKETZEP/', Icon: FacebookIcon },
-  { label: 'X', href: 'https://x.com/SinasGlasss', Icon: XIcon },
+  { label: 'X', href: 'https://x.com/SinasCreations', Icon: XIcon },
   { label: 'TikTok', href: 'https://www.tiktok.com/@sinascreations?_r=1&_t=ZT-98xLwfn3d2T', Icon: TikTokIcon },
 ];
 
