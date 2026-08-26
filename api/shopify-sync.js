@@ -578,7 +578,7 @@ async function archiveMissingProducts(token, syncedSkus) {
 }
 
 const REDIRECT_MARKER = 'sina-storefront-redirect';
-const REDIRECT_TARGET = 'https://sinasglass.com';
+const REDIRECT_TARGET = 'https://www.sinascreations.com';
 
 // The raw *.myshopify.com storefront is reachable by anyone who stumbles on
 // it (shared link, search engine, typo) even though nothing ever links to
