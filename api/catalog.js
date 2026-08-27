@@ -388,6 +388,10 @@ function normalizeProduct(row, shopifyImages) {
     type: normalizeText(row.Type),
     tags: normalizeText(row.Tags),
     colors: normalizeText(row.Colors),
+    // Colors holds hex codes for the mosaic's own color-matching math --
+    // "Human Colors" is the plain-English column ("Silver, Dark Blue",
+    // "Hot Pink") that's actually searchable by a person typing a color.
+    colorNames: normalizeText(row['Human Colors']),
     shopifyUrl: normalizeText(row['Shopify Product URL']),
     status: normalizeStatus(row, shopifyEntry),
     // A "Featured" column in the sheet lets Featured Pieces on the home page

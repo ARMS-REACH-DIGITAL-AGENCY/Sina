@@ -618,7 +618,7 @@ export function Shop() {
         const sku = String(product.sku ?? '').toLowerCase();
         const name = String(product.name ?? '').toLowerCase();
         const type = String(product.type ?? '').toLowerCase();
-        const colors = String(product.colors ?? '').toLowerCase();
+        const colors = String(product.colorNames ?? '').toLowerCase();
         // Sold pieces aren't tagged "adopted" in the Sheet -- their sold
         // status already says that -- but searching "adopted" should still
         // surface them, since browsing past adoptions is a real use case.
