@@ -1057,6 +1057,13 @@ export default async function handler(req, res) {
     res.setHeader('Content-Type', 'application/json');
     const apply = req.query.apply === 'true';
     const createMissing = req.query.createMissing === 'true';
+    // Keep large first-time publishes within the serverless execution window.
+    // Each run re-reads Shopify, so the next batch always starts with only
+    // the still-missing Sheet rows and cannot duplicate products.
+    const requestedCreateLimit = Number.parseInt(String(req.query.createLimit || '20'), 10);
+    const createLimit = Number.isFinite(requestedCreateLimit)
+      ? Math.min(Math.max(requestedCreateLimit, 1), 25)
+      : 20;
     try {
       const token = await fetchAccessToken();
       const sheetRows = await fetchSheetRows();
@@ -1281,8 +1288,10 @@ export default async function handler(req, res) {
         }
 
         if (createMissing) {
-          for (const candidate of pendingCreation) {
-            if (!candidate.readyToCreate) continue;
+          const creationBatch = pendingCreation
+            .filter((candidate) => candidate.readyToCreate)
+            .slice(0, createLimit);
+          for (const candidate of creationBatch) {
             try {
               const fullRow = sheetBySku.get(candidate.sku);
               await createProduct(token, fullRow, locationId);
@@ -1328,6 +1337,8 @@ export default async function handler(req, res) {
             skippedSold,
             unmatchedShopifyProducts,
             pendingCreation,
+            readyToCreateCount: pendingCreation.filter((candidate) => candidate.readyToCreate).length,
+            createBatchLimit: createLimit,
             applied: apply ? applied : undefined,
             failed: apply ? failed : undefined,
           },
