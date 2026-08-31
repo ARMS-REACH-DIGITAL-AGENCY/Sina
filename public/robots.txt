@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://sinascreations.com/api/sitemap
+Sitemap: https://www.sinascreations.com/sitemap.xml
