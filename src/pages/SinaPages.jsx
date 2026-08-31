@@ -618,6 +618,7 @@ export function Shop() {
         const sku = String(product.sku ?? '').toLowerCase();
         const name = String(product.name ?? '').toLowerCase();
         const type = String(product.type ?? '').toLowerCase();
+        const size = String(product.size ?? '').toLowerCase();
         const colors = String(product.colorNames ?? '').toLowerCase();
         // Sold pieces aren't tagged "adopted" in the Sheet -- their sold
         // status already says that -- but searching "adopted" should still
@@ -627,6 +628,7 @@ export function Shop() {
           sku.includes(searchTerm) ||
           name.includes(searchTerm) ||
           type.includes(searchTerm) ||
+          size.includes(searchTerm) ||
           colors.includes(searchTerm) ||
           adopted.includes(searchTerm)
         );
