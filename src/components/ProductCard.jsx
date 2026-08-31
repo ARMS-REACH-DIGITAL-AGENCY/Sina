@@ -56,6 +56,18 @@ function ProductCardSkuRow({ eyebrowLabel, sku }) {
   );
 }
 
+function ProductNameLink({ product }) {
+  return (
+    <a
+      href={`/p/${encodeURIComponent(product.sku)}`}
+      onClick={(event) => event.stopPropagation()}
+      aria-label={`Open ${product.name}'s permanent product page`}
+    >
+      {product.name}
+    </a>
+  );
+}
+
 function ShareButton({ sku, onShare, shareStatus }) {
   return (
     <button
@@ -134,9 +146,8 @@ export function ProductCard({ product, eyebrowOverride, sharedSku }) {
 
   const handleShare = async (event) => {
     event.stopPropagation();
-    // /p/:sku is a short redirect to the full /shop?sku= deep link (see
-    // ProductShortLink in SinaPages.jsx) -- keeps shared links (texts, DMs,
-    // social captions) from being the long shop-with-query-string URL.
+    // /p/:sku is the permanent public product page. It is used everywhere:
+    // share links, QR labels, search indexing, and internal product links.
     const shareUrl = `${window.location.origin}/p/${encodeURIComponent(product.sku)}`;
     const shareTitle = `${product.name} — Sina's Creations`;
     // Some share targets (notably Android's SMS/Messages) only surface the
@@ -225,7 +236,7 @@ export function ProductCard({ product, eyebrowOverride, sharedSku }) {
         {!showBack ? (
           <>
             <ProductCardSkuRow eyebrowLabel={eyebrowLabel} sku={product.sku} />
-            <h3>{product.name}</h3>
+            <h3><ProductNameLink product={product} /></h3>
             <p className="product-card__line">{product.line}</p>
             <div className="price-row">
               <strong>${product.price}</strong>
@@ -241,7 +252,7 @@ export function ProductCard({ product, eyebrowOverride, sharedSku }) {
         ) : (
           <>
             <ProductCardSkuRow eyebrowLabel={eyebrowLabel} sku={product.sku} />
-            <h3>{product.name}</h3>
+            <h3><ProductNameLink product={product} /></h3>
             <p className="product-card__line">{product.line}</p>
             <div className="product-card__description-shell">
               <ProductCardDescription product={product} />
