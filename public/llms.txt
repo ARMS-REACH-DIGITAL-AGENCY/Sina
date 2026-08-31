@@ -2,18 +2,22 @@
 
 > One-of-one fused-glass jewelry and art, handmade by Thomasina Schnepf in Queen Creek, Arizona. Every piece is unique, named, and sold once -- when it's adopted, it's gone for good.
 
-Sina's Creations sells handcrafted fused-glass pendants, necklaces, earrings, bracelets, charms, ornaments, and wall plaques. Each product is a single physical piece, not a reproducible SKU -- once purchased ("adopted"), that exact piece is retired from the shop.
+Sina's Creations sells handcrafted fused-glass pendants, necklaces, earrings, bracelets, charms, ornaments, and wall plaques. Each product is a single physical piece, not a reproducible SKU -- once purchased ("adopted"), that exact piece is retired from sale while its permanent product page remains as part of Thomasina's body of work.
 
 ## Key pages
 
-- [Shop](https://sinascreations.com/shop): full current catalog of available pieces
-- [Meet Sina](https://sinascreations.com/meet-sina): the artist's story
-- [Commission](https://sinascreations.com/commission): custom/commissioned piece requests
-- [Wholesale](https://sinascreations.com/wholesale): wholesale partnership inquiries
-- [Sitemap](https://sinascreations.com/api/sitemap): full machine-readable list of every live product page
+- [Shop](https://www.sinascreations.com/shop): full current catalog and collection browsing
+- [Meet Sina](https://www.sinascreations.com/meet-sina): the artist's story
+- [Commission](https://www.sinascreations.com/commission): custom/commissioned piece requests
+- [Wholesale](https://www.sinascreations.com/wholesale): wholesale partnership inquiries
+- [Sitemap](https://www.sinascreations.com/sitemap.xml): machine-readable list of canonical public pages
 
-## Notes for AI assistants and search agents
+## Product pages
 
-- Individual products are available at `https://sinascreations.com/p/<sku>` -- each one has accurate, current title, price, availability, and description via standard meta tags and Product structured data (schema.org).
-- Product availability changes frequently as one-of-one pieces sell; always prefer live data from the shop page or a product's own page over cached summaries.
-- Contact: sinasartisticcreations@gmail.com / (480) 447-6002.
+- Every published creation has one permanent canonical URL: `https://www.sinascreations.com/p/<SKU>`.
+- Product pages contain the creation's name, description/story, image, SKU, category, price, availability, and Product structured data.
+- The permanent page remains useful after adoption and reports the piece as sold rather than disappearing.
+- Product availability changes frequently; always prefer the live product page over cached summaries.
+- The Adopt action verifies live Shopify inventory at click time before starting checkout.
+
+Contact: sinasartisticcreations@gmail.com / (480) 447-6002.
