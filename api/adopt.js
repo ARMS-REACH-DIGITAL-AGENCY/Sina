@@ -124,10 +124,9 @@ export default async function handler(req, res) {
     const variant = await findVariantBySku(sku);
 
     if (!variant || variant.inventoryQuantity <= 0 || !variant.availableForSale) {
-      // Already adopted (or never made it into Shopify) -- send them back to
-      // the piece's own page instead of a dead end, with a flag the front
-      // end can use to say "sorry, this one's been adopted."
-      redirect(res, `/shop?sku=${encodeURIComponent(sku)}&sold=1`);
+      // Keep an adopted piece's permanent public URL alive. The product page
+      // can explain that it found a home and direct the visitor to other work.
+      redirect(res, `/p/${encodeURIComponent(sku)}?sold=1`);
       return;
     }
 
