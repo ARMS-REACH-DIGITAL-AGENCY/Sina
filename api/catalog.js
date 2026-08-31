@@ -386,6 +386,9 @@ function normalizeProduct(row, shopifyImages) {
     width: readDimension(row, 'W', 'Width'),
     weight: readDimension(row, 'oz.', 'oz', 'Oz.', 'Oz', 'Weight'),
     type: normalizeText(row.Type),
+    // Size is a separate, structured Sheet column (small / medium / large).
+    // Keep Type as its existing freeform descriptor for compatibility.
+    size: normalizeText(row.Size),
     tags: normalizeText(row.Tags),
     colors: normalizeText(row.Colors),
     // Colors holds hex codes for the mosaic's own color-matching math --
