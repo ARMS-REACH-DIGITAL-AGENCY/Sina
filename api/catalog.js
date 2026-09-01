@@ -1,4 +1,4 @@
-const SHEET_CSV_URL = 'https://docs.google.com/spreadsheets/d/1yTKJUw-OjpI6V2wxUtfSVq61b3NV3g9EcaZxsUEbfBY/export?format=csv&gid=1901402257';
+import { SHEET_CSV_URL } from '../lib/sina-config.mjs';
 const SHOPIFY_API_VERSION = '2024-10';
 
 const CATEGORY_MAP = {
