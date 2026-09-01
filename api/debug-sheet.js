@@ -1,4 +1,4 @@
-import { SHEET_CSV_URL, isAdminKeyValid as validateAdminKey } from '../lib/sina-config.mjs';
+const { SHEET_CSV_URL, isAdminKeyValid: validateAdminKey } = require('../lib/sina-config.js');
 // One-off admin endpoint: returns raw Sheet rows (every column, unfiltered by
 // Published) for a given list of SKUs, so a duplicate-SKU investigation can
 // inspect the actual sheet contents without pulling the whole ~300-row CSV
