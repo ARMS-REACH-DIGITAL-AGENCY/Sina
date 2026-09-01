@@ -62,19 +62,31 @@ async function findProductBySku(request, sku) {
   }
 }
 
-function productGalleryUrls(product, primaryImageUrl) {
-  const urls = [];
-  const add = (url) => {
-    if (!url) return;
-    const absolute = url.startsWith('http') ? url : `${SITE_ORIGIN}${url}`;
-    if (!urls.includes(absolute)) urls.push(absolute);
-  };
+function absoluteImageUrl(url) {
+  if (!url) return '';
+  return url.startsWith('http') ? url : `${SITE_ORIGIN}${url}`;
+}
 
-  add(primaryImageUrl);
-  for (const slot of product.gallery || []) {
-    if (Array.isArray(slot)) add(slot[0]);
+// Preserve the same slot/fallback model used by ProductCard: slot 0 is the
+// primary image and each optional Image 2/3/4 (or Shopify media item) is its
+// own slot. Each slot can carry several filename-extension fallbacks.
+function productGallerySlots(product, primaryImageUrl) {
+  const rawSlots = product.gallery?.length
+    ? product.gallery
+    : [[product.image, ...(product.imageFallbacks || [])].filter(Boolean)];
+
+  const slots = rawSlots
+    .map((slot) => (Array.isArray(slot) ? slot : [slot]))
+    .map((slot) => [...new Set(slot.map(absoluteImageUrl).filter(Boolean))])
+    .filter((slot) => slot.length);
+
+  const primary = absoluteImageUrl(primaryImageUrl);
+  if (primary) {
+    if (!slots.length) slots.push([primary]);
+    else if (!slots[0].includes(primary)) slots[0].unshift(primary);
   }
-  return urls.slice(0, 4);
+
+  return slots.slice(0, 4);
 }
 
 function openCardDescriptionHtml(product) {
@@ -133,6 +145,52 @@ function globalHeaderHtml() {
     <a href="/shop">Adopt Sina's Creations</a>
     <a href="/wholesale">Wholesale Partners</a>
   </div>`;
+}
+
+function categoryIconSvg(type) {
+  switch (type) {
+    case 'pendants':
+      return `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3.5a2.5 2.5 0 1 1 0 5a2.5 2.5 0 0 1 0-5Zm0 5v2.5"></path><path d="M12 11l4.5 5.5L12 21l-4.5-4.5L12 11Z"></path></svg>`;
+    case 'necklaces':
+      return `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 4c0 3 2.2 5.5 5 7c2.8-1.5 5-4 5-7"></path><path d="M9 15c0-1.7 1.3-3 3-3s3 1.3 3 3-1.3 3-3 3-3-1.3-3-3Z"></path></svg>`;
+    case 'lanyards':
+      return `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 4c0 3.2 1.7 5.8 4 7.5c2.3-1.7 4-4.3 4-7.5"></path><path d="M10 14h4"></path><path d="M11 14v5"></path><path d="M13 14v5"></path></svg>`;
+    case 'plates':
+      return `<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="7.5"></circle><circle cx="12" cy="12" r="3.5"></circle></svg>`;
+    case 'wall-art':
+      return `<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4.5" y="5" width="15" height="14" rx="1.5"></rect><path d="M8 14l2.5-2.5 2.2 2.2 3.3-4.2 2 2.5"></path></svg>`;
+    case 'charms':
+      return `<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m12 4 1.9 4 4.4.6-3.2 3.1.8 4.4L12 14l-3.9 2.1.8-4.4-3.2-3.1 4.4-.6L12 4Z"></path></svg>`;
+    case 'sets':
+    default:
+      return `<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="6" width="7" height="7" rx="1.2"></rect><rect x="13" y="6" width="7" height="7" rx="1.2"></rect><rect x="8.5" y="13" width="7" height="7" rx="1.2"></rect></svg>`;
+  }
+}
+
+function collectionBrowseHtml(product) {
+  const tabs = [
+    ['Pendants', 'pendants'],
+    ['Necklaces', 'necklaces'],
+    ['Lanyards', 'lanyards'],
+    ['Plates', 'plates'],
+    ['Plaques', 'wall-art'],
+    ['Charms', 'charms'],
+    ['Sets', 'sets'],
+  ];
+
+  return `<section class="shop-hero-controls seo-product-collection-nav" aria-label="Browse the full catalog by collection">
+    <div class="shop-hero-controls__inner">
+      <div class="shop-icon-tabs" role="tablist" aria-label="Browse products by collection">
+        ${tabs.map(([name, iconType]) => {
+          const active = product.category === name;
+          return `<a href="/shop?collection=${encodeURIComponent(name)}" role="tab" aria-selected="${active ? 'true' : 'false'}" aria-label="${escapeHtml(name)}" class="shop-icon-tab${active ? ' active' : ''}">
+            <span class="shop-icon-tab__glyph">${categoryIconSvg(iconType)}</span>
+            <span class="shop-icon-tab__label">${escapeHtml(name)}</span>
+          </a>`;
+        }).join('')}
+      </div>
+    </div>
+  </section>`;
 }
 
 function globalFooterHtml() {
@@ -194,16 +252,17 @@ function shareIconHtml() {
 
 function productOpenCardHtml(product, imageUrl) {
   const isSold = product.status === 'sold-out';
-  const gallery = productGalleryUrls(product, imageUrl);
-  const mainImage = gallery[0] || imageUrl;
+  const gallerySlots = productGallerySlots(product, imageUrl);
+  const mainSlot = gallerySlots[0] || [absoluteImageUrl(imageUrl)];
+  const mainImage = mainSlot[0] || absoluteImageUrl(imageUrl);
   const descriptionHtml = openCardDescriptionHtml(product);
   const hasDimensions = Boolean(product.height || product.width || product.weight);
   const eyebrow = escapeHtml(product.category || categoryLabel(product.category));
   const price = Number.isFinite(Number(product.price)) ? Number(product.price).toFixed(0) : escapeHtml(product.price);
 
-  const thumbs = gallery.length > 1
+  const thumbs = gallerySlots.length > 1
     ? `<div class="product-card__thumbs seo-card-thumbs" aria-label="${escapeHtml(product.name)} image gallery">
-        ${gallery.map((url, index) => `<button type="button" class="product-card__thumb seo-card-thumb${index === 0 ? ' active' : ''}" data-gallery-src="${escapeHtml(url)}" aria-label="View image ${index + 1} for ${escapeHtml(product.name)}"><img src="${escapeHtml(url)}" alt="" loading="lazy" /></button>`).join('')}
+        ${gallerySlots.map((slot, index) => `<button type="button" class="product-card__thumb seo-card-thumb${index === 0 ? ' active' : ''}" data-gallery-candidates="${escapeHtml(JSON.stringify(slot))}" aria-label="View image ${index + 1} for ${escapeHtml(product.name)}"><img src="${escapeHtml(slot[0])}" data-image-candidates="${escapeHtml(JSON.stringify(slot))}" alt="" loading="lazy" /></button>`).join('')}
       </div>`
     : '';
 
@@ -233,7 +292,7 @@ function productOpenCardHtml(product, imageUrl) {
 
       <section class="product-card__visual seo-card-visual" aria-label="Photos of ${escapeHtml(product.name)}">
         <div class="product-card__image seo-card-main-image">
-          <img id="seo-product-main-image" src="${escapeHtml(mainImage)}" alt="${escapeHtml(`${product.name}, ${categoryLabel(product.category)} by Sina's Creations`)}" fetchpriority="high" />
+          <img id="seo-product-main-image" src="${escapeHtml(mainImage)}" data-image-candidates="${escapeHtml(JSON.stringify(mainSlot))}" alt="${escapeHtml(`${product.name}, ${categoryLabel(product.category)} by Sina's Creations`)}" fetchpriority="high" />
           <span class="product-card__one-of-one"><span class="nowrap">1-of-1</span></span>
         </div>
         ${thumbs}
@@ -243,13 +302,14 @@ function productOpenCardHtml(product, imageUrl) {
 }
 
 function productFallbackHtml(product, imageUrl) {
-  return `<div id="root"><div class="site-shell">${globalHeaderHtml()}${productOpenCardHtml(product, imageUrl)}${globalFooterHtml()}</div></div>`;
+  return `<div id="root"><div class="site-shell">${globalHeaderHtml()}${collectionBrowseHtml(product)}${productOpenCardHtml(product, imageUrl)}${globalFooterHtml()}</div></div>`;
 }
 
 function productPageStyles() {
   return `<style id="product-page-css">
     .seo-product-page{max-width:1200px;margin:0 auto;padding:18px var(--page-gutter) 72px}
-    .seo-open-card{display:grid;grid-template-columns:minmax(0,1.28fr) minmax(390px,1fr);background:var(--off-white);border:1px solid rgba(41,42,40,.22);border-radius:var(--radius);overflow:hidden;box-shadow:2px 3px 0 rgba(41,42,40,.12);min-height:560px}
+    .seo-product-collection-nav a.shop-icon-tab{text-decoration:none}
+    .seo-open-card{display:grid;grid-template-columns:minmax(0,1.28fr) minmax(390px,1fr);background:var(--off-white);border:1px solid rgba(41,42,40,.22);border-radius:var(--radius);overflow:hidden;box-shadow:2px 3px 0 rgba(41,42,40,.12)}
     .seo-card-panel{grid-column:1;padding:38px 34px 30px;min-width:0;background:var(--off-white);display:flex;flex-direction:column;align-items:stretch}
     .seo-card-visual{grid-column:2;min-width:0;background:var(--black);display:flex;flex-direction:column;align-self:stretch}
     .seo-card-sku-row{display:flex;align-items:flex-start;justify-content:space-between;gap:18px;margin-bottom:10px}
@@ -268,8 +328,8 @@ function productPageStyles() {
     .seo-card-share{display:inline-flex;align-items:center;justify-content:center;width:38px;height:38px;border:0;background:transparent;color:var(--charcoal);cursor:pointer;padding:7px}
     .seo-card-share svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
     .seo-card-adopt{width:100%;margin-top:20px;min-height:54px}.seo-card-adopt.is-sold{opacity:.72}
-    .seo-card-main-image{position:relative;flex:1 1 auto;min-height:500px;background:#e8e4da;overflow:hidden}
-    .seo-card-main-image>img{width:100%;height:100%;min-height:500px;object-fit:cover;object-position:center}
+    .seo-card-main-image{position:relative;flex:0 0 auto;aspect-ratio:1/1;min-height:0;background:#e8e4da;overflow:hidden}
+    .seo-card-main-image>img{display:block;width:100%;height:100%;min-height:0;aspect-ratio:1/1;object-fit:cover;object-position:center}
     .seo-card-main-image .product-card__one-of-one{position:absolute;left:18px;bottom:18px;background:rgba(41,42,40,.88);color:var(--off-white);border-radius:999px;padding:8px 13px;font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase}
     .seo-card-thumbs{display:flex;align-items:center;gap:10px;min-height:92px;padding:12px 14px;background:var(--black);overflow-x:auto}
     .seo-card-thumb{flex:0 0 62px;width:62px;height:62px;padding:0;border:2px solid transparent;background:#292a28;border-radius:2px;overflow:hidden;cursor:pointer}
@@ -277,10 +337,10 @@ function productPageStyles() {
     .seo-card-thumb img{width:100%;height:100%;object-fit:cover}
     @media(max-width:760px){
       .seo-product-page{padding:16px 16px 56px}
-      .seo-open-card{grid-template-columns:1fr;min-height:0}
+      .seo-open-card{grid-template-columns:1fr}
       .seo-card-visual{grid-column:1;grid-row:1}
       .seo-card-panel{grid-column:1;grid-row:2;padding:28px 24px 26px}
-      .seo-card-main-image,.seo-card-main-image>img{min-height:0}
+      .seo-card-main-image{aspect-ratio:1/1}
       .seo-card-main-image>img{aspect-ratio:1/1;object-fit:cover}
       .seo-card-title{font-size:40px}
       .seo-card-line{font-size:18px}
@@ -328,12 +388,46 @@ function productPageScript(product) {
         }
       }
 
+      function readCandidates(element, attribute) {
+        try {
+          var value = JSON.parse(element.getAttribute(attribute) || '[]');
+          return Array.isArray(value) ? value.filter(Boolean) : [];
+        } catch (error) {
+          return [];
+        }
+      }
+
+      function armFallbackImage(image, candidates, hideOnFailure) {
+        if (!image || !candidates.length) return;
+        var index = Math.max(0, candidates.indexOf(image.getAttribute('src')));
+        image.onerror = function () {
+          index += 1;
+          if (index < candidates.length) {
+            image.src = candidates[index];
+            return;
+          }
+          image.onerror = null;
+          if (hideOnFailure) {
+            var thumb = image.closest('.seo-card-thumb');
+            if (thumb) thumb.hidden = true;
+          }
+        };
+      }
+
       var mainImage = document.getElementById('seo-product-main-image');
+      if (mainImage) armFallbackImage(mainImage, readCandidates(mainImage, 'data-image-candidates'), false);
+
       var thumbs = Array.prototype.slice.call(document.querySelectorAll('.seo-card-thumb'));
       thumbs.forEach(function (thumb) {
+        var thumbImage = thumb.querySelector('img');
+        if (thumbImage) armFallbackImage(thumbImage, readCandidates(thumbImage, 'data-image-candidates'), true);
         thumb.addEventListener('click', function () {
           if (!mainImage) return;
-          mainImage.src = thumb.getAttribute('data-gallery-src');
+          var candidates = readCandidates(thumb, 'data-gallery-candidates');
+          if (!candidates.length) return;
+          mainImage.setAttribute('data-image-candidates', JSON.stringify(candidates));
+          mainImage.src = candidates[0];
+          armFallbackImage(mainImage, candidates, false);
           thumbs.forEach(function (item) { item.classList.remove('active'); });
           thumb.classList.add('active');
         });
