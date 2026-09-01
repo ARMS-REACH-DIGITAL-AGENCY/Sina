@@ -285,6 +285,268 @@
   display: none !important;
 }
 
+/*
+ * Permanent /p/:sku pages are server-rendered in middleware, but their
+ * visible product block must be the same design as ProductCard's opened
+ * state. The middleware still carries older one-off SEO page sizing rules;
+ * these declarations intentionally override only the .seo-* permanent-page
+ * hooks with the exact values used by the live ProductCard component.
+ */
+.site-shell .seo-product-page {
+  max-width: none !important;
+  margin: 0 !important;
+  padding: 32px var(--page-gutter) 84px !important;
+  background: var(--warm-cream) !important;
+}
+
+.site-shell .seo-open-card {
+  display: flex !important;
+  flex-direction: row !important;
+  max-width: 1200px !important;
+  margin: 0 auto !important;
+  background: var(--off-white) !important;
+  border: 1.5px solid rgba(41,42,40,.18) !important;
+  box-shadow: 0 2px 0 rgba(0,0,0,.07) !important;
+  border-radius: var(--radius) !important;
+  overflow: hidden !important;
+}
+
+.site-shell .seo-card-panel {
+  order: 1 !important;
+  flex: 1 1 auto !important;
+  min-width: 0 !important;
+  padding: 32px !important;
+  background: var(--off-white) !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: stretch !important;
+}
+
+.site-shell .seo-card-visual {
+  order: 2 !important;
+  flex: 0 0 42% !important;
+  min-width: 0 !important;
+  background: var(--black) !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-self: stretch !important;
+}
+
+.site-shell .seo-card-sku-row {
+  align-items: center !important;
+  justify-content: space-between !important;
+  gap: 12px !important;
+  margin-bottom: 0 !important;
+}
+
+.site-shell .seo-card-sku-row > span {
+  color: var(--burnt-orange) !important;
+  text-transform: uppercase !important;
+  letter-spacing: .14em !important;
+  font-size: 10px !important;
+  font-weight: 700 !important;
+}
+
+.site-shell .seo-card-sku-row > strong {
+  font-size: 10px !important;
+  line-height: normal !important;
+  background: rgba(41,42,40,.06) !important;
+  padding: 4px 7px !important;
+  text-transform: none !important;
+  white-space: nowrap !important;
+}
+
+.site-shell .seo-card-title {
+  margin: 12px 0 0 !important;
+  font-family: var(--font-display) !important;
+  font-size: 32px !important;
+  line-height: 1.02 !important;
+  font-weight: 800 !important;
+  letter-spacing: -.01em !important;
+  color: var(--charcoal) !important;
+}
+
+.site-shell .seo-card-line {
+  margin: 0 !important;
+  color: var(--charcoal) !important;
+  font-size: 15px !important;
+  line-height: 1.55 !important;
+  font-weight: 700 !important;
+}
+
+.site-shell .seo-card-description-shell {
+  margin-top: 10px !important;
+}
+
+.site-shell .seo-card-description,
+.site-shell .seo-card-description p {
+  color: var(--muted-olive) !important;
+  font-size: 15px !important;
+  line-height: 1.62 !important;
+}
+
+.site-shell .seo-card-description {
+  display: grid !important;
+  gap: 12px !important;
+}
+
+.site-shell .seo-card-description p {
+  margin: 0 !important;
+}
+
+.site-shell .seo-card-dimensions {
+  display: flex !important;
+  align-items: initial !important;
+  gap: 18px !important;
+  flex-wrap: wrap !important;
+  margin-top: 12px !important;
+  padding: 12px 0 0 !important;
+  border-top: 1px solid rgba(41,42,40,.14) !important;
+  border-bottom: 0 !important;
+  color: var(--muted-olive) !important;
+  font-size: 12px !important;
+  font-weight: 700 !important;
+  text-transform: uppercase !important;
+  letter-spacing: .08em !important;
+}
+
+.site-shell .seo-card-price-row {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: stretch !important;
+  justify-content: flex-start !important;
+  gap: 6px !important;
+  border-top: 1px solid rgba(41,42,40,.18) !important;
+  margin-top: 16px !important;
+  padding-top: 14px !important;
+}
+
+.site-shell .seo-card-price-row > strong {
+  display: block !important;
+  font-size: 24px !important;
+  line-height: 1.1 !important;
+  color: var(--charcoal) !important;
+}
+
+.site-shell .seo-card-cost-share {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  gap: 12px !important;
+  margin-left: 0 !important;
+}
+
+.site-shell .seo-card-cost-share .product-card__flip-cta-caption {
+  display: block !important;
+  max-width: none !important;
+  text-align: left !important;
+  font-size: 10px !important;
+  line-height: 1.1 !important;
+  text-transform: uppercase !important;
+  letter-spacing: .12em !important;
+  color: var(--muted-olive) !important;
+  font-weight: 700 !important;
+}
+
+.site-shell .seo-card-share {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 5px !important;
+  width: auto !important;
+  height: 24px !important;
+  padding: 0 !important;
+  border: 0 !important;
+  background: transparent !important;
+  color: var(--charcoal) !important;
+  font-size: 11px !important;
+  font-weight: 700 !important;
+}
+
+.site-shell .seo-card-share svg {
+  width: 21px !important;
+  height: 21px !important;
+  stroke: currentColor !important;
+  fill: none !important;
+  stroke-width: 1.8 !important;
+}
+
+.site-shell .seo-card-adopt {
+  width: 100% !important;
+  min-height: 48px !important;
+  margin-top: 12px !important;
+}
+
+.site-shell .seo-card-main-image {
+  position: relative !important;
+  flex: none !important;
+  width: 100% !important;
+  aspect-ratio: 1 / 1 !important;
+  min-height: 0 !important;
+  background: var(--black) !important;
+  overflow: hidden !important;
+}
+
+.site-shell .seo-card-main-image > img {
+  position: absolute !important;
+  inset: 0 !important;
+  display: block !important;
+  width: 100% !important;
+  height: 100% !important;
+  min-height: 0 !important;
+  aspect-ratio: auto !important;
+  object-fit: contain !important;
+  object-position: center !important;
+}
+
+.site-shell .seo-card-main-image .product-card__one-of-one {
+  position: absolute !important;
+  left: 16px !important;
+  bottom: 16px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  padding: 7px 12px !important;
+  border-radius: 999px !important;
+  background: rgba(23,24,22,.78) !important;
+  color: var(--off-white) !important;
+  font-size: 10px !important;
+  font-weight: 800 !important;
+  letter-spacing: .18em !important;
+  text-transform: uppercase !important;
+}
+
+.site-shell .seo-card-thumbs {
+  display: flex !important;
+  align-items: initial !important;
+  gap: 10px !important;
+  min-height: 0 !important;
+  padding: 12px !important;
+  background: var(--black) !important;
+  overflow-x: auto !important;
+}
+
+.site-shell .seo-card-thumb {
+  flex: 0 0 56px !important;
+  width: 56px !important;
+  height: 56px !important;
+  padding: 0 !important;
+  border: 1.5px solid rgba(247,244,236,.2) !important;
+  border-radius: 4px !important;
+  overflow: hidden !important;
+  background: #111 !important;
+}
+
+.site-shell .seo-card-thumb.active {
+  border-color: var(--sand) !important;
+}
+
+.site-shell .seo-card-thumb img {
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: contain !important;
+}
+
 @media (max-width: 959px) {
   .site-header {
     gap: 8px !important;
@@ -371,6 +633,32 @@
     order: 2;
     min-height: 40px;
   }
+
+  .site-shell .seo-product-page {
+    padding: 24px 16px 64px !important;
+  }
+
+  .site-shell .seo-open-card {
+    flex-direction: column !important;
+  }
+
+  .site-shell .seo-card-visual {
+    order: 1 !important;
+    flex: 0 0 auto !important;
+  }
+
+  .site-shell .seo-card-panel {
+    order: 2 !important;
+    padding: 18px !important;
+  }
+
+  .site-shell .seo-card-title {
+    font-size: 24px !important;
+  }
+
+  .site-shell .seo-card-adopt {
+    min-height: 54px !important;
+  }
 }
 
 @media (max-width: 420px) {
@@ -427,5 +715,10 @@
 
   .header-catalog-search__input {
     font-size: 13px;
+  }
+
+  .site-shell .seo-product-page {
+    padding-left: 14px !important;
+    padding-right: 14px !important;
   }
 }
