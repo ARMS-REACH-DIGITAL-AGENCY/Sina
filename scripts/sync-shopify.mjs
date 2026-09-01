@@ -1,4 +1,5 @@
-import { SHEET_CSV_URL } from '../lib/sina-config.mjs';
+import sinaConfig from '../lib/sina-config.js';
+const { SHEET_CSV_URL } = sinaConfig;
 #!/usr/bin/env node
 // Pushes the Google Sheet catalog into Shopify as minimal, checkout-only
 // records (title/price/SKU/qty=1) -- the Sheet stays the only place anyone
