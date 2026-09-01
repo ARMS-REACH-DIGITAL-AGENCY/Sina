@@ -1,3 +1,4 @@
+import { SHEET_CSV_URL } from '../lib/sina-config.mjs';
 #!/usr/bin/env node
 // Pushes the Google Sheet catalog into Shopify as minimal, checkout-only
 // records (title/price/SKU/qty=1) -- the Sheet stays the only place anyone
@@ -12,7 +13,6 @@
 //
 // Usage: SHOPIFY_ADMIN_STORE_DOMAIN=... SHOPIFY_CLIENT_ID=... SHOPIFY_CLIENT_SECRET=... node scripts/sync-shopify.mjs
 
-const SHEET_CSV_URL = 'https://docs.google.com/spreadsheets/d/1yTKJUw-OjpI6V2wxUtfSVq61b3NV3g9EcaZxsUEbfBY/export?format=csv&gid=1901402257';
 const SYNC_TAG = 'sheet-sync';
 const API_VERSION = '2024-10';
 
