@@ -1,15 +1,10 @@
-// Product-page SEO for the Vite/React storefront.
-//
-// /p/:sku is a permanent, server-rendered product page. It is intentionally
-// independent of the client-side shop so QR codes, search results, shares,
-// and bookmarks always keep the same durable URL. The interactive catalog
-// remains at /shop; product pages hand off to Shopify only after Adopt Me.
+// Permanent product-page SEO for the Vite/React storefront.
+// /p/:sku stays server-rendered and canonical while visually matching the
+// shop's open product-card experience.
 
 const SITE_ORIGIN = 'https://www.sinascreations.com';
 
-export const config = {
-  matcher: ['/p/:sku*', '/shop'],
-};
+export const config = { matcher: ['/p/:sku*', '/shop'] };
 
 function escapeHtml(value) {
   return String(value || '')
@@ -17,6 +12,10 @@ function escapeHtml(value) {
     .replace(/</g, '&lt;')
     .replace(/>/g, '&gt;')
     .replace(/"/g, '&quot;');
+}
+
+function escapeRegExp(value) {
+  return String(value || '').replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 }
 
 function truncate(value, max) {
@@ -51,8 +50,9 @@ function safeJsonLd(value) {
 async function findProductBySku(request, sku) {
   if (!sku) return null;
   try {
-    const catalogUrl = new URL('/api/catalog', request.url);
-    const response = await fetch(catalogUrl, { headers: { Accept: 'application/json' } });
+    const response = await fetch(new URL('/api/catalog', request.url), {
+      headers: { Accept: 'application/json' },
+    });
     if (!response.ok) return null;
     const data = await response.json();
     const target = sku.trim().toUpperCase();
@@ -62,7 +62,7 @@ async function findProductBySku(request, sku) {
   }
 }
 
-function productGalleryHtml(product, primaryImageUrl, label) {
+function productGalleryUrls(product, primaryImageUrl) {
   const urls = [];
   const add = (url) => {
     if (!url) return;
@@ -74,15 +74,32 @@ function productGalleryHtml(product, primaryImageUrl, label) {
   for (const slot of product.gallery || []) {
     if (Array.isArray(slot)) add(slot[0]);
   }
+  return urls.slice(0, 4);
+}
 
-  return urls.slice(0, 4).map((url, index) => `
-    <img
-      src="${escapeHtml(url)}"
-      alt="${escapeHtml(index === 0
-        ? `${product.name}, one-of-one fused glass ${label.toLowerCase()} handcrafted by Thomasina Schnepf`
-        : `${product.name}, additional view ${index + 1}`)}"
-      ${index === 0 ? 'fetchpriority="high"' : 'loading="lazy"'}
-    />`).join('');
+function openCardDescriptionHtml(product) {
+  if (product.descriptionHtml) {
+    let html = String(product.descriptionHtml)
+      .replace(/\[\[SIZE_TBD\]\]/gi, '')
+      .replace(/<p>\s*<\/p>/gi, '')
+      .trim();
+
+    if (product.line) {
+      const escaped = escapeRegExp(product.line);
+      html = html.replace(
+        new RegExp(`^\\s*<p>\\s*<strong>\\s*${escaped}\\s*<\\/strong>\\s*<\\/p>`, 'i'),
+        ''
+      ).trim();
+    }
+    return html;
+  }
+
+  let description = String(product.description || '').trim();
+  const line = String(product.line || '').trim();
+  if (line && description.toLowerCase().startsWith(line.toLowerCase())) {
+    description = description.slice(line.length).trim().replace(/^[-–—:]+\s*/, '');
+  }
+  return description ? `<p>${escapeHtml(description)}</p>` : '';
 }
 
 function globalHeaderHtml() {
@@ -100,10 +117,7 @@ function globalHeaderHtml() {
     </nav>
     <form class="header-catalog-search header-catalog-search--global" action="/shop" method="get" role="search">
       <span class="header-catalog-search__icon" aria-hidden="true">
-        <svg viewBox="0 0 24 24">
-          <circle cx="11" cy="11" r="6.5"></circle>
-          <path d="M16 16l4.5 4.5"></path>
-        </svg>
+        <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.5"></circle><path d="M16 16l4.5 4.5"></path></svg>
       </span>
       <input class="header-catalog-search__input" type="search" name="q" placeholder="Search by SKU or piece name" autocomplete="off" />
       <button type="button" class="header-catalog-search__clear" aria-label="Clear search" hidden>×</button>
@@ -166,10 +180,7 @@ function globalFooterHtml() {
     <div class="footer-bottom">
       <p class="footer-disclaimer">Disclaimer: Each piece is handmade from fused glass and one-of-one; natural variation in color, texture, and shape is part of the process, not a defect. Product images are for reference only. Pricing and availability may change.</p>
       <div class="footer-legal">
-        <div class="footer-legal__links">
-          <a href="/privacy">Privacy Policy</a>
-          <a href="/terms">Terms &amp; Messaging Terms</a>
-        </div>
+        <div class="footer-legal__links"><a href="/privacy">Privacy Policy</a><a href="/terms">Terms &amp; Messaging Terms</a></div>
         <p class="footer-copyright">&copy; 2026 Sina's Creations &middot; sinascreations.com &middot; Queen Creek, AZ</p>
         <p class="footer-powered">Powered by <a href="https://armsreachdigital.agency" target="_blank" rel="noopener noreferrer">ARMS REACH Digital Agency</a></p>
       </div>
@@ -177,94 +188,117 @@ function globalFooterHtml() {
   </footer>`;
 }
 
-function productFallbackHtml(product, imageUrl, pageUrl) {
-  const label = categoryLabel(product.category);
-  const isSold = product.status === 'sold-out';
-  const statusCopy = isSold
-    ? `${product.name} has found a home, but this one-of-one creation remains here as part of Thomasina's body of work.`
-    : `${product.name} is a one-of-one original currently available for adoption.`;
-  const price = Number.isFinite(Number(product.price)) ? `$${Number(product.price).toFixed(2)}` : '';
-  const colors = product.colorNames ? `<li><strong>Colors:</strong> ${escapeHtml(product.colorNames)}</li>` : '';
-  const dimensions = [
-    product.height ? `H ${escapeHtml(product.height)}&Prime;` : '',
-    product.width ? `W ${escapeHtml(product.width)}&Prime;` : '',
-    product.weight ? `${escapeHtml(product.weight)} oz` : '',
-  ].filter(Boolean).join(' · ');
-  const gallery = productGalleryHtml(product, imageUrl, label);
+function shareIconHtml() {
+  return `<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line></svg>`;
+}
 
-  return `<div id="root">
-    <div class="site-shell">
-      ${globalHeaderHtml()}
-      <main class="seo-product-page">
-        <nav class="seo-breadcrumb" aria-label="Breadcrumb">
-          <a href="/">Home</a><span>›</span><a href="/shop">Shop</a><span>›</span><span>${escapeHtml(product.name)}</span>
-        </nav>
-        <article class="seo-product-layout">
-          <section class="seo-product-gallery" aria-label="Photos of ${escapeHtml(product.name)}">
-            ${gallery}
-          </section>
-          <section class="seo-product-copy">
-            <p class="seo-eyebrow">One-of-One Handcrafted Fused Glass ${escapeHtml(label)}</p>
-            <h1>${escapeHtml(product.name)}</h1>
-            <p class="seo-sku">SKU ${escapeHtml(product.sku)}</p>
-            ${product.line ? `<p class="seo-product-line">${escapeHtml(product.line)}</p>` : ''}
-            <div class="seo-product-story"><p>${escapeHtml(product.description || statusCopy)}</p></div>
-            <ul class="seo-product-details">
-              <li><strong>Artist:</strong> Thomasina Schnepf</li>
-              <li><strong>Type:</strong> ${escapeHtml(label)}</li>
-              ${colors}
-              ${dimensions ? `<li><strong>Size:</strong> ${dimensions}</li>` : ''}
-              ${price ? `<li><strong>Adoption price:</strong> ${escapeHtml(price)}</li>` : ''}
-            </ul>
-            <p class="seo-product-status">${escapeHtml(statusCopy)}</p>
-            <div class="seo-product-actions">
-              ${isSold
-                ? '<a class="seo-primary-button" href="/shop">Browse Available Creations</a>'
-                : `<a class="seo-primary-button" href="/api/adopt?sku=${encodeURIComponent(product.sku)}">Adopt ${escapeHtml(product.name)}</a>`}
-              <a class="seo-secondary-button" href="/shop">Browse the Full Collection</a>
-            </div>
-          </section>
-        </article>
-        <section class="seo-product-why">
-          <h2>Made once. Named once. Adopted once.</h2>
-          <p>Every Sina's Creations piece is handcrafted by Thomasina Schnepf and offered as a single original. When a creation is adopted, this page remains as its permanent record.</p>
-          <a href="/meet-sina">Meet Thomasina and read her story</a>
-        </section>
-      </main>
-      ${globalFooterHtml()}
-    </div>
-  </div>`;
+function productOpenCardHtml(product, imageUrl) {
+  const isSold = product.status === 'sold-out';
+  const gallery = productGalleryUrls(product, imageUrl);
+  const mainImage = gallery[0] || imageUrl;
+  const descriptionHtml = openCardDescriptionHtml(product);
+  const hasDimensions = Boolean(product.height || product.width || product.weight);
+  const eyebrow = escapeHtml(product.category || categoryLabel(product.category));
+  const price = Number.isFinite(Number(product.price)) ? Number(product.price).toFixed(0) : escapeHtml(product.price);
+
+  const thumbs = gallery.length > 1
+    ? `<div class="product-card__thumbs seo-card-thumbs" aria-label="${escapeHtml(product.name)} image gallery">
+        ${gallery.map((url, index) => `<button type="button" class="product-card__thumb seo-card-thumb${index === 0 ? ' active' : ''}" data-gallery-src="${escapeHtml(url)}" aria-label="View image ${index + 1} for ${escapeHtml(product.name)}"><img src="${escapeHtml(url)}" alt="" loading="lazy" /></button>`).join('')}
+      </div>`
+    : '';
+
+  return `<main class="seo-product-page">
+    <article class="seo-open-card${isSold ? ' is-sold' : ''}">
+      <section class="product-card__panel seo-card-panel">
+        <div class="sku-row seo-card-sku-row"><span>${eyebrow}</span><strong>SKU ${escapeHtml(product.sku)}</strong></div>
+        <h1 class="seo-card-title">${escapeHtml(product.name)}</h1>
+        ${product.line ? `<p class="product-card__line seo-card-line">${escapeHtml(product.line)}</p>` : ''}
+        ${descriptionHtml ? `<div class="product-card__description-shell seo-card-description-shell"><div class="product-card__description seo-card-description">${descriptionHtml}</div></div>` : ''}
+        ${hasDimensions ? `<div class="product-card__dimensions seo-card-dimensions">
+          ${product.height ? `<span>H ${escapeHtml(product.height)}&Prime;</span>` : ''}
+          ${product.width ? `<span>W ${escapeHtml(product.width)}&Prime;</span>` : ''}
+          ${product.weight ? `<span>${escapeHtml(product.weight)} oz</span>` : ''}
+        </div>` : ''}
+        <div class="price-row seo-card-price-row">
+          <strong>$${price}</strong>
+          <div class="price-row__cost-share seo-card-cost-share">
+            <span class="product-card__flip-cta-caption">Cost to adopt this <span class="nowrap">1-of-1</span> original</span>
+            <button type="button" class="product-card__share seo-card-share" id="seo-product-share" aria-label="Share ${escapeHtml(product.name)}">${shareIconHtml()}</button>
+          </div>
+        </div>
+        ${isSold
+          ? `<span class="button primary product-card__adopt-cta seo-card-adopt is-sold" aria-disabled="true">${escapeHtml(product.name)} Found a Home!</span>`
+          : `<a class="button primary product-card__adopt-cta seo-card-adopt" href="/api/adopt?sku=${encodeURIComponent(product.sku)}">Adopt Me</a>`}
+      </section>
+
+      <section class="product-card__visual seo-card-visual" aria-label="Photos of ${escapeHtml(product.name)}">
+        <div class="product-card__image seo-card-main-image">
+          <img id="seo-product-main-image" src="${escapeHtml(mainImage)}" alt="${escapeHtml(`${product.name}, ${categoryLabel(product.category)} by Sina's Creations`)}" fetchpriority="high" />
+          <span class="product-card__one-of-one"><span class="nowrap">1-of-1</span></span>
+        </div>
+        ${thumbs}
+      </section>
+    </article>
+  </main>`;
+}
+
+function productFallbackHtml(product, imageUrl) {
+  return `<div id="root"><div class="site-shell">${globalHeaderHtml()}${productOpenCardHtml(product, imageUrl)}${globalFooterHtml()}</div></div>`;
 }
 
 function productPageStyles() {
   return `<style id="product-page-css">
-    .seo-product-page{max-width:1180px;margin:0 auto;padding:38px clamp(20px,5vw,56px) 72px}
-    .seo-breadcrumb{display:flex;gap:9px;align-items:center;flex-wrap:wrap;margin-bottom:28px;font-size:13px;color:#626552}
-    .seo-breadcrumb a{text-decoration:underline;text-underline-offset:3px}
-    .seo-product-layout{display:grid;grid-template-columns:minmax(0,1fr) minmax(320px,.82fr);gap:clamp(34px,6vw,76px);align-items:start}
-    .seo-product-gallery{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
-    .seo-product-gallery img{width:100%;aspect-ratio:1/1;object-fit:cover;background:#eee9de;border-radius:4px}
-    .seo-product-gallery img:first-child{grid-column:1/-1;aspect-ratio:1/1}
-    .seo-product-copy{padding-top:8px}
-    .seo-eyebrow{margin:0 0 12px;color:#c76a32;font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.17em}
-    .seo-product-copy h1{font-size:clamp(42px,6vw,72px);line-height:1;margin:0 0 10px;color:#292a28}
-    .seo-sku{font-size:13px;font-weight:700;color:#626552;letter-spacing:.08em;text-transform:uppercase;margin:0 0 26px}
-    .seo-product-line{font-size:clamp(20px,2.4vw,28px);line-height:1.3;font-weight:700;margin:0 0 22px;color:#292a28}
-    .seo-product-story p{font-size:17px;line-height:1.75;color:#5a4434;margin:0 0 26px}
-    .seo-product-details{list-style:none;padding:20px 0;margin:0 0 22px;border-top:1px solid rgba(41,42,40,.18);border-bottom:1px solid rgba(41,42,40,.18);display:grid;gap:8px;color:#626552;font-size:14px}
-    .seo-product-details strong{color:#292a28}
-    .seo-product-status{font-size:15px;line-height:1.6;margin:0 0 24px;color:#5a4434}
-    .seo-product-actions{display:grid;gap:10px}
-    .seo-primary-button,.seo-secondary-button{display:flex;align-items:center;justify-content:center;min-height:52px;padding:12px 18px;border:2px solid #eebf68;border-radius:4px;text-transform:uppercase;letter-spacing:.06em;font-size:12px;font-weight:800;text-align:center}
-    .seo-primary-button{background:#eebf68;color:#171816}.seo-secondary-button{background:transparent;color:#292a28;border-color:#292a28}
-    .seo-product-why{margin-top:70px;padding:34px;background:#292a28;color:#f7f4ec;border-top:3px solid #c76a32}
-    .seo-product-why h2{font-size:clamp(28px,4vw,40px);margin:0 0 12px}.seo-product-why p{max-width:760px;color:rgba(247,244,236,.78);line-height:1.7;margin:0 0 14px}.seo-product-why a{color:#eebf68;text-decoration:underline;text-underline-offset:3px}
-    @media(max-width:760px){.seo-product-layout{grid-template-columns:1fr}.seo-product-gallery{grid-template-columns:1fr 1fr}.seo-product-copy h1{font-size:48px}.seo-product-page{padding-top:24px}}
-    @media(max-width:520px){.seo-product-page{padding-left:20px;padding-right:20px}.seo-product-gallery{grid-template-columns:1fr}.seo-product-gallery img:first-child{grid-column:auto}.seo-product-gallery img:not(:first-child){display:none}.seo-product-copy h1{font-size:42px}.seo-breadcrumb{margin-bottom:22px}}
+    .seo-product-page{max-width:1200px;margin:0 auto;padding:18px var(--page-gutter) 72px}
+    .seo-open-card{display:grid;grid-template-columns:minmax(0,1.28fr) minmax(390px,1fr);background:var(--off-white);border:1px solid rgba(41,42,40,.22);border-radius:var(--radius);overflow:hidden;box-shadow:2px 3px 0 rgba(41,42,40,.12);min-height:560px}
+    .seo-card-panel{grid-column:1;padding:38px 34px 30px;min-width:0;background:var(--off-white);display:flex;flex-direction:column;align-items:stretch}
+    .seo-card-visual{grid-column:2;min-width:0;background:var(--black);display:flex;flex-direction:column;align-self:stretch}
+    .seo-card-sku-row{display:flex;align-items:flex-start;justify-content:space-between;gap:18px;margin-bottom:10px}
+    .seo-card-sku-row>span{color:var(--burnt-orange);font-size:11px;font-weight:700;letter-spacing:.14em;text-transform:uppercase}
+    .seo-card-sku-row>strong{background:rgba(41,42,40,.06);padding:7px 9px;font-size:10px;line-height:1.2;text-transform:uppercase;white-space:nowrap}
+    .seo-card-title{margin:0;font-size:clamp(34px,4vw,48px);line-height:1.02;color:var(--charcoal);letter-spacing:-.035em}
+    .seo-card-line{margin:4px 0 18px;color:var(--muted-olive);font-size:18px;font-weight:700;line-height:1.25}
+    .seo-card-description-shell{margin-top:0}
+    .seo-card-description,.seo-card-description p{color:var(--muted-olive);font-size:16px;line-height:1.6}
+    .seo-card-description p{margin:0 0 12px}.seo-card-description p:last-child{margin-bottom:0}
+    .seo-card-dimensions{display:flex;align-items:center;gap:24px;flex-wrap:wrap;margin-top:22px;padding:14px 0;border-top:1px solid rgba(41,42,40,.2);border-bottom:1px solid rgba(41,42,40,.2);color:var(--muted-olive);font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.04em}
+    .seo-card-price-row{display:flex;align-items:flex-end;justify-content:space-between;gap:20px;margin-top:18px;padding-top:0}
+    .seo-card-price-row>strong{font-size:30px;line-height:1;color:var(--charcoal)}
+    .seo-card-cost-share{display:flex;align-items:center;gap:12px;margin-left:auto}
+    .seo-card-cost-share .product-card__flip-cta-caption{max-width:190px;text-align:right;color:var(--muted-olive);font-size:9px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;line-height:1.2}
+    .seo-card-share{display:inline-flex;align-items:center;justify-content:center;width:38px;height:38px;border:0;background:transparent;color:var(--charcoal);cursor:pointer;padding:7px}
+    .seo-card-share svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+    .seo-card-adopt{width:100%;margin-top:20px;min-height:54px}.seo-card-adopt.is-sold{opacity:.72}
+    .seo-card-main-image{position:relative;flex:1 1 auto;min-height:500px;background:#e8e4da;overflow:hidden}
+    .seo-card-main-image>img{width:100%;height:100%;min-height:500px;object-fit:cover;object-position:center}
+    .seo-card-main-image .product-card__one-of-one{position:absolute;left:18px;bottom:18px;background:rgba(41,42,40,.88);color:var(--off-white);border-radius:999px;padding:8px 13px;font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase}
+    .seo-card-thumbs{display:flex;align-items:center;gap:10px;min-height:92px;padding:12px 14px;background:var(--black);overflow-x:auto}
+    .seo-card-thumb{flex:0 0 62px;width:62px;height:62px;padding:0;border:2px solid transparent;background:#292a28;border-radius:2px;overflow:hidden;cursor:pointer}
+    .seo-card-thumb.active{border-color:var(--sand)}
+    .seo-card-thumb img{width:100%;height:100%;object-fit:cover}
+    @media(max-width:760px){
+      .seo-product-page{padding:16px 16px 56px}
+      .seo-open-card{grid-template-columns:1fr;min-height:0}
+      .seo-card-visual{grid-column:1;grid-row:1}
+      .seo-card-panel{grid-column:1;grid-row:2;padding:28px 24px 26px}
+      .seo-card-main-image,.seo-card-main-image>img{min-height:0}
+      .seo-card-main-image>img{aspect-ratio:1/1;object-fit:cover}
+      .seo-card-title{font-size:40px}
+      .seo-card-line{font-size:18px}
+    }
+    @media(max-width:480px){
+      .seo-product-page{padding:12px 12px 46px}
+      .seo-card-panel{padding:24px 20px}
+      .seo-card-sku-row{align-items:center}
+      .seo-card-sku-row>strong{white-space:normal;text-align:right}
+      .seo-card-price-row{align-items:flex-end}
+      .seo-card-cost-share .product-card__flip-cta-caption{max-width:140px}
+      .seo-card-thumbs{min-height:82px;padding:10px 12px}
+      .seo-card-thumb{flex-basis:56px;width:56px;height:56px}
+    }
   </style>`;
 }
 
-function productPageScript() {
+function productPageScript(product) {
   return `<script id="product-page-shell-js">
     (function () {
       var button = document.getElementById('product-menu-button');
@@ -278,12 +312,8 @@ function productPageScript() {
           bars.forEach(function (bar) { bar.classList.toggle('x', open); });
           document.body.style.overflow = open ? 'hidden' : '';
         };
-        button.addEventListener('click', function () {
-          setOpen(button.getAttribute('aria-expanded') !== 'true');
-        });
-        document.addEventListener('keydown', function (event) {
-          if (event.key === 'Escape') setOpen(false);
-        });
+        button.addEventListener('click', function () { setOpen(button.getAttribute('aria-expanded') !== 'true'); });
+        document.addEventListener('keydown', function (event) { if (event.key === 'Escape') setOpen(false); });
       }
 
       var search = document.querySelector('.header-catalog-search');
@@ -293,13 +323,40 @@ function productPageScript() {
         if (input && clear) {
           var syncClear = function () { clear.hidden = !input.value; };
           input.addEventListener('input', syncClear);
-          clear.addEventListener('click', function () {
-            input.value = '';
-            syncClear();
-            input.focus();
-          });
+          clear.addEventListener('click', function () { input.value = ''; syncClear(); input.focus(); });
           syncClear();
         }
+      }
+
+      var mainImage = document.getElementById('seo-product-main-image');
+      var thumbs = Array.prototype.slice.call(document.querySelectorAll('.seo-card-thumb'));
+      thumbs.forEach(function (thumb) {
+        thumb.addEventListener('click', function () {
+          if (!mainImage) return;
+          mainImage.src = thumb.getAttribute('data-gallery-src');
+          thumbs.forEach(function (item) { item.classList.remove('active'); });
+          thumb.classList.add('active');
+        });
+      });
+
+      var share = document.getElementById('seo-product-share');
+      if (share) {
+        share.addEventListener('click', async function () {
+          var url = window.location.href;
+          var title = ${JSON.stringify(`${product.name} — Sina's Creations`)};
+          var text = ${JSON.stringify(`${product.name}\n${product.line || ''}\nOne-of-one, handcrafted by Thomasina Schnepf.`)};
+          if (navigator.share) {
+            try { await navigator.share({ title: title, text: text, url: url }); return; }
+            catch (error) { if (error && error.name === 'AbortError') return; }
+          }
+          if (navigator.clipboard) {
+            try {
+              await navigator.clipboard.writeText(url);
+              share.setAttribute('aria-label', 'Link copied');
+              window.setTimeout(function () { share.setAttribute('aria-label', 'Share ${escapeHtml(product.name)}'); }, 1800);
+            } catch (error) {}
+          }
+        });
       }
     }());
   </script>`;
@@ -311,22 +368,14 @@ export default async function middleware(request) {
   const isLegacyShopDeepLink = url.pathname === '/shop' && Boolean(url.searchParams.get('sku'));
 
   let sku = '';
-  if (isProductPath) {
-    sku = decodeURIComponent(url.pathname.slice('/p/'.length));
-  } else if (isLegacyShopDeepLink) {
-    sku = url.searchParams.get('sku') || '';
-  }
-
+  if (isProductPath) sku = decodeURIComponent(url.pathname.slice('/p/'.length));
+  else if (isLegacyShopDeepLink) sku = url.searchParams.get('sku') || '';
   if (!sku) return undefined;
 
   const product = await findProductBySku(request, sku);
   if (!product) return undefined;
 
   const pageUrl = canonicalProductUrl(product);
-
-  // Consolidate the old /shop?sku= deep links and non-normalized /p/ paths
-  // onto one permanent URL. Preserve only the transient sold flag; all other
-  // query/tracking parameters are intentionally excluded from canonical URLs.
   if (isLegacyShopDeepLink || `${SITE_ORIGIN}${url.pathname}` !== pageUrl) {
     const redirectUrl = new URL(pageUrl);
     if (url.searchParams.get('sold') === '1') redirectUrl.searchParams.set('sold', '1');
@@ -339,14 +388,9 @@ export default async function middleware(request) {
 
   const label = categoryLabel(product.category);
   const title = `${product.name} — One-of-One Fused Glass ${label} | Sina's Creations`;
-  const description = truncate(
-    product.description || `${product.name} is a one-of-one fused-glass ${label.toLowerCase()} handcrafted by Thomasina Schnepf.`,
-    160
-  );
+  const description = truncate(product.description || `${product.name} is a one-of-one fused-glass ${label.toLowerCase()} handcrafted by Thomasina Schnepf.`, 160);
   const imageUrl = product.image?.startsWith('http') ? product.image : `${SITE_ORIGIN}${product.image || ''}`;
-  const availability = product.status === 'sold-out'
-    ? 'https://schema.org/SoldOut'
-    : 'https://schema.org/InStock';
+  const availability = product.status === 'sold-out' ? 'https://schema.org/SoldOut' : 'https://schema.org/InStock';
 
   const productJsonLd = {
     '@context': 'https://schema.org/',
@@ -361,19 +405,14 @@ export default async function middleware(request) {
     material: 'Fused glass',
     brand: { '@type': 'Brand', name: "Sina's Creations" },
     offers: {
-      '@type': 'Offer',
-      url: pageUrl,
-      priceCurrency: 'USD',
-      price: product.price,
-      availability,
-      itemCondition: 'https://schema.org/NewCondition',
+      '@type': 'Offer', url: pageUrl, priceCurrency: 'USD', price: product.price,
+      availability, itemCondition: 'https://schema.org/NewCondition',
       seller: { '@type': 'Organization', name: "Sina's Creations", url: SITE_ORIGIN },
     },
   };
 
   const breadcrumbJsonLd = {
-    '@context': 'https://schema.org',
-    '@type': 'BreadcrumbList',
+    '@context': 'https://schema.org', '@type': 'BreadcrumbList',
     itemListElement: [
       { '@type': 'ListItem', position: 1, name: "Sina's Creations", item: `${SITE_ORIGIN}/` },
       { '@type': 'ListItem', position: 2, name: 'Shop', item: `${SITE_ORIGIN}/shop` },
@@ -382,14 +421,8 @@ export default async function middleware(request) {
   };
 
   html = html.replace(/<title>.*?<\/title>/i, `<title>${escapeHtml(title)}</title>`);
-  html = html.replace(
-    /<meta name="description"[^>]*\/?>/i,
-    `<meta name="description" content="${escapeHtml(description)}" />`
-  );
-  html = html.replace(
-    /<meta property="og:type"[^>]*\/?>/i,
-    '<meta property="og:type" content="product" />'
-  );
+  html = html.replace(/<meta name="description"[^>]*\/?>/i, `<meta name="description" content="${escapeHtml(description)}" />`);
+  html = html.replace(/<meta property="og:type"[^>]*\/?>/i, '<meta property="og:type" content="product" />');
 
   const extraTags = `
     <link rel="canonical" href="${escapeHtml(pageUrl)}" />
@@ -412,12 +445,8 @@ export default async function middleware(request) {
   </head>`;
 
   html = html.replace('</head>', extraTags);
-  html = html.replace('<div id="root"></div>', productFallbackHtml(product, imageUrl, pageUrl));
-  html = html.replace('</body>', `${productPageScript()}</body>`);
-
-  // /p/SKU is intentionally a standalone server-rendered page, not a React
-  // route that immediately mutates the address into /shop?sku=. Remove the
-  // Vite module bootstrap only from product responses. CSS/fonts remain.
+  html = html.replace('<div id="root"></div>', productFallbackHtml(product, imageUrl));
+  html = html.replace('</body>', `${productPageScript(product)}</body>`);
   html = html.replace(/\s*<script type="module"[^>]*><\/script>/gi, '');
 
   return new Response(html, {
