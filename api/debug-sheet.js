@@ -1,12 +1,10 @@
+import { SHEET_CSV_URL, isAdminKeyValid as validateAdminKey } from '../lib/sina-config.mjs';
 // One-off admin endpoint: returns raw Sheet rows (every column, unfiltered by
 // Published) for a given list of SKUs, so a duplicate-SKU investigation can
 // inspect the actual sheet contents without pulling the whole ~300-row CSV
 // through the calling agent's context. Gated by the same admin key pattern
 // as the other one-off endpoints in this file. Delete once the investigation
 // is done.
-
-const ADMIN_KEY = 'ce4dbfc3c446ba331b5dda0b4cea3bd7726a7f59c7c8a8e0';
-const SHEET_CSV_URL = 'https://docs.google.com/spreadsheets/d/1yTKJUw-OjpI6V2wxUtfSVq61b3NV3g9EcaZxsUEbfBY/export?format=csv&gid=1901402257';
 
 function normalizeText(value) {
   return typeof value === 'string' ? value.trim() : '';
@@ -65,7 +63,7 @@ function normalizeSku(row) {
 
 export default async function handler(req, res) {
   const suppliedKey = req.headers['x-admin-key'] || req.query.key;
-  if (suppliedKey !== ADMIN_KEY) {
+  if (!validateAdminKey(suppliedKey)) {
     res.statusCode = 401;
     res.end('Unauthorized.');
     return;
