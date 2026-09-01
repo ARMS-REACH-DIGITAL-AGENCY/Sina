@@ -1,4 +1,4 @@
-import { isAdminKeyValid as validateAdminKey } from '../lib/sina-config.mjs';
+const { isAdminKeyValid: validateAdminKey } = require('../lib/sina-config.js');
 // One-off admin endpoint: runs a single product photo through Photoroom's
 // AI editing API (background removal + clean dark background + square
 // crop) and commits the result straight back into this repo via GitHub's
