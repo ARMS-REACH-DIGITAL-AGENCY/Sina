@@ -1,3 +1,4 @@
+import { SHEET_CSV_URL, isAdminKeyValid as validateAdminKey } from '../lib/sina-config.mjs';
 // Keeps Shopify useful as a commerce/discovery engine without making it the
 // primary Sina's Creations brand site. This job:
 // 1) removes the old blanket *.myshopify.com -> Sina homepage redirect,
@@ -8,9 +9,7 @@
 // Vercel cron calls mode=recent after the main catalog sync. For a one-time
 // full backfill, call mode=backfill repeatedly with the returned nextCursor.
 
-const ADMIN_KEY = 'ce4dbfc3c446ba331b5dda0b4cea3bd7726a7f59c7c8a8e0';
 const API_VERSION = '2024-10';
-const SHEET_CSV_URL = 'https://docs.google.com/spreadsheets/d/1yTKJUw-OjpI6V2wxUtfSVq61b3NV3g9EcaZxsUEbfBY/export?format=csv&gid=1901402257';
 const REDIRECT_MARKER = 'sina-storefront-redirect';
 
 const DESIRED_PUBLICATION_NAMES = new Set([
@@ -406,7 +405,7 @@ export default async function handler(req, res) {
   const suppliedKey = req.headers['x-admin-key'] || req.query.key;
   const authHeader = req.headers['authorization'] || '';
   const bearerToken = authHeader.startsWith('Bearer ') ? authHeader.slice(7) : '';
-  const isAdminKeyValid = suppliedKey === ADMIN_KEY;
+  const isAdminKeyValid = validateAdminKey(suppliedKey);
   const isCronSecretValid = Boolean(process.env.CRON_SECRET) && bearerToken === process.env.CRON_SECRET;
 
   if (!isAdminKeyValid && !isCronSecretValid) {
