@@ -1,4 +1,4 @@
-import { SHEET_CSV_URL, isAdminKeyValid as validateAdminKey } from '../lib/sina-config.mjs';
+const { SHEET_CSV_URL, isAdminKeyValid: validateAdminKey } = require('../lib/sina-config.js');
 // One-off admin endpoint: reconciles Shopify against the Google Sheet, the
 // same logic as scripts/sync-shopify.mjs but reachable as a batched HTTP
 // call so it can run from the live deployment (where SHOPIFY_* creds
