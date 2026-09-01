@@ -281,6 +281,10 @@
   overflow-y: auto !important;
 }
 
+.mobile-menu[hidden] {
+  display: none !important;
+}
+
 @media (max-width: 959px) {
   .site-header {
     gap: 8px !important;
