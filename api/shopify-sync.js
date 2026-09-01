@@ -1,3 +1,4 @@
+import { SHEET_CSV_URL, isAdminKeyValid as validateAdminKey } from '../lib/sina-config.mjs';
 // One-off admin endpoint: reconciles Shopify against the Google Sheet, the
 // same logic as scripts/sync-shopify.mjs but reachable as a batched HTTP
 // call so it can run from the live deployment (where SHOPIFY_* creds
@@ -7,8 +8,6 @@
 // longer exists in the Sheet. Gated by the same admin key pattern as the
 // other one-off endpoints in this file. Delete once the sync is verified.
 
-const ADMIN_KEY = 'ce4dbfc3c446ba331b5dda0b4cea3bd7726a7f59c7c8a8e0';
-const SHEET_CSV_URL = 'https://docs.google.com/spreadsheets/d/1yTKJUw-OjpI6V2wxUtfSVq61b3NV3g9EcaZxsUEbfBY/export?format=csv&gid=1901402257';
 const SYNC_TAG = 'sheet-sync';
 const API_VERSION = '2024-10';
 const IMAGE_BASE_URL = 'https://www.sinascreations.com/images/products';
@@ -754,7 +753,7 @@ export default async function handler(req, res) {
   const suppliedKey = req.headers['x-admin-key'] || req.query.key;
   const authHeader = req.headers['authorization'] || '';
   const bearerToken = authHeader.startsWith('Bearer ') ? authHeader.slice(7) : '';
-  const isAdminKeyValid = suppliedKey === ADMIN_KEY;
+  const isAdminKeyValid = validateAdminKey(suppliedKey);
   // Vercel's Cron Jobs invoke this endpoint directly, sending
   // Authorization: Bearer <CRON_SECRET> (set as a Production env var) rather
   // than the human-facing x-admin-key -- accept either credential so the
