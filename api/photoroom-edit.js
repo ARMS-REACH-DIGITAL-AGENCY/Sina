@@ -1,3 +1,4 @@
+import { isAdminKeyValid as validateAdminKey } from '../lib/sina-config.mjs';
 // One-off admin endpoint: runs a single product photo through Photoroom's
 // AI editing API (background removal + clean dark background + square
 // crop) and commits the result straight back into this repo via GitHub's
@@ -7,7 +8,6 @@
 // Gated by a bearer key baked in at deploy time; remove this file once the
 // batch run is done.
 
-const ADMIN_KEY = 'ce4dbfc3c446ba331b5dda0b4cea3bd7726a7f59c7c8a8e0';
 const REPO_OWNER = 'ARMS-REACH-DIGITAL-AGENCY';
 const REPO_NAME = 'Sina';
 const IMAGE_BASE_URL = 'https://www.sinascreations.com/images/products';
@@ -206,7 +206,7 @@ async function fetchLiveFilenames() {
 
 export default async function handler(req, res) {
   const suppliedKey = req.headers['x-admin-key'] || req.query.key;
-  if (suppliedKey !== ADMIN_KEY) {
+  if (!validateAdminKey(suppliedKey)) {
     res.statusCode = 401;
     res.end('Unauthorized.');
     return;
