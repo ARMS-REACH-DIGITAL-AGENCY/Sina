@@ -85,6 +85,98 @@ function productGalleryHtml(product, primaryImageUrl, label) {
     />`).join('');
 }
 
+function globalHeaderHtml() {
+  return `<header class="site-header">
+    <a class="brand logo-brand" href="/" aria-label="Sina's Creations home">
+      <img class="brand-logo" src="/assets/brand/sinas-creations-black-logo.png" alt="Sina's Creations" />
+      <span class="brand-fallback" aria-hidden="true"><span>Sina</span><small>Creations</small></span>
+    </a>
+    <nav class="desktop-nav" aria-label="Main navigation">
+      <a href="/">Home</a>
+      <a href="/meet-sina">Meet Sina</a>
+      <a href="/commission">Commission Sina</a>
+      <a href="/shop">Adopt Sina's Creations</a>
+      <a href="/wholesale">Wholesale Partners</a>
+    </nav>
+    <form class="header-catalog-search header-catalog-search--global" action="/shop" method="get" role="search">
+      <span class="header-catalog-search__icon" aria-hidden="true">
+        <svg viewBox="0 0 24 24">
+          <circle cx="11" cy="11" r="6.5"></circle>
+          <path d="M16 16l4.5 4.5"></path>
+        </svg>
+      </span>
+      <input class="header-catalog-search__input" type="search" name="q" placeholder="Search by SKU or piece name" autocomplete="off" />
+      <button type="button" class="header-catalog-search__clear" aria-label="Clear search" hidden>×</button>
+    </form>
+    <button type="button" class="menu-button" id="product-menu-button" aria-controls="product-mobile-menu" aria-expanded="false" aria-label="Open menu">
+      <span></span><span></span><span></span>
+    </button>
+  </header>
+  <div class="mobile-menu" id="product-mobile-menu" hidden>
+    <a href="/">Home</a>
+    <a href="/meet-sina">Meet Sina</a>
+    <a href="/commission">Commission Sina</a>
+    <a href="/shop">Adopt Sina's Creations</a>
+    <a href="/wholesale">Wholesale Partners</a>
+  </div>`;
+}
+
+function globalFooterHtml() {
+  return `<footer class="footer">
+    <div class="footer-top">
+      <div class="footer-brand">
+        <img class="footer-logo" src="/assets/brand/sinas-creations-white-logo.png" alt="Sina's Creations" />
+        <p>1 of 1 fused glass art. Named, made by hand, and adopted once.</p>
+      </div>
+      <div>
+        <h4>Navigate</h4>
+        <a href="/meet-sina">Meet Sina</a>
+        <a href="/commission">Commission Sina</a>
+        <a href="/wholesale">Wholesale Partners</a>
+        <a href="/shop">Adopt Sina's Creations</a>
+      </div>
+      <div>
+        <h4>Connect</h4>
+        <a href="/commission">Commission</a>
+        <a href="/wholesale">Wholesale</a>
+        <a href="/schedule">Schedule</a>
+        <a href="tel:+14804476002">(480) 447-6002</a>
+        <a href="mailto:sinasartisticcreations@gmail.com">sinasartisticcreations@gmail.com</a>
+        <div class="footer-social">
+          <a href="https://www.instagram.com/sinascreations?igsh=bThtdGtrbzNmOG9m&igsi=bThtdGtrbzNmOG9m" target="_blank" rel="noopener noreferrer" aria-label="Instagram" class="footer-social__link">
+            <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="5" stroke="currentColor" stroke-width="1.8"></rect><circle cx="12" cy="12" r="4" stroke="currentColor" stroke-width="1.8"></circle><circle cx="17.3" cy="6.7" r="1.1" fill="currentColor"></circle></svg>
+          </a>
+          <a href="https://www.facebook.com/share/1CvzKETZEP/" target="_blank" rel="noopener noreferrer" aria-label="Facebook" class="footer-social__link">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M13.5 21v-7.7h2.6l.4-3h-3v-1.9c0-.87.24-1.46 1.5-1.46H16.6V4.14C16.3 4.1 15.3 4 14.2 4c-2.35 0-3.95 1.43-3.95 4.06v2.24H7.6v3h2.65V21h3.25Z"></path></svg>
+          </a>
+          <a href="https://x.com/SinasCreations" target="_blank" rel="noopener noreferrer" aria-label="X" class="footer-social__link">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M13.6 10.5 20 3h-2l-5.2 6-4.2-6H3l6.7 9.5L3 21h2l5.6-6.5L15 21h5.5l-6.9-10.5Zm-2 2.3-.65-.9L5.4 4.6h2l4.2 5.9.65.9 5.9 8.3h-2l-4.5-6.3Z"></path></svg>
+          </a>
+          <a href="https://www.tiktok.com/@sinascreations?_r=1&_t=ZT-98xLwfn3d2T" target="_blank" rel="noopener noreferrer" aria-label="TikTok" class="footer-social__link">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M16.6 3h-3v11.6a2.6 2.6 0 1 1-1.9-2.5V8.9a5.9 5.9 0 1 0 4.9 5.8V9.4a7.5 7.5 0 0 0 4.4 1.4V7.7A4.6 4.6 0 0 1 16.6 3Z"></path></svg>
+          </a>
+        </div>
+      </div>
+      <div>
+        <h4>Adopt</h4>
+        <p>Choose a piece, ask a question, or start a custom conversation.</p>
+        <a class="button primary footer-button" href="/shop">Adopt</a>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <p class="footer-disclaimer">Disclaimer: Each piece is handmade from fused glass and one-of-one; natural variation in color, texture, and shape is part of the process, not a defect. Product images are for reference only. Pricing and availability may change.</p>
+      <div class="footer-legal">
+        <div class="footer-legal__links">
+          <a href="/privacy">Privacy Policy</a>
+          <a href="/terms">Terms &amp; Messaging Terms</a>
+        </div>
+        <p class="footer-copyright">&copy; 2026 Sina's Creations &middot; sinascreations.com &middot; Queen Creek, AZ</p>
+        <p class="footer-powered">Powered by <a href="https://armsreachdigital.agency" target="_blank" rel="noopener noreferrer">ARMS REACH Digital Agency</a></p>
+      </div>
+    </div>
+  </footer>`;
+}
+
 function productFallbackHtml(product, imageUrl, pageUrl) {
   const label = categoryLabel(product.category);
   const isSold = product.status === 'sold-out';
@@ -101,62 +193,51 @@ function productFallbackHtml(product, imageUrl, pageUrl) {
   const gallery = productGalleryHtml(product, imageUrl, label);
 
   return `<div id="root">
-    <header class="seo-product-header">
-      <a class="seo-product-brand" href="/" aria-label="Sina's Creations home">Sina's Creations</a>
-      <nav aria-label="Main navigation">
-        <a href="/meet-sina">Meet Sina</a>
-        <a href="/shop">Adopt a Creation</a>
-        <a href="/commission">Commission</a>
-      </nav>
-    </header>
-    <main class="seo-product-page">
-      <nav class="seo-breadcrumb" aria-label="Breadcrumb">
-        <a href="/">Home</a><span>›</span><a href="/shop">Shop</a><span>›</span><span>${escapeHtml(product.name)}</span>
-      </nav>
-      <article class="seo-product-layout">
-        <section class="seo-product-gallery" aria-label="Photos of ${escapeHtml(product.name)}">
-          ${gallery}
+    <div class="site-shell">
+      ${globalHeaderHtml()}
+      <main class="seo-product-page">
+        <nav class="seo-breadcrumb" aria-label="Breadcrumb">
+          <a href="/">Home</a><span>›</span><a href="/shop">Shop</a><span>›</span><span>${escapeHtml(product.name)}</span>
+        </nav>
+        <article class="seo-product-layout">
+          <section class="seo-product-gallery" aria-label="Photos of ${escapeHtml(product.name)}">
+            ${gallery}
+          </section>
+          <section class="seo-product-copy">
+            <p class="seo-eyebrow">One-of-One Handcrafted Fused Glass ${escapeHtml(label)}</p>
+            <h1>${escapeHtml(product.name)}</h1>
+            <p class="seo-sku">SKU ${escapeHtml(product.sku)}</p>
+            ${product.line ? `<p class="seo-product-line">${escapeHtml(product.line)}</p>` : ''}
+            <div class="seo-product-story"><p>${escapeHtml(product.description || statusCopy)}</p></div>
+            <ul class="seo-product-details">
+              <li><strong>Artist:</strong> Thomasina Schnepf</li>
+              <li><strong>Type:</strong> ${escapeHtml(label)}</li>
+              ${colors}
+              ${dimensions ? `<li><strong>Size:</strong> ${dimensions}</li>` : ''}
+              ${price ? `<li><strong>Adoption price:</strong> ${escapeHtml(price)}</li>` : ''}
+            </ul>
+            <p class="seo-product-status">${escapeHtml(statusCopy)}</p>
+            <div class="seo-product-actions">
+              ${isSold
+                ? '<a class="seo-primary-button" href="/shop">Browse Available Creations</a>'
+                : `<a class="seo-primary-button" href="/api/adopt?sku=${encodeURIComponent(product.sku)}">Adopt ${escapeHtml(product.name)}</a>`}
+              <a class="seo-secondary-button" href="/shop">Browse the Full Collection</a>
+            </div>
+          </section>
+        </article>
+        <section class="seo-product-why">
+          <h2>Made once. Named once. Adopted once.</h2>
+          <p>Every Sina's Creations piece is handcrafted by Thomasina Schnepf and offered as a single original. When a creation is adopted, this page remains as its permanent record.</p>
+          <a href="/meet-sina">Meet Thomasina and read her story</a>
         </section>
-        <section class="seo-product-copy">
-          <p class="seo-eyebrow">One-of-One Handcrafted Fused Glass ${escapeHtml(label)}</p>
-          <h1>${escapeHtml(product.name)}</h1>
-          <p class="seo-sku">SKU ${escapeHtml(product.sku)}</p>
-          ${product.line ? `<p class="seo-product-line">${escapeHtml(product.line)}</p>` : ''}
-          <div class="seo-product-story"><p>${escapeHtml(product.description || statusCopy)}</p></div>
-          <ul class="seo-product-details">
-            <li><strong>Artist:</strong> Thomasina Schnepf</li>
-            <li><strong>Type:</strong> ${escapeHtml(label)}</li>
-            ${colors}
-            ${dimensions ? `<li><strong>Size:</strong> ${dimensions}</li>` : ''}
-            ${price ? `<li><strong>Adoption price:</strong> ${escapeHtml(price)}</li>` : ''}
-          </ul>
-          <p class="seo-product-status">${escapeHtml(statusCopy)}</p>
-          <div class="seo-product-actions">
-            ${isSold
-              ? '<a class="seo-primary-button" href="/shop">Browse Available Creations</a>'
-              : `<a class="seo-primary-button" href="/api/adopt?sku=${encodeURIComponent(product.sku)}">Adopt ${escapeHtml(product.name)}</a>`}
-            <a class="seo-secondary-button" href="/shop">Browse the Full Collection</a>
-          </div>
-        </section>
-      </article>
-      <section class="seo-product-why">
-        <h2>Made once. Named once. Adopted once.</h2>
-        <p>Every Sina's Creations piece is handcrafted by Thomasina Schnepf and offered as a single original. When a creation is adopted, this page remains as its permanent record.</p>
-        <a href="/meet-sina">Meet Thomasina and read her story</a>
-      </section>
-    </main>
-    <footer class="seo-product-footer">
-      <p>© Sina's Creations · One-of-one fused glass art and jewelry</p>
-      <p><a href="/privacy">Privacy</a> · <a href="/terms">Terms</a></p>
-    </footer>
+      </main>
+      ${globalFooterHtml()}
+    </div>
   </div>`;
 }
 
 function productPageStyles() {
   return `<style id="product-page-css">
-    .seo-product-header{position:sticky;top:0;z-index:20;display:flex;align-items:center;justify-content:space-between;gap:24px;padding:18px clamp(20px,5vw,64px);background:#f7f4ec;border-bottom:2px solid #c76a32}
-    .seo-product-brand{font-size:24px;font-weight:800;letter-spacing:-.02em}
-    .seo-product-header nav{display:flex;gap:22px;flex-wrap:wrap;font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.08em}
     .seo-product-page{max-width:1180px;margin:0 auto;padding:38px clamp(20px,5vw,56px) 72px}
     .seo-breadcrumb{display:flex;gap:9px;align-items:center;flex-wrap:wrap;margin-bottom:28px;font-size:13px;color:#626552}
     .seo-breadcrumb a{text-decoration:underline;text-underline-offset:3px}
@@ -178,10 +259,50 @@ function productPageStyles() {
     .seo-primary-button{background:#eebf68;color:#171816}.seo-secondary-button{background:transparent;color:#292a28;border-color:#292a28}
     .seo-product-why{margin-top:70px;padding:34px;background:#292a28;color:#f7f4ec;border-top:3px solid #c76a32}
     .seo-product-why h2{font-size:clamp(28px,4vw,40px);margin:0 0 12px}.seo-product-why p{max-width:760px;color:rgba(247,244,236,.78);line-height:1.7;margin:0 0 14px}.seo-product-why a{color:#eebf68;text-decoration:underline;text-underline-offset:3px}
-    .seo-product-footer{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;padding:28px clamp(20px,5vw,64px);background:#171816;color:rgba(247,244,236,.72);font-size:12px}.seo-product-footer a{text-decoration:underline}
-    @media(max-width:760px){.seo-product-header{align-items:flex-start}.seo-product-header nav{gap:12px;font-size:10px}.seo-product-layout{grid-template-columns:1fr}.seo-product-gallery{grid-template-columns:1fr 1fr}.seo-product-copy h1{font-size:48px}.seo-product-page{padding-top:24px}}
-    @media(max-width:520px){.seo-product-header{position:static;display:block}.seo-product-brand{display:block;margin-bottom:12px}.seo-product-header nav{justify-content:space-between}.seo-product-gallery{grid-template-columns:1fr}.seo-product-gallery img:first-child{grid-column:auto}.seo-product-gallery img:not(:first-child){display:none}.seo-product-copy h1{font-size:42px}}
+    @media(max-width:760px){.seo-product-layout{grid-template-columns:1fr}.seo-product-gallery{grid-template-columns:1fr 1fr}.seo-product-copy h1{font-size:48px}.seo-product-page{padding-top:24px}}
+    @media(max-width:520px){.seo-product-page{padding-left:20px;padding-right:20px}.seo-product-gallery{grid-template-columns:1fr}.seo-product-gallery img:first-child{grid-column:auto}.seo-product-gallery img:not(:first-child){display:none}.seo-product-copy h1{font-size:42px}.seo-breadcrumb{margin-bottom:22px}}
   </style>`;
+}
+
+function productPageScript() {
+  return `<script id="product-page-shell-js">
+    (function () {
+      var button = document.getElementById('product-menu-button');
+      var menu = document.getElementById('product-mobile-menu');
+      if (button && menu) {
+        var bars = Array.prototype.slice.call(button.querySelectorAll('span'));
+        var setOpen = function (open) {
+          menu.hidden = !open;
+          button.setAttribute('aria-expanded', open ? 'true' : 'false');
+          button.setAttribute('aria-label', open ? 'Close menu' : 'Open menu');
+          bars.forEach(function (bar) { bar.classList.toggle('x', open); });
+          document.body.style.overflow = open ? 'hidden' : '';
+        };
+        button.addEventListener('click', function () {
+          setOpen(button.getAttribute('aria-expanded') !== 'true');
+        });
+        document.addEventListener('keydown', function (event) {
+          if (event.key === 'Escape') setOpen(false);
+        });
+      }
+
+      var search = document.querySelector('.header-catalog-search');
+      if (search) {
+        var input = search.querySelector('.header-catalog-search__input');
+        var clear = search.querySelector('.header-catalog-search__clear');
+        if (input && clear) {
+          var syncClear = function () { clear.hidden = !input.value; };
+          input.addEventListener('input', syncClear);
+          clear.addEventListener('click', function () {
+            input.value = '';
+            syncClear();
+            input.focus();
+          });
+          syncClear();
+        }
+      }
+    }());
+  </script>`;
 }
 
 export default async function middleware(request) {
@@ -292,6 +413,7 @@ export default async function middleware(request) {
 
   html = html.replace('</head>', extraTags);
   html = html.replace('<div id="root"></div>', productFallbackHtml(product, imageUrl, pageUrl));
+  html = html.replace('</body>', `${productPageScript()}</body>`);
 
   // /p/SKU is intentionally a standalone server-rendered page, not a React
   // route that immediately mutates the address into /shop?sku=. Remove the
