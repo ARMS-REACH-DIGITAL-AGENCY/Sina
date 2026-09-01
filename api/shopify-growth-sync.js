@@ -1,4 +1,4 @@
-import { SHEET_CSV_URL, isAdminKeyValid as validateAdminKey } from '../lib/sina-config.mjs';
+const { SHEET_CSV_URL, isAdminKeyValid: validateAdminKey } = require('../lib/sina-config.js');
 // Keeps Shopify useful as a commerce/discovery engine without making it the
 // primary Sina's Creations brand site. This job:
 // 1) removes the old blanket *.myshopify.com -> Sina homepage redirect,
