@@ -4,6 +4,7 @@
     { "source": "/(.*)", "destination": "/index.html" }
   ],
   "crons": [
-    { "path": "/api/shopify-sync?mode=sync-catalog&apply=true&createMissing=true&createLimit=20", "schedule": "0 * * * *" }
+    { "path": "/api/shopify-sync?mode=sync-catalog&apply=true&createMissing=true&createLimit=20", "schedule": "0 * * * *" },
+    { "path": "/api/shopify-growth-sync?mode=recent&limit=50", "schedule": "10 * * * *" }
   ]
 }
