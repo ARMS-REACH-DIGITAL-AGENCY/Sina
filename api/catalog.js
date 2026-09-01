@@ -1,4 +1,4 @@
-import { SHEET_CSV_URL } from '../lib/sina-config.mjs';
+const { SHEET_CSV_URL } = require('../lib/sina-config.js');
 const SHOPIFY_API_VERSION = '2024-10';
 
 const CATEGORY_MAP = {
