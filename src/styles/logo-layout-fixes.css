@@ -722,3 +722,60 @@
     padding-right: 14px !important;
   }
 }
+
+
+/* Contextual shop filters preserve the live Sheet categories and only refine
+   the combined Pendants & Charms view after it is selected. */
+.shop-subcategory-tabs {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  padding: 2px 0 4px;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.shop-subcategory-tabs::-webkit-scrollbar {
+  display: none;
+}
+
+.shop-subcategory-tab {
+  flex: 0 0 auto;
+  min-height: 26px;
+  padding: 5px 10px;
+  border: 1px solid rgba(247,244,236,.28);
+  border-radius: 999px;
+  background: transparent;
+  color: rgba(247,244,236,.72);
+  font: inherit;
+  font-size: 10px;
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+
+.shop-subcategory-tab:hover,
+.shop-subcategory-tab.active {
+  border-color: var(--sand);
+  background: var(--sand);
+  color: var(--charcoal);
+}
+
+@media (max-width: 959px) {
+  .shop-subcategory-tabs {
+    justify-content: flex-start;
+    gap: 6px;
+    padding: 2px 2px 4px;
+  }
+
+  .shop-subcategory-tab {
+    min-height: 24px;
+    padding: 4px 8px;
+    font-size: 8px;
+    letter-spacing: .07em;
+  }
+}
