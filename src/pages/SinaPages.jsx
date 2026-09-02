@@ -60,23 +60,22 @@ const collectionIcons = {
 };
 
 const PENDANTS_AND_CHARMS = 'Pendants & Charms';
-const pendantCharmSubfilters = ['All', 'Small Pendants', 'Medium Pendants', 'Large Pendants', 'Charms'];
+const pendantCharmSubfilters = ['All', 'Small', 'Medium', 'Large', 'Charms'];
 
 function productIsPendantOrCharm(product) {
   return product.category === 'Pendants' || product.category === 'Charms';
 }
 
-function pendantMatchesSkuSize(product, sizeCode) {
-  const sku = String(product.sku || '').toUpperCase();
+function pendantMatchesCatalogSize(product, size) {
   return product.category === 'Pendants'
-    && new RegExp(`(?:^|-)\${sizeCode}(?:-|$)`).test(sku);
+    && String(product.size || '').trim().toLowerCase() === size.toLowerCase();
 }
 
 function productMatchesShopFilter(product, collection, subcategory) {
   if (collection !== PENDANTS_AND_CHARMS) return product.category === collection;
-  if (subcategory === 'Small Pendants') return pendantMatchesSkuSize(product, 'SM');
-  if (subcategory === 'Medium Pendants') return pendantMatchesSkuSize(product, 'MD');
-  if (subcategory === 'Large Pendants') return pendantMatchesSkuSize(product, 'LG');
+  if (subcategory === 'Small') return pendantMatchesCatalogSize(product, 'Small');
+  if (subcategory === 'Medium') return pendantMatchesCatalogSize(product, 'Medium');
+  if (subcategory === 'Large') return pendantMatchesCatalogSize(product, 'Large');
   if (subcategory === 'Charms') return product.category === 'Charms';
   return productIsPendantOrCharm(product);
 }
@@ -579,6 +578,7 @@ export function Shop() {
   const location = useLocation();
   const navigate = useNavigate();
   const productGridRef = React.useRef(null);
+  const [isSubcategoryDrawerOpen, setIsSubcategoryDrawerOpen] = React.useState(false);
   const shopCollections = React.useMemo(() => {
     const available = new Set(collections);
     const directCollections = ['Necklaces', 'Lanyards', 'Plates', 'Plaques', 'Ornaments', 'Sets'];
@@ -716,7 +716,17 @@ export function Shop() {
                   aria-selected={isActive}
                   aria-label={tab}
                   className={`shop-icon-tab${isActive ? ' active' : ''}`}
+                  aria-expanded={tab === PENDANTS_AND_CHARMS ? isSubcategoryDrawerOpen : undefined}
+                  aria-controls={tab === PENDANTS_AND_CHARMS ? 'pendant-subcategory-drawer' : undefined}
                   onClick={() => {
+                    const isPendantCharmTab = tab === PENDANTS_AND_CHARMS;
+
+                    if (isPendantCharmTab && queryFilter === PENDANTS_AND_CHARMS) {
+                      setIsSubcategoryDrawerOpen((isOpen) => !isOpen);
+                      return;
+                    }
+
+                    setIsSubcategoryDrawerOpen(isPendantCharmTab);
                     navigate(`/shop?collection=${encodeURIComponent(tab)}`);
                     window.requestAnimationFrame(() => window.requestAnimationFrame(scrollProductsToTop));
                   }}
@@ -727,28 +737,35 @@ export function Shop() {
               );
             })}
           </div>
-          {queryFilter === PENDANTS_AND_CHARMS && (
-            <div className="shop-subcategory-tabs" role="tablist" aria-label="Filter pendants and charms">
-              {pendantCharmSubfilters.map((subcategory) => {
-                const isActive = activeSubcategory === subcategory;
-                return (
-                  <button
-                    key={subcategory}
-                    type="button"
-                    role="tab"
-                    aria-selected={isActive}
-                    className={`shop-subcategory-tab${isActive ? ' active' : ''}`}
-                    onClick={() => {
-                      navigate(`/shop?collection=${encodeURIComponent(PENDANTS_AND_CHARMS)}&subcategory=${encodeURIComponent(subcategory)}`);
-                      window.requestAnimationFrame(() => window.requestAnimationFrame(scrollProductsToTop));
-                    }}
-                  >
-                    {subcategory}
-                  </button>
-                );
-              })}
+          <div
+            id="pendant-subcategory-drawer"
+            className={`shop-subcategory-drawer${queryFilter === PENDANTS_AND_CHARMS && isSubcategoryDrawerOpen ? ' is-open' : ''}`}
+            aria-hidden={queryFilter !== PENDANTS_AND_CHARMS || !isSubcategoryDrawerOpen}
+          >
+            <div className="shop-subcategory-drawer__inner">
+              <div className="shop-subcategory-tabs" role="tablist" aria-label="Pendant and charm filters">
+                {pendantCharmSubfilters.map((subcategory) => {
+                  const isActive = activeSubcategory === subcategory;
+                  return (
+                    <button
+                      key={subcategory}
+                      type="button"
+                      role="tab"
+                      aria-selected={isActive}
+                      className={`shop-subcategory-tab${isActive ? ' active' : ''}`}
+                      onClick={() => {
+                        setIsSubcategoryDrawerOpen(true);
+                        navigate(`/shop?collection=${encodeURIComponent(PENDANTS_AND_CHARMS)}&subcategory=${encodeURIComponent(subcategory)}`);
+                        window.requestAnimationFrame(() => window.requestAnimationFrame(scrollProductsToTop));
+                      }}
+                    >
+                      {subcategory}
+                    </button>
+                  );
+                })}
+              </div>
             </div>
-          )}
+          </div>
         </div>
       </section>
       <section className="shop-section shop-section--floating-controls">
