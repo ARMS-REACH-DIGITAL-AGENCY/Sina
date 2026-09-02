@@ -726,13 +726,36 @@
 
 /* Contextual shop filters preserve the live Sheet categories and only refine
    the combined Pendants & Charms view after it is selected. */
+.shop-subcategory-drawer {
+  display: grid;
+  grid-template-rows: 0fr;
+  width: 100%;
+  overflow: hidden;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition: grid-template-rows 240ms ease, opacity 180ms ease, visibility 0s linear 240ms;
+}
+
+.shop-subcategory-drawer.is-open {
+  grid-template-rows: 1fr;
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+  transition: grid-template-rows 240ms ease, opacity 180ms ease;
+}
+
+.shop-subcategory-drawer__inner {
+  min-height: 0;
+}
+
 .shop-subcategory-tabs {
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 8px;
   width: 100%;
-  padding: 2px 0 4px;
+  padding: 10px 0 6px;
   overflow-x: auto;
   scrollbar-width: none;
 }
@@ -743,39 +766,35 @@
 
 .shop-subcategory-tab {
   flex: 0 0 auto;
-  min-height: 26px;
-  padding: 5px 10px;
-  border: 1px solid rgba(247,244,236,.28);
-  border-radius: 999px;
+  border: 1px solid rgba(244, 240, 231, 0.36);
   background: transparent;
-  color: rgba(247,244,236,.72);
+  color: rgba(244, 240, 231, 0.78);
+  border-radius: 999px;
+  padding: 8px 13px;
   font: inherit;
   font-size: 10px;
-  font-weight: 700;
+  font-weight: 800;
+  letter-spacing: 0.07em;
   line-height: 1;
-  letter-spacing: .08em;
   text-transform: uppercase;
   cursor: pointer;
 }
 
-.shop-subcategory-tab:hover,
 .shop-subcategory-tab.active {
-  border-color: var(--sand);
-  background: var(--sand);
-  color: var(--charcoal);
+  border-color: var(--gold);
+  background: var(--gold);
+  color: #171715;
 }
 
 @media (max-width: 959px) {
   .shop-subcategory-tabs {
     justify-content: flex-start;
     gap: 6px;
-    padding: 2px 2px 4px;
+    padding: 8px 2px 6px;
   }
 
   .shop-subcategory-tab {
-    min-height: 24px;
-    padding: 4px 8px;
-    font-size: 8px;
-    letter-spacing: .07em;
+    padding: 8px 12px;
+    font-size: 9px;
   }
 }
