@@ -55,9 +55,31 @@ const collectionIcons = {
   Lanyards: 'lanyards',
   Plates: 'plates',
   Plaques: 'wall-art',
-  Charms: 'charms',
+  Ornaments: 'ornaments',
   Sets: 'sets',
 };
+
+const PENDANTS_AND_CHARMS = 'Pendants & Charms';
+const pendantCharmSubfilters = ['All', 'Small Pendants', 'Medium Pendants', 'Large Pendants', 'Charms'];
+
+function productIsPendantOrCharm(product) {
+  return product.category === 'Pendants' || product.category === 'Charms';
+}
+
+function pendantMatchesSkuSize(product, sizeCode) {
+  const sku = String(product.sku || '').toUpperCase();
+  return product.category === 'Pendants'
+    && new RegExp(`(?:^|-)\${sizeCode}(?:-|$)`).test(sku);
+}
+
+function productMatchesShopFilter(product, collection, subcategory) {
+  if (collection !== PENDANTS_AND_CHARMS) return product.category === collection;
+  if (subcategory === 'Small Pendants') return pendantMatchesSkuSize(product, 'SM');
+  if (subcategory === 'Medium Pendants') return pendantMatchesSkuSize(product, 'MD');
+  if (subcategory === 'Large Pendants') return pendantMatchesSkuSize(product, 'LG');
+  if (subcategory === 'Charms') return product.category === 'Charms';
+  return productIsPendantOrCharm(product);
+}
 
 function createInitialFormState(lockedInterest = '') {
   return {
@@ -339,6 +361,15 @@ function CategoryIcon({ type }) {
           <path d="m12 4 1.9 4 4.4.6-3.2 3.1.8 4.4L12 14l-3.9 2.1.8-4.4-3.2-3.1 4.4-.6L12 4Z" />
         </svg>
       );
+    case 'ornaments':
+      return (
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+          <path d="M10 5.5V4h4v1.5" />
+          <path d="M9 7.5c0-1.1 1.3-2 3-2s3 .9 3 2" />
+          <circle cx="12" cy="14" r="5.7" />
+          <path d="M9.5 14h5" />
+        </svg>
+      );
     case 'sets':
     default:
       return (
@@ -548,10 +579,19 @@ export function Shop() {
   const location = useLocation();
   const navigate = useNavigate();
   const productGridRef = React.useRef(null);
-  const shopCollections = React.useMemo(
-    () => collections.filter((name) => collectionIcons[name]),
-    [collections]
-  );
+  const shopCollections = React.useMemo(() => {
+    const available = new Set(collections);
+    const directCollections = ['Necklaces', 'Lanyards', 'Plates', 'Plaques', 'Ornaments', 'Sets'];
+    const extras = collections.filter(
+      (name) => !['Pendants', 'Charms', ...directCollections].includes(name) && collectionIcons[name]
+    );
+
+    return [
+      ...(available.has('Pendants') || available.has('Charms') ? [PENDANTS_AND_CHARMS] : []),
+      ...directCollections.filter((name) => available.has(name)),
+      ...extras,
+    ];
+  }, [collections]);
   const sharedSku = React.useMemo(
     () => new URLSearchParams(location.search).get('sku')?.trim().toUpperCase() || '',
     [location.search]
@@ -572,19 +612,39 @@ export function Shop() {
       ? sharedProduct.description
       : 'Browse every available one-of-one fused-glass creation by Thomasina Schnepf -- pendants, necklaces, plaques, plates, and more.'
   );
+  const requestedCollection = React.useMemo(
+    () => new URLSearchParams(location.search).get('collection') || '',
+    [location.search]
+  );
+  const requestedSubcategory = React.useMemo(
+    () => new URLSearchParams(location.search).get('subcategory') || '',
+    [location.search]
+  );
   const queryFilter = React.useMemo(() => {
-    const requested = new URLSearchParams(location.search).get('collection');
-    if (shopCollections.includes(requested)) {
-      return requested;
-    }
+    const normalizedRequested = ['Pendants', 'Charms', PENDANTS_AND_CHARMS].includes(requestedCollection)
+      ? PENDANTS_AND_CHARMS
+      : requestedCollection;
+
+    if (shopCollections.includes(normalizedRequested)) return normalizedRequested;
+
     // A shared-product link (?sku=) should land on that product's own
-    // category tab so the card is actually visible, not whatever tab
-    // happens to be first.
-    if (sharedProduct && shopCollections.includes(sharedProduct.category)) {
-      return sharedProduct.category;
+    // collection so the card is actually visible, not whichever tab is first.
+    if (sharedProduct) {
+      const productCollection = productIsPendantOrCharm(sharedProduct)
+        ? PENDANTS_AND_CHARMS
+        : sharedProduct.category;
+      if (shopCollections.includes(productCollection)) return productCollection;
     }
+
     return shopCollections[0] || '';
-  }, [location.search, shopCollections, sharedProduct]);
+  }, [requestedCollection, shopCollections, sharedProduct]);
+  const activeSubcategory = React.useMemo(() => {
+    if (queryFilter !== PENDANTS_AND_CHARMS) return 'All';
+    if (pendantCharmSubfilters.includes(requestedSubcategory)) return requestedSubcategory;
+    return requestedCollection === 'Charms' || (sharedProduct && sharedProduct.category === 'Charms')
+      ? 'Charms'
+      : 'All';
+  }, [queryFilter, requestedCollection, requestedSubcategory, sharedProduct]);
   const searchTerm = React.useMemo(() => readShopSearchTerm(location.search).toLowerCase(), [location.search]);
   // /api/adopt sends someone back here with ?sold=1 when the piece they
   // just tried to adopt sold out between page load and checkout click --
@@ -635,8 +695,10 @@ export function Shop() {
       });
     }
 
-    return queryFilter ? products.filter((product) => product.category === queryFilter) : products;
-  }, [products, queryFilter, searchTerm]);
+    return queryFilter
+      ? products.filter((product) => productMatchesShopFilter(product, queryFilter, activeSubcategory))
+      : products;
+  }, [products, queryFilter, activeSubcategory, searchTerm]);
 
   return (
     <Layout>
@@ -644,7 +706,7 @@ export function Shop() {
         <div className="shop-hero-controls__inner">
           <div className="shop-icon-tabs" role="tablist" aria-label="Filter products by collection">
             {shopCollections.map((tab) => {
-              const iconType = collectionIcons[tab] || 'sets';
+              const iconType = tab === PENDANTS_AND_CHARMS ? 'pendants' : collectionIcons[tab] || 'sets';
               const isActive = queryFilter === tab;
               return (
                 <button
@@ -665,6 +727,28 @@ export function Shop() {
               );
             })}
           </div>
+          {queryFilter === PENDANTS_AND_CHARMS && (
+            <div className="shop-subcategory-tabs" role="tablist" aria-label="Filter pendants and charms">
+              {pendantCharmSubfilters.map((subcategory) => {
+                const isActive = activeSubcategory === subcategory;
+                return (
+                  <button
+                    key={subcategory}
+                    type="button"
+                    role="tab"
+                    aria-selected={isActive}
+                    className={`shop-subcategory-tab${isActive ? ' active' : ''}`}
+                    onClick={() => {
+                      navigate(`/shop?collection=${encodeURIComponent(PENDANTS_AND_CHARMS)}&subcategory=${encodeURIComponent(subcategory)}`);
+                      window.requestAnimationFrame(() => window.requestAnimationFrame(scrollProductsToTop));
+                    }}
+                  >
+                    {subcategory}
+                  </button>
+                );
+              })}
+            </div>
+          )}
         </div>
       </section>
       <section className="shop-section shop-section--floating-controls">
