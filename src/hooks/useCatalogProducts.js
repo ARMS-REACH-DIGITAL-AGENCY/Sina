@@ -8,6 +8,7 @@ const preferredCollectionOrder = [
   'Plates',
   'Plaques',
   'Charms',
+  'Ornaments',
   'Sets',
 ];
 
