@@ -8,7 +8,7 @@ import './mosaic-brand-alignment.css';
 
 const PORTRAIT_SRC = '/images/hero/mosaic_portrait.jpg';
 const DESKTOP_GRID = { cols: 45, rows: 60 };
-const MOBILE_GRID = { cols: 30, rows: 40 };
+const MOBILE_GRID = { cols: 45, rows: 60 };
 const MOBILE_BREAKPOINT = 767;
 const MAX_ZOOM = 10;
 const ZOOM_RESET_THRESHOLD = 1.02;
