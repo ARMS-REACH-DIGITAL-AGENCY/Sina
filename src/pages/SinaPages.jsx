@@ -363,10 +363,8 @@ function CategoryIcon({ type }) {
     case 'ornaments':
       return (
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-          <path d="M10 5.5V4h4v1.5" />
-          <path d="M9 7.5c0-1.1 1.3-2 3-2s3 .9 3 2" />
-          <circle cx="12" cy="14" r="5.7" />
-          <path d="M9.5 14h5" />
+          <path d="m12 3 3.4 5H13l4 5h-2.6l4.1 5H5.5l4.1-5H7l4-5H8.6L12 3Z" />
+          <path d="M12 18v3" />
         </svg>
       );
     case 'sets':
