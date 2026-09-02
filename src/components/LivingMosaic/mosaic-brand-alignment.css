@@ -113,8 +113,8 @@
    timer in LivingMosaic.jsx) -- not the moment the grid itself is ready,
    which is still while the view is zoomed in tight. */
 .living-mosaic__frame.is-portrait-revealed .living-mosaic__portrait-reveal {
-  opacity: .42;
-  filter: saturate(.78) contrast(1.12) brightness(1.02);
+  opacity: .58;
+  filter: saturate(.8) contrast(1.08) brightness(1.04);
 }
 
 /* If the tile grid can't be assembled at all, fall back to showing the
