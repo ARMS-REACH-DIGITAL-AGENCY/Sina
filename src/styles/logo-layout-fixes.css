@@ -798,3 +798,74 @@
     font-size: 9px;
   }
 }
+
+
+/* Compact pendant-and-charm subcategory drawer: match the site eyebrow treatment. */
+.shop-subcategory-tabs {
+  display: grid;
+  grid-template-columns: repeat(5, max-content);
+  align-items: center;
+  justify-content: space-between;
+  gap: 0;
+  padding: 8px 0 6px;
+  overflow: visible;
+}
+
+.shop-subcategory-tab {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 0;
+  border: 1px solid transparent;
+  border-radius: 0;
+  background: transparent;
+  color: rgba(244, 240, 231, 0.78);
+  padding: 7px 6px;
+  font: inherit;
+  font-size: 9px;
+  font-weight: 800;
+  letter-spacing: 0.07em;
+  line-height: 1;
+  text-transform: uppercase;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.shop-subcategory-tab.active,
+.shop-subcategory-tab[aria-selected="true"] {
+  border-color: var(--burnt-orange);
+  background: transparent;
+  color: var(--burnt-orange);
+}
+
+@media (max-width: 959px) {
+  .shop-subcategory-tabs {
+    grid-template-columns: repeat(5, max-content);
+    justify-content: space-between;
+    gap: 0;
+    padding: 7px 4px 5px;
+  }
+
+  .shop-subcategory-tab {
+    padding: 6px 4px;
+    font-size: 8px;
+    letter-spacing: 0.055em;
+  }
+
+  .shop-icon-tab.active .shop-icon-tab__label--combined {
+    gap: 1px;
+    line-height: 1;
+    white-space: nowrap;
+  }
+
+  .shop-icon-tab__label--combined span {
+    display: block;
+  }
+}
+
+@media (min-width: 960px) {
+  .shop-icon-tab.active .shop-icon-tab__label--combined {
+    flex-direction: row;
+    gap: 4px;
+  }
+}
