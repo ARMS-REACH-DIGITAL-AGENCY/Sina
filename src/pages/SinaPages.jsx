@@ -730,7 +730,16 @@ export function Shop() {
                   }}
                 >
                   <span className="shop-icon-tab__glyph"><CategoryIcon type={iconType} /></span>
-                  <span className="shop-icon-tab__label">{tab}</span>
+                  <span
+                              className={`shop-icon-tab__label${tab === PENDANTS_AND_CHARMS ? ' shop-icon-tab__label--combined' : ''}`}
+                            >
+                              {tab === PENDANTS_AND_CHARMS ? (
+                                <>
+                                  <span>Pendants</span>
+                                  <span>&amp; Charms</span>
+                                </>
+                              ) : tab}
+                            </span>
                 </button>
               );
             })}
