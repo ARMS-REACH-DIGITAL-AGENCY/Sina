@@ -19,6 +19,9 @@ const ZOOM_RESET_THRESHOLD = 1.02;
 const INITIAL_ZOOM_STATE = { scale: 4, x: 0, y: 0 };
 const AUTO_REVEAL_DELAY_MS = 5000;
 const AUTO_REVEAL_DURATION_MS = 2400;
+const INITIAL_PREVIEW_COLUMNS = 5;
+const INITIAL_PREVIEW_ROWS = 6;
+const INITIAL_PREVIEW_TILE_COUNT = INITIAL_PREVIEW_COLUMNS * INITIAL_PREVIEW_ROWS;
 
 function clamp(value, min, max) {
   return Math.min(Math.max(value, min), max);
@@ -54,6 +57,18 @@ export default function LivingMosaic() {
   const hasAutoRevealedRef = useRef(false);
 
   const { cols: gridCols, rows: gridRows } = gridConfig;
+
+  // Start with a deliberate 5 x 6 grid of real creations, not a crop of
+  // the portrait. The complete interactive mosaic can then zoom out behind it.
+  const initialPreviewProducts = useMemo(() => {
+    const productsWithImages = products.filter((product) => product.image);
+    if (!productsWithImages.length) return [];
+
+    return Array.from(
+      { length: INITIAL_PREVIEW_TILE_COUNT },
+      (_, index) => productsWithImages[index % productsWithImages.length]
+    );
+  }, [products]);
 
   useEffect(() => {
     zoomRef.current = zoomState;
@@ -346,7 +361,7 @@ export default function LivingMosaic() {
   const mosaicVisible = mosaicReady && (autoRevealing || portraitRevealed);
 
   useEffect(() => {
-    // The close-up portrait is available immediately. Do not make that
+    // The 5 x 6 creation preview is available immediately. Do not make that
     // first impression wait for the catalog fetch and 2,700 tile matches.
     // A deliberate page scroll, or five seconds of viewing, starts the
     // slow zoom-out while the prepared mosaic fades in behind it.
@@ -408,22 +423,39 @@ export default function LivingMosaic() {
         onClickCapture={handleViewportClickCapture}
         aria-label="Interactive mosaic portrait"
       >
+        <img
+          className="living-mosaic__portrait-base"
+          src={PORTRAIT_SRC}
+          alt="Thomasina Schnepf holding one of her fused-glass creations"
+          loading="eager"
+          fetchPriority="high"
+          decoding="async"
+          onLoad={() => setPortraitLoaded(true)}
+        />
+
+        {initialPreviewProducts.length > 0 && (
+          <div
+            className={`living-mosaic__initial-preview${mosaicVisible ? ' is-hidden' : ''}`}
+            aria-hidden="true"
+          >
+            {initialPreviewProducts.map((product, index) => (
+              <img
+                key={`${product.sku || product.id || product.name || 'creation'}-${index}`}
+                src={product.image}
+                alt=""
+                loading="eager"
+                decoding="async"
+              />
+            ))}
+          </div>
+        )}
+
         <div
           className={`living-mosaic__zoom-stage${autoRevealing ? ' is-auto-revealing' : ''}`}
           style={{
             transform: `translate3d(${zoomState.x}px, ${zoomState.y}px, 0) scale(${zoomState.scale})`,
           }}
         >
-          <img
-            className="living-mosaic__portrait-base"
-            src={PORTRAIT_SRC}
-            alt="Thomasina Schnepf holding one of her fused-glass creations"
-            loading="eager"
-            fetchPriority="high"
-            decoding="async"
-            onLoad={() => setPortraitLoaded(true)}
-          />
-
           <div className="living-mosaic__grid-reveal" aria-hidden={!mosaicVisible}>
             {!gridError && grid.length > 0 && (
               <div className="living-mosaic__grid" style={{ '--mosaic-cols': gridCols, '--mosaic-rows': gridRows }}>
