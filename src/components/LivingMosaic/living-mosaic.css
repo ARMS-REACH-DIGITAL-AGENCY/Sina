@@ -75,7 +75,8 @@
 .living-mosaic__initial-preview {
   position: absolute;
   inset: 0;
-  z-index: 1;
+  /* Keep the first-load 5x6 creation grid above the pre-positioned zoom stage. */
+  z-index: 3;
   display: grid;
   grid-template-columns: repeat(5, minmax(0, 1fr));
   grid-template-rows: repeat(6, minmax(0, 1fr));
