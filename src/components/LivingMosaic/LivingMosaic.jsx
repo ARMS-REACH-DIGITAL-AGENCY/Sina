@@ -17,7 +17,7 @@ const ZOOM_RESET_THRESHOLD = 1.02;
 // the "the creations are all part of her" story without requiring a
 // visitor to think to zoom out on their own (see is-auto-revealing below).
 const INITIAL_ZOOM_STATE = { scale: 4, x: 0, y: 0 };
-const AUTO_REVEAL_DELAY_MS = 500;
+const AUTO_REVEAL_DELAY_MS = 5000;
 const AUTO_REVEAL_DURATION_MS = 2400;
 
 function clamp(value, min, max) {
@@ -343,31 +343,48 @@ export default function LivingMosaic() {
   }, [products]);
 
   const mosaicReady = portraitLoaded && !productsLoading && !gridLoading && !gridError && grid.length > 0;
+  const mosaicVisible = mosaicReady && (autoRevealing || portraitRevealed);
 
   useEffect(() => {
-    if (!active || !mosaicReady || hasAutoRevealedRef.current) return undefined;
-    hasAutoRevealedRef.current = true;
+    // The close-up portrait is available immediately. Do not make that
+    // first impression wait for the catalog fetch and 2,700 tile matches.
+    // A deliberate page scroll, or five seconds of viewing, starts the
+    // slow zoom-out while the prepared mosaic fades in behind it.
+    if (!active || !portraitLoaded || hasAutoRevealedRef.current) return undefined;
 
-    const startTimer = window.setTimeout(() => {
+    let endTimer;
+    const startScrollY = window.scrollY;
+
+    const revealMosaic = () => {
+      if (hasAutoRevealedRef.current) return;
+      hasAutoRevealedRef.current = true;
+      window.clearTimeout(startTimer);
+      window.removeEventListener('scroll', handleScroll);
+
       setAutoRevealing(true);
       setZoomState({ scale: 1, x: 0, y: 0 });
-    }, AUTO_REVEAL_DELAY_MS);
 
-    const endTimer = window.setTimeout(() => {
-      setAutoRevealing(false);
-      // The portrait overlay only fades in once the zoom-out has fully
-      // played and the grid is completely loaded -- fading it in the
-      // moment the grid is ready (while still zoomed in tight) tinted the
-      // close-up tiles with a blurry portrait wash, which read the same as
-      // the original "just a picture of Sina" problem this was meant to fix.
-      setPortraitRevealed(true);
-    }, AUTO_REVEAL_DELAY_MS + AUTO_REVEAL_DURATION_MS);
+      endTimer = window.setTimeout(() => {
+        setAutoRevealing(false);
+        setPortraitRevealed(true);
+      }, AUTO_REVEAL_DURATION_MS);
+    };
+
+    const handleScroll = () => {
+      if (Math.abs(window.scrollY - startScrollY) > 12) {
+        revealMosaic();
+      }
+    };
+
+    const startTimer = window.setTimeout(revealMosaic, AUTO_REVEAL_DELAY_MS);
+    window.addEventListener('scroll', handleScroll, { passive: true });
 
     return () => {
       window.clearTimeout(startTimer);
       window.clearTimeout(endTimer);
+      window.removeEventListener('scroll', handleScroll);
     };
-  }, [active, mosaicReady]);
+  }, [active, portraitLoaded]);
 
   function handleTap(cell) {
     setModalProduct(cellProduct(cell));
@@ -382,7 +399,7 @@ export default function LivingMosaic() {
 
   return (
     <div
-      className={`living-mosaic__frame${mosaicReady ? ' is-mosaic-ready' : ''}${gridError ? ' has-grid-error' : ''}${portraitRevealed ? ' is-portrait-revealed' : ''}`}
+      className={`living-mosaic__frame${mosaicVisible ? ' is-mosaic-ready' : ''}${gridError ? ' has-grid-error' : ''}${portraitRevealed ? ' is-portrait-revealed' : ''}`}
       ref={sectionRef}
     >
       <div
@@ -397,7 +414,17 @@ export default function LivingMosaic() {
             transform: `translate3d(${zoomState.x}px, ${zoomState.y}px, 0) scale(${zoomState.scale})`,
           }}
         >
-          <div className="living-mosaic__grid-reveal" aria-hidden={!mosaicReady}>
+          <img
+            className="living-mosaic__portrait-base"
+            src={PORTRAIT_SRC}
+            alt="Thomasina Schnepf holding one of her fused-glass creations"
+            loading="eager"
+            fetchPriority="high"
+            decoding="async"
+            onLoad={() => setPortraitLoaded(true)}
+          />
+
+          <div className="living-mosaic__grid-reveal" aria-hidden={!mosaicVisible}>
             {!gridError && grid.length > 0 && (
               <div className="living-mosaic__grid" style={{ '--mosaic-cols': gridCols, '--mosaic-rows': gridRows }}>
                 {grid.map((cell) => {
@@ -420,8 +447,9 @@ export default function LivingMosaic() {
           <img
             className="living-mosaic__portrait-reveal"
             src={PORTRAIT_SRC}
-            alt="Thomasina Schnepf holding one of her fused-glass creations"
-            onLoad={() => setPortraitLoaded(true)}
+            alt=""
+            aria-hidden="true"
+            decoding="async"
           />
         </div>
       </div>
