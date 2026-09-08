@@ -54,6 +54,7 @@
   overflow: hidden;
 }
 
+.living-mosaic__portrait-base,
 .living-mosaic__portrait-reveal,
 .living-mosaic__grid-reveal {
   position: absolute;
@@ -66,6 +67,15 @@
   z-index: 1;
   opacity: 0;
   transition: opacity 1.15s ease;
+}
+
+.living-mosaic__portrait-base {
+  z-index: 0;
+  object-fit: cover;
+  object-position: center center;
+  opacity: 1;
+  filter: saturate(.96) contrast(1.02) brightness(.92);
+  pointer-events: none;
 }
 
 .living-mosaic__portrait-reveal {
