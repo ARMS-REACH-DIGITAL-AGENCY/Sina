@@ -359,7 +359,10 @@ export default function LivingMosaic() {
     return (cell) => (cell ? products[cell.productIndex] : null);
   }, [products]);
 
-  const mosaicReady = portraitLoaded && !productsLoading && !gridLoa  useEffect(() => {
+  const mosaicReady = portraitLoaded && !productsLoading && !gridLoading && !gridError && grid.length > 0;
+  const mosaicVisible = mosaicReady && (autoRevealing || portraitRevealed);
+
+  useEffect(() => {
     // Start the timer right away, but leave the 5 x 6 product preview on
     // screen until the complete interactive tile map is ready to animate.
     if (!active || !portraitLoaded || hasAutoRevealedRef.current) return undefined;
