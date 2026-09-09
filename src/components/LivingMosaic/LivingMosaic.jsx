@@ -46,6 +46,7 @@ export default function LivingMosaic() {
   const [zoomState, setZoomState] = useState(INITIAL_ZOOM_STATE);
   const [autoRevealing, setAutoRevealing] = useState(false);
   const [portraitRevealed, setPortraitRevealed] = useState(false);
+  const [revealRequested, setRevealRequested] = useState(false);
   const [gridConfig, setGridConfig] = useState(getGridConfig);
 
   const sectionRef = useRef(null);
@@ -55,6 +56,7 @@ export default function LivingMosaic() {
   const suppressTapRef = useRef(false);
   const mouseDragRef = useRef({ active: false });
   const hasAutoRevealedRef = useRef(false);
+  const revealAnimationStartedRef = useRef(false);
 
   const { cols: gridCols, rows: gridRows } = gridConfig;
 
@@ -357,49 +359,64 @@ export default function LivingMosaic() {
     return (cell) => (cell ? products[cell.productIndex] : null);
   }, [products]);
 
-  const mosaicReady = portraitLoaded && !productsLoading && !gridLoading && !gridError && grid.length > 0;
-  const mosaicVisible = mosaicReady && (autoRevealing || portraitRevealed);
-
-  useEffect(() => {
-    // The 5 x 6 creation preview is available immediately. Do not make that
-    // first impression wait for the catalog fetch and 2,700 tile matches.
-    // A deliberate page scroll, or five seconds of viewing, starts the
-    // slow zoom-out while the prepared mosaic fades in behind it.
+  const mosaicReady = portraitLoaded && !productsLoading && !gridLoa  useEffect(() => {
+    // Start the timer right away, but leave the 5 x 6 product preview on
+    // screen until the complete interactive tile map is ready to animate.
     if (!active || !portraitLoaded || hasAutoRevealedRef.current) return undefined;
 
-    let endTimer;
     const startScrollY = window.scrollY;
 
-    const revealMosaic = () => {
+    const requestReveal = () => {
       if (hasAutoRevealedRef.current) return;
       hasAutoRevealedRef.current = true;
       window.clearTimeout(startTimer);
       window.removeEventListener('scroll', handleScroll);
-
-      setAutoRevealing(true);
-      setZoomState({ scale: 1, x: 0, y: 0 });
-
-      endTimer = window.setTimeout(() => {
-        setAutoRevealing(false);
-        setPortraitRevealed(true);
-      }, AUTO_REVEAL_DURATION_MS);
+      setRevealRequested(true);
     };
 
     const handleScroll = () => {
       if (Math.abs(window.scrollY - startScrollY) > 12) {
-        revealMosaic();
+        requestReveal();
       }
     };
 
-    const startTimer = window.setTimeout(revealMosaic, AUTO_REVEAL_DELAY_MS);
+    const startTimer = window.setTimeout(requestReveal, AUTO_REVEAL_DELAY_MS);
     window.addEventListener('scroll', handleScroll, { passive: true });
 
     return () => {
       window.clearTimeout(startTimer);
-      window.clearTimeout(endTimer);
       window.removeEventListener('scroll', handleScroll);
     };
   }, [active, portraitLoaded]);
+
+  useEffect(() => {
+    // Commit the transition class before changing the transform. Two frames
+    // ensure the browser interpolates the pull-back instead of snapping to it.
+    if (!revealRequested || !mosaicReady || revealAnimationStartedRef.current) {
+      return undefined;
+    }
+
+    revealAnimationStartedRef.current = true;
+    setAutoRevealing(true);
+
+    let secondFrame;
+    const firstFrame = window.requestAnimationFrame(() => {
+      secondFrame = window.requestAnimationFrame(() => {
+        setZoomState({ scale: 1, x: 0, y: 0 });
+      });
+    });
+
+    const endTimer = window.setTimeout(() => {
+      setAutoRevealing(false);
+      setPortraitRevealed(true);
+    }, AUTO_REVEAL_DURATION_MS);
+
+    return () => {
+      window.cancelAnimationFrame(firstFrame);
+      if (secondFrame) window.cancelAnimationFrame(secondFrame);
+      window.clearTimeout(endTimer);
+    };
+  }, [mosaicReady, revealRequested]);
 
   function handleTap(cell) {
     setModalProduct(cellProduct(cell));
@@ -435,7 +452,7 @@ export default function LivingMosaic() {
 
         {initialPreviewProducts.length > 0 && (
           <div
-            className={`living-mosaic__initial-preview${mosaicVisible ? ' is-hidden' : ''}`}
+            className={`living-mosaic__initial-preview${(mosaicVisible || gridError) ? ' is-hidden' : ''}`}
             aria-hidden="true"
           >
             {initialPreviewProducts.map((product, index) => (
