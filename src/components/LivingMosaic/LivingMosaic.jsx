@@ -18,7 +18,7 @@ const ZOOM_RESET_THRESHOLD = 1.02;
 // visitor to think to zoom out on their own (see is-auto-revealing below).
 const INITIAL_ZOOM_STATE = { scale: 9, x: 0, y: 0 };
 const AUTO_REVEAL_DELAY_MS = 5000;
-const AUTO_REVEAL_DURATION_MS = 2400;
+const AUTO_REVEAL_DURATION_MS = 4800;
 const INITIAL_PREVIEW_COLUMNS = 5;
 const INITIAL_PREVIEW_ROWS = 6;
 const INITIAL_PREVIEW_TILE_COUNT = INITIAL_PREVIEW_COLUMNS * INITIAL_PREVIEW_ROWS;
@@ -32,6 +32,20 @@ function getGridConfig() {
     return MOBILE_GRID;
   }
   return DESKTOP_GRID;
+}
+
+function getInitialPreviewPlacement(cols, rows) {
+  const startCol = Math.floor((cols - INITIAL_PREVIEW_COLUMNS) / 2);
+  const startRow = Math.floor((rows - INITIAL_PREVIEW_ROWS) / 2);
+
+  return {
+    left: `${(startCol / cols) * 100}%`,
+    top: `${(startRow / rows) * 100}%`,
+    width: `${(INITIAL_PREVIEW_COLUMNS / cols) * 100}%`,
+    height: `${(INITIAL_PREVIEW_ROWS / rows) * 100}%`,
+    "--initial-preview-scale-y":
+      (rows / INITIAL_PREVIEW_ROWS) / (cols / INITIAL_PREVIEW_COLUMNS),
+  };
 }
 
 function anchorInitialPreviewToMosaic(grid, previewProducts, products, cols, rows) {
@@ -115,6 +129,11 @@ export default function LivingMosaic() {
       (_, index) => productsWithImages[index % productsWithImages.length]
     );
   }, [products]);
+
+  const initialPreviewPlacement = useMemo(
+    () => getInitialPreviewPlacement(gridCols, gridRows),
+    [gridCols, gridRows]
+  );
 
   useEffect(() => {
     zoomRef.current = zoomState;
@@ -418,8 +437,7 @@ export default function LivingMosaic() {
   }, [products]);
 
   const mosaicReady = portraitLoaded && !productsLoading && !gridLoading && !gridError && grid.length > 0;
-  const mosaicVisible = mosaicReady && (autoRevealing || portraitRevealed);
-
+  
   useEffect(() => {
     // Start the timer right away, but leave the 5 x 6 product preview on
     // screen until the complete interactive tile map is ready to animate.
@@ -492,7 +510,7 @@ export default function LivingMosaic() {
 
   return (
     <div
-      className={`living-mosaic__frame${mosaicVisible ? ' is-mosaic-ready' : ''}${gridError ? ' has-grid-error' : ''}${portraitRevealed ? ' is-portrait-revealed' : ''}`}
+      className={`living-mosaic__frame${mosaicReady ? ' is-mosaic-ready' : ''}${gridError ? ' has-grid-error' : ''}${portraitRevealed ? ' is-portrait-revealed' : ''}`}
       ref={sectionRef}
     >
       <div
@@ -513,7 +531,7 @@ export default function LivingMosaic() {
 
         {initialPreviewProducts.length > 0 && (
           <div
-            className={`living-mosaic__initial-preview${(mosaicVisible || gridError) ? ' is-hidden' : ''}`}
+            className={`living-mosaic__initial-preview living-mosaic__initial-preview--fallback${(mosaicReady || gridError) ? ' is-hidden' : ''}`}
             aria-hidden="true"
           >
             {initialPreviewProducts.map((product, index) => (
@@ -534,7 +552,7 @@ export default function LivingMosaic() {
             transform: `translate3d(${zoomState.x}px, ${zoomState.y}px, 0) scale(${zoomState.scale})`,
           }}
         >
-          <div className="living-mosaic__grid-reveal" aria-hidden={!mosaicVisible}>
+          <div className="living-mosaic__grid-reveal" aria-hidden={!mosaicReady}>
             {!gridError && grid.length > 0 && (
               <div className="living-mosaic__grid" style={{ '--mosaic-cols': gridCols, '--mosaic-rows': gridRows }}>
                 {grid.map((cell) => {
@@ -550,6 +568,23 @@ export default function LivingMosaic() {
                     />
                   );
                 })}
+                {initialPreviewProducts.length > 0 ? (
+                  <div
+                    className={`living-mosaic__initial-preview living-mosaic__initial-preview--anchored${autoRevealing ? ' is-pulling-back' : ''}${(portraitRevealed || gridError) ? ' is-hidden' : ''}`}
+                    style={initialPreviewPlacement}
+                    aria-hidden="true"
+                  >
+                    {initialPreviewProducts.map((product, index) => (
+                      <img
+                        key={`anchored-preview-${product.sku || product.id || product.name || 'creation'}-${index}`}
+                        src={product.image}
+                        alt=""
+                        loading="eager"
+                        decoding="async"
+                      />
+                    ))}
+                  </div>
+                ) : null}
               </div>
             )}
           </div>
