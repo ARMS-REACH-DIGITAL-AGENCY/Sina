@@ -73,7 +73,7 @@
   z-index: 0;
   object-fit: cover;
   object-position: center center;
-  opacity: 1;
+  opacity: 0;
   filter: saturate(.96) contrast(1.02) brightness(.92);
   pointer-events: none;
 }
@@ -129,7 +129,7 @@
 
 /* If the tile grid can't be assembled at all, fall back to showing the
    plain portrait rather than an empty dark frame. */
-.living-mosaic__frame.has-grid-error .living-mosaic__portrait-reveal {
+.living-mosaic__frame.has-grid-error .living-mosaic__portrait-base {
   opacity: 1;
 }
 
