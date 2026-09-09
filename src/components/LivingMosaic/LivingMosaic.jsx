@@ -16,7 +16,7 @@ const ZOOM_RESET_THRESHOLD = 1.02;
 // reveal the full portrait once the section scrolls into view -- telling
 // the "the creations are all part of her" story without requiring a
 // visitor to think to zoom out on their own (see is-auto-revealing below).
-const INITIAL_ZOOM_STATE = { scale: 4, x: 0, y: 0 };
+const INITIAL_ZOOM_STATE = { scale: 9, x: 0, y: 0 };
 const AUTO_REVEAL_DELAY_MS = 5000;
 const AUTO_REVEAL_DURATION_MS = 2400;
 const INITIAL_PREVIEW_COLUMNS = 5;
@@ -32,6 +32,50 @@ function getGridConfig() {
     return MOBILE_GRID;
   }
   return DESKTOP_GRID;
+}
+
+function anchorInitialPreviewToMosaic(grid, previewProducts, products, cols, rows) {
+  if (!grid.length || !previewProducts.length) return grid;
+
+  const productIndexes = new Map(
+    products.map((product, index) => [
+      product.sku || product.id || product.name,
+      index,
+    ])
+  );
+  const startCol = Math.floor((cols - INITIAL_PREVIEW_COLUMNS) / 2);
+  const startRow = Math.floor((rows - INITIAL_PREVIEW_ROWS) / 2);
+
+  // The instant 5 x 6 preview is the center of the completed mosaic, so the
+  // reveal behaves like a pull-back instead of swapping to another image set.
+  return grid.map((cell) => {
+    const previewCol = cell.col - startCol;
+    const previewRow = cell.row - startRow;
+
+    if (
+      previewCol < 0 ||
+      previewCol >= INITIAL_PREVIEW_COLUMNS ||
+      previewRow < 0 ||
+      previewRow >= INITIAL_PREVIEW_ROWS
+    ) {
+      return cell;
+    }
+
+    const previewProduct =
+      previewProducts[previewRow * INITIAL_PREVIEW_COLUMNS + previewCol];
+    const productIndex = productIndexes.get(
+      previewProduct.sku || previewProduct.id || previewProduct.name
+    );
+
+    if (productIndex === undefined) return cell;
+
+    return {
+      ...cell,
+      productIndex,
+      resolvedSrc: previewProduct.image || cell.resolvedSrc,
+      isCustomCrop: false,
+    };
+  });
 }
 
 export default function LivingMosaic() {
@@ -119,7 +163,15 @@ export default function LivingMosaic() {
     buildMosaicGrid({ portraitSrc: PORTRAIT_SRC, products, cols: gridCols, rows: gridRows })
       .then((result) => {
         if (!cancelled) {
-          setGrid(result);
+          setGrid(
+          anchorInitialPreviewToMosaic(
+            result,
+            initialPreviewProducts,
+            products,
+            gridCols,
+            gridRows
+          )
+        );
           setGridLoading(false);
         }
       })
@@ -132,7 +184,13 @@ export default function LivingMosaic() {
     return () => {
       cancelled = true;
     };
-  }, [gridCols, gridRows, products, productsLoading]);
+  }, [
+    gridCols,
+    gridRows,
+    initialPreviewProducts,
+    products,
+    productsLoading,
+  ]);
 
   useEffect(() => {
     const viewport = viewportRef.current;
