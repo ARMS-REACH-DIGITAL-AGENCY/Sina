@@ -74,8 +74,6 @@
 
 .living-mosaic__initial-preview {
   position: absolute;
-  inset: 0;
-  /* Keep the first-load 5x6 creation grid above the pre-positioned zoom stage. */
   z-index: 3;
   display: grid;
   grid-template-columns: repeat(5, minmax(0, 1fr));
@@ -83,8 +81,24 @@
   overflow: hidden;
   background: #090909;
   opacity: 1;
-  transition: opacity 350ms ease;
   pointer-events: none;
+}
+
+.living-mosaic__initial-preview--fallback {
+  inset: 0;
+  transition: opacity 160ms linear;
+}
+
+.living-mosaic__initial-preview--anchored {
+  transform: scaleY(var(--initial-preview-scale-y, 1));
+  transform-origin: center center;
+  will-change: transform, opacity;
+  transition: opacity 180ms linear;
+}
+
+.living-mosaic__initial-preview--anchored.is-pulling-back {
+  transform: scaleY(1);
+  transition: transform 4.8s cubic-bezier(.16, .8, .3, 1), opacity 180ms linear;
 }
 
 .living-mosaic__initial-preview.is-hidden {
@@ -103,7 +117,7 @@
    with zero lag, so this eased transition is added just for the reveal and
    removed the moment it finishes. */
 .living-mosaic__zoom-stage.is-auto-revealing {
-  transition: transform 2.4s cubic-bezier(.16, .8, .3, 1);
+  transition: transform 4.8s cubic-bezier(.16, .8, .3, 1);
 }
 
 .living-mosaic__loading {
@@ -127,6 +141,7 @@
 }
 
 .living-mosaic__grid {
+  position: relative;
   display: grid;
   grid-template-columns: repeat(var(--mosaic-cols), 1fr);
   grid-template-rows: repeat(var(--mosaic-rows), 1fr);
