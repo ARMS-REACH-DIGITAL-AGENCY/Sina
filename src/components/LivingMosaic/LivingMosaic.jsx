@@ -280,6 +280,16 @@ export default function LivingMosaic() {
     }
 
     function handleTouchStart(event) {
+      // Every new touch sequence starts clean. suppressTapRef is only cleared
+      // by a click landing on the viewport, but a pinch or a finger-drag on
+      // touch usually fires NO click at all -- so the flag survived the
+      // gesture and swallowed the user's next real tap on a tile. That made
+      // tapping a creation fail exactly once after any pinch or pan, which is
+      // the whole advertised interaction.
+      if (event.touches.length === 1) {
+        suppressTapRef.current = false;
+      }
+
       if (event.touches.length >= 2) {
         suppressTapRef.current = true;
         event.preventDefault();
@@ -382,6 +392,8 @@ export default function LivingMosaic() {
     }
 
     function handleMouseDown(event) {
+      // Same fresh-gesture reset as touch, for click-and-drag panning.
+      suppressTapRef.current = false;
       if (zoomRef.current.scale <= 1) return;
       event.preventDefault();
       const current = zoomRef.current;

@@ -26,8 +26,13 @@ export default function MosaicTile({ cell, product, active, onTap, showNames }) 
         className="mosaic-tile__face mosaic-tile__face--front"
         style={{ backgroundColor: rgbToCss(cell.color) }}
       >
+        {/* Deliberately not lazy: buildMosaicGrid already loaded every one of
+            these images to sample its color, and ~2,700 tiles share only ~338
+            unique URLs, so they are all already cached. Lazy-loading only
+            staggered the paint and left the portrait visibly patchy while it
+            filled in. */}
         {active && (
-          <img src={cell.resolvedSrc || product.image} alt="" loading="lazy" decoding="async" aria-hidden="true" />
+          <img src={cell.resolvedSrc || product.image} alt="" decoding="async" aria-hidden="true" />
         )}
       </div>
       <span className="mosaic-tile__name" aria-hidden="true">{product.name}</span>

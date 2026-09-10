@@ -1,4 +1,5 @@
 import React, { useEffect, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import { ProductCard } from '../ProductCard.jsx';
 
 // Tapping a mosaic tile used to open a bespoke flip-card modal with its own
@@ -16,12 +17,32 @@ export default function ProductModal({ product, onClose }) {
       if (e.key === 'Escape') onClose();
     };
     document.addEventListener('keydown', onKey);
-    return () => document.removeEventListener('keydown', onKey);
+
+    // Freeze the page behind the modal. Beyond the usual reason (the page
+    // scrolling under an open dialog feels broken), this is what stops the
+    // backdrop from being the only thing that paints on mobile: the modal
+    // opens straight out of a touch gesture on a hardware-accelerated
+    // transform layer, and letting that scroll continue underneath left the
+    // card unpainted until something forced a recomposite.
+    const { overflow } = document.body.style;
+    document.body.style.overflow = 'hidden';
+
+    return () => {
+      document.removeEventListener('keydown', onKey);
+      document.body.style.overflow = overflow;
+    };
   }, [onClose]);
 
   if (!product) return null;
 
-  return (
+  // Rendered into <body> rather than inline. Inline, this sits inside the
+  // mosaic's stacking/compositing context -- the zoom stage next to it is a
+  // promoted layer (will-change: transform) that is mid-gesture at exactly
+  // the moment a tile is tapped. On mobile that left a position:fixed
+  // overlay dimming the page with no visible card until the user tapped
+  // again or scrolled. As a direct child of <body> it has nothing to get
+  // trapped behind.
+  return createPortal(
     <div
       className="mosaic-modal-bg"
       onClick={(e) => {
@@ -34,6 +55,7 @@ export default function ProductModal({ product, onClose }) {
         </button>
         <ProductCard product={product} />
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }
