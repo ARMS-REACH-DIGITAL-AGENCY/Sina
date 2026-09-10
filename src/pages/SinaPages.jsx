@@ -400,18 +400,22 @@ export function Home() {
         backgroundPosition="left center"
       />
       <section className="cream-section living-mosaic-section" id="collection">
-        <div className="section-header">
-          <span>Her Story &amp; Creations. Your Choice.</span>
-          <FitHeading
-            as="h2"
-            className="living-mosaic-section__title"
-            lines={['The Closer She Gets,', 'The More She Sees.']}
-            maxFontSize={44}
-            minFontSize={16}
-          />
-        </div>
         <div className="living-mosaic__body">
           <div className="living-mosaic__visual">
+            {/* The heading lives inside the left column rather than spanning the
+                section, so the story column starts level with it instead of
+                level with the mosaic -- otherwise the right column began a
+                heading's height lower and left dead space above it. */}
+            <div className="section-header living-mosaic__heading">
+              <span>Her Story &amp; Creations. Your Choice.</span>
+              <FitHeading
+                as="h2"
+                className="living-mosaic-section__title"
+                lines={['The Closer She Gets,', 'The More She Sees.']}
+                maxFontSize={44}
+                minFontSize={16}
+              />
+            </div>
             <LivingMosaic />
             <p className="living-mosaic__hint">
               Pinch or use &minus;&nbsp;/&nbsp;+ to come closer. Drag to look around. <strong>Tap any creation to hear its story</strong> &mdash; and to adopt it.

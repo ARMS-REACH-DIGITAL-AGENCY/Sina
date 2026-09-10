@@ -123,8 +123,8 @@
    timer in LivingMosaic.jsx) -- not the moment the grid itself is ready,
    which is still while the view is zoomed in tight. */
 .living-mosaic__frame.is-portrait-revealed .living-mosaic__portrait-reveal {
-  opacity: .34;
-  filter: saturate(.78) contrast(1.06) brightness(1.05);
+  opacity: .44;
+  filter: saturate(.82) contrast(1.06) brightness(1.04);
 }
 
 /* If the tile grid can't be assembled at all, fall back to showing the
@@ -210,4 +210,13 @@
     font-size: 14px;
     line-height: 1.65;
   }
+}
+
+
+/* The section heading now sits in the left column above the mosaic, so it
+   should not also carry the centred section-header treatment. */
+.living-mosaic__heading {
+  text-align: left;
+  margin: 0 0 18px;
+  max-width: none;
 }

@@ -139,35 +139,70 @@ export async function buildMosaicGrid({ portraitSrc, products, cols, rows }) {
   );
 
   const grid = [];
-  let aboveRowChoices = new Array(cols).fill(-1);
+  // Only checking the cell to the left and the one directly above is not
+  // enough. Across a large flat region of the portrait -- a lit forehead, a
+  // plain shirt -- the same product is the nearest colour match for hundreds
+  // of cells running, so a left/above test just alternates two products in a
+  // checkerboard. That is what reads as "forced" up close.
+  //
+  // Instead, weigh a handful of near-enough matches per cell and pick the one
+  // that is least repetitive: penalise a product that already sits within
+  // REPEAT_RADIUS cells, and penalise one already used far more than its
+  // fair share of the grid. Colour distance still dominates, so the portrait
+  // still resolves -- these factors only decide between matches that are
+  // already close in colour.
+  const REPEAT_RADIUS = 3;
+  const CANDIDATE_POOL = 14;
+  const fairShare = (cols * rows) / Math.max(1, sampled.length);
+  const usageByProduct = new Map();
+  const placedByCell = new Array(cols * rows).fill(-1);
+
+  function crowdingPenalty(col, row, productIndex) {
+    let penalty = 0;
+    for (let dr = -REPEAT_RADIUS; dr <= 0; dr++) {
+      const r = row + dr;
+      if (r < 0) continue;
+      for (let dc = -REPEAT_RADIUS; dc <= REPEAT_RADIUS; dc++) {
+        // Cells after this one in the current row aren't placed yet.
+        if (dr === 0 && dc >= 0) continue;
+        const c = col + dc;
+        if (c < 0 || c >= cols) continue;
+        if (placedByCell[r * cols + c] !== productIndex) continue;
+        const ringDistance = Math.max(Math.abs(dr), Math.abs(dc));
+        penalty += REPEAT_RADIUS + 1 - ringDistance;
+      }
+    }
+    return penalty;
+  }
 
   for (let row = 0; row < rows; row++) {
-    const thisRowChoices = new Array(cols).fill(-1);
-    let leftChoice = -1;
-
     for (let col = 0; col < cols; col++) {
       const idx = row * cols + col;
       const cellColor = cellColors[idx];
 
       const ranked = productColors
         .map((color, i) => ({ productIndex: sampled[i].productIndex, d: distanceSq(cellColor, color) }))
-        .sort((a, b) => a.d - b.d);
+        .sort((a, b) => a.d - b.d)
+        .slice(0, CANDIDATE_POOL);
 
-      // With a small catalog, the literal nearest match repeats constantly
-      // right next to itself. Prefer the runner-up when it's not a
-      // meaningfully worse match, so the mosaic doesn't tile in obvious
-      // 2x2 blocks. This gap closes naturally once the real catalog (100s
-      // of SKUs) is wired in and neighboring cells rarely share a best match.
       let chosen = ranked[0];
-      const above = aboveRowChoices[col];
-      if (sampled.length > 3 && ranked[1]) {
-        const collides = chosen.productIndex === leftChoice || chosen.productIndex === above;
-        const runnerUpIsClose = ranked[1].d <= chosen.d * 1.6;
-        if (collides && runnerUpIsClose) chosen = ranked[1];
+      if (sampled.length > 3 && ranked.length > 1) {
+        let bestScore = Infinity;
+        for (const candidate of ranked) {
+          const used = usageByProduct.get(candidate.productIndex) || 0;
+          const overuse = Math.max(0, used - fairShare) / Math.max(1, fairShare);
+          const crowding = crowdingPenalty(col, row, candidate.productIndex);
+          // +1 so an exact colour match can still be outweighed by crowding.
+          const score = (candidate.d + 1) * (1 + 0.55 * crowding) * (1 + 0.35 * overuse);
+          if (score < bestScore) {
+            bestScore = score;
+            chosen = candidate;
+          }
+        }
       }
 
-      thisRowChoices[col] = chosen.productIndex;
-      leftChoice = chosen.productIndex;
+      placedByCell[idx] = chosen.productIndex;
+      usageByProduct.set(chosen.productIndex, (usageByProduct.get(chosen.productIndex) || 0) + 1);
       grid.push({
         col,
         row,
@@ -177,8 +212,6 @@ export async function buildMosaicGrid({ portraitSrc, products, cols, rows }) {
         isCustomCrop: isCustomCropByIndex.get(chosen.productIndex),
       });
     }
-
-    aboveRowChoices = thisRowChoices;
   }
 
   // Pure nearest-color assignment above can leave some products' colors
