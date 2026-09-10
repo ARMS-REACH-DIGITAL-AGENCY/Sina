@@ -414,18 +414,19 @@ export function Home() {
           <div className="living-mosaic__visual">
             <LivingMosaic />
             <p className="living-mosaic__hint">
-              Pinch to come closer. Drag to look around. <strong>Tap any creation to meet her by name</strong> &mdash; and to adopt her.
-              <span className="living-mosaic__hint-desktop"> On a computer: scroll to zoom, drag to look around, click any creation to meet her.</span>
+              Pinch to come closer. Drag to look around. <strong>Tap any creation to hear its story</strong> &mdash; and to adopt it.
+              <span className="living-mosaic__hint-desktop"> On a computer: scroll to zoom, drag to look around, then click any creation.</span>
             </p>
           </div>
           <div className="living-mosaic__story">
-            <p className="living-mosaic__lead">Step back to see this amazing legally blind artist.</p>
-            <p className="living-mosaic__story-copy">Every named creation carries a piece of Sina&rsquo;s vision &mdash; glass, light, color, texture, and touch shaped into something that will never exist again.</p>
-            <p className="living-mosaic__lead">Come closer to meet her family of one-of-a-kind creations.</p>
+            <p className="living-mosaic__lead">Thomasina is legally blind. She works inches from the glass.</p>
+            <p className="living-mosaic__story-copy">A tumor on her optic nerve took most of her sight when she was four. So she leans in &mdash; close enough to touch &mdash; until color, light and texture come into focus. Everything she makes comes from that closeness.</p>
+            <p className="living-mosaic__story-copy"><strong>This portrait is made of her creations.</strong> Not a filter, not an effect &mdash; every tile is a real piece she shaped by hand and gave a name.</p>
+            <p className="living-mosaic__lead">Come closer and you meet them one at a time. Step back and they become her.</p>
             <div className="dark-card living-mosaic__card">
               <span>1 of 1</span>
-              <h3>Each creation waits for the person it was meant to find.</h3>
-              <p>When a piece is adopted, it leaves Thomasina&apos;s hands and begins its next story in a new home.</p>
+              <h3>To browse her work, you have to do what she does. Get close.</h3>
+              <p>Each creation is made once and adopted once. When a piece finds its person, it leaves Thomasina&rsquo;s hands and begins its next story in a new home &mdash; and it never comes back to the shop.</p>
             </div>
             <div className="hero-actions">
               <Link className="button primary" to="/shop">Adopt Sina&apos;s Creations</Link>
