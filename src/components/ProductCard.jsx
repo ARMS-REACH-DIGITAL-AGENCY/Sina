@@ -81,6 +81,50 @@ function ShareButton({ sku, onShare, shareStatus }) {
   );
 }
 
+// The closed card's button opens the card; the open card's button is the real
+// checkout hand-off. The two labels must differ: a button that opens a card on
+// the first click and sends you to a payment screen on the second is a trust
+// trap, and this is a first-time visitor spending $75+ on a piece they just met.
+// "Meet" -> "Adopt" also matches the adoption story the whole brand runs on.
+function ProductCardCta({ product, isOpen, onOpen }) {
+  const priceLabel = `$${product.price}`;
+
+  if (!isOpen) {
+    return (
+      <button
+        type="button"
+        className="button primary product-card__adopt-cta product-card__adopt-cta--meet"
+        // The <article> toggles on click as well, so without stopPropagation
+        // the card would open here and immediately close again on the bubble.
+        onClick={(event) => {
+          event.stopPropagation();
+          onOpen();
+        }}
+      >
+        Meet {product.name} &middot; {priceLabel}
+      </button>
+    );
+  }
+
+  if (product.status === 'sold-out') {
+    return (
+      <span className="button primary product-card__adopt-cta product-card__adopt-cta--sold" aria-disabled="true">
+        {product.name} Found a Home!
+      </span>
+    );
+  }
+
+  return (
+    <a
+      href={`/api/adopt?sku=${encodeURIComponent(product.sku)}`}
+      className="button primary product-card__adopt-cta"
+      onClick={(event) => event.stopPropagation()}
+    >
+      Adopt {product.name} &middot; {priceLabel}
+    </a>
+  );
+}
+
 export function ProductCard({ product, eyebrowOverride, sharedSku }) {
   const [showBack, setShowBack] = React.useState(false);
   // Sheet data entry mistakes happen -- a row's "Final Image Filename" can
@@ -238,14 +282,8 @@ export function ProductCard({ product, eyebrowOverride, sharedSku }) {
             <ProductCardSkuRow eyebrowLabel={eyebrowLabel} sku={product.sku} />
             <h3><ProductNameLink product={product} /></h3>
             <p className="product-card__line">{product.line}</p>
-            <div className="price-row">
-              <strong>${product.price}</strong>
-            </div>
-            <div className="product-card__flip-cta-row">
-              <div className="product-card__flip-cta-text">
-                <span className="product-card__flip-cta-caption">Cost to adopt this <span className="nowrap">1-of-1</span> original</span>
-                <span className="product-card__flip-cta">Read {product.name}&rsquo;s Story Before Adopting</span>
-              </div>
+            <div className="product-card__cta-row">
+              <ProductCardCta product={product} isOpen={false} onOpen={toggleCard} />
               <ShareButton sku={product.sku} onShare={handleShare} shareStatus={shareStatus} />
             </div>
           </>
@@ -271,19 +309,7 @@ export function ProductCard({ product, eyebrowOverride, sharedSku }) {
                 <ShareButton sku={product.sku} onShare={handleShare} shareStatus={shareStatus} />
               </div>
             </div>
-            {product.status === 'sold-out' ? (
-              <span className="button primary product-card__adopt-cta product-card__adopt-cta--sold" aria-disabled="true">
-                {product.name} Found a Home!
-              </span>
-            ) : (
-              <a
-                href={`/api/adopt?sku=${encodeURIComponent(product.sku)}`}
-                className="button primary product-card__adopt-cta"
-                onClick={(event) => event.stopPropagation()}
-              >
-                Adopt Me
-              </a>
-            )}
+            <ProductCardCta product={product} isOpen onOpen={toggleCard} />
             <p className="product-card__close-hint">Close</p>
           </>
         )}

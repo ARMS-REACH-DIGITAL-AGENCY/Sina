@@ -131,7 +131,7 @@ function globalHeaderHtml() {
       <span class="header-catalog-search__icon" aria-hidden="true">
         <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.5"></circle><path d="M16 16l4.5 4.5"></path></svg>
       </span>
-      <input class="header-catalog-search__input" type="search" name="q" placeholder="Search by SKU or piece name" autocomplete="off" />
+      <input class="header-catalog-search__input" type="search" name="q" placeholder="Search by name, color, size or keyword" autocomplete="off" />
       <button type="button" class="header-catalog-search__clear" aria-label="Clear search" hidden>×</button>
     </form>
     <button type="button" class="menu-button" id="product-menu-button" aria-controls="product-mobile-menu" aria-expanded="false" aria-label="Open menu">
@@ -287,7 +287,7 @@ function productOpenCardHtml(product, imageUrl) {
         </div>
         ${isSold
           ? `<span class="button primary product-card__adopt-cta seo-card-adopt is-sold" aria-disabled="true">${escapeHtml(product.name)} Found a Home!</span>`
-          : `<a class="button primary product-card__adopt-cta seo-card-adopt" href="/api/adopt?sku=${encodeURIComponent(product.sku)}">Adopt Me</a>`}
+          : `<a class="button primary product-card__adopt-cta seo-card-adopt" href="/api/adopt?sku=${encodeURIComponent(product.sku)}">Adopt ${escapeHtml(product.name)} &middot; $${escapeHtml(String(product.price))}</a>`}
       </section>
 
       <section class="product-card__visual seo-card-visual" aria-label="Photos of ${escapeHtml(product.name)}">

@@ -92,6 +92,8 @@ function createInitialFormState(lockedInterest = '') {
   };
 }
 
+const SHOP_SEARCH_SUGGESTIONS = ['ocean', 'hot pink', 'wire wrapped', 'small', 'adopted'];
+
 function readShopSearchTerm(searchString = '') {
   return new URLSearchParams(searchString).get('q')?.trim() || '';
 }
@@ -157,7 +159,7 @@ function LayoutFrame({ children }) {
             type="search"
             value={headerSearchValue}
             onChange={(event) => setHeaderSearchValue(event.target.value)}
-            placeholder="Search by SKU or piece name"
+            placeholder="Search by name, color, size or keyword"
           />
           {headerSearchValue && (
             <button type="button" className="header-catalog-search__clear" onClick={clearHeaderSearch} aria-label="Clear search">×</button>
@@ -678,16 +680,29 @@ export function Shop() {
         const type = String(product.type ?? '').toLowerCase();
         const size = String(product.size ?? '').toLowerCase();
         const colors = String(product.colorNames ?? '').toLowerCase();
+        // Lets collection words work as searches -- "necklace", "ornament",
+        // "plaque" -- which otherwise only matched if the word happened to
+        // appear in the piece's name.
+        const category = String(product.category ?? '').toLowerCase();
+        // Materials and technique ("dichroic", "stone", "wire wrapped") are
+        // usually only written in the prose, not in any structured column.
+        // Use the plain-text description, never descriptionHtml, or queries
+        // would false-match on tag names like "p" or "strong".
+        const description = String(product.description ?? '').toLowerCase();
         // Sold pieces aren't tagged "adopted" in the Sheet -- their sold
         // status already says that -- but searching "adopted" should still
         // surface them, since browsing past adoptions is a real use case.
         const adopted = product.status === 'sold-out' ? 'adopted' : '';
         return (
+          // SKU stays searchable as an internal shortcut, it's just no longer
+          // advertised in the placeholder -- customers don't shop by SKU.
           sku.includes(searchTerm) ||
           name.includes(searchTerm) ||
           type.includes(searchTerm) ||
           size.includes(searchTerm) ||
           colors.includes(searchTerm) ||
+          category.includes(searchTerm) ||
+          description.includes(searchTerm) ||
           adopted.includes(searchTerm)
         );
       });
@@ -779,6 +794,27 @@ export function Shop() {
         {justMissed && (
           <div className="shop-sold-notice">
             <p>That one was just adopted by someone else &mdash; sorry! Here&rsquo;s the rest of the collection.</p>
+          </div>
+        )}
+        {/* Placeholder text says searching is possible; concrete examples show
+            what's worth typing. Hidden once a search is active -- by then the
+            point has been made and the row is just clutter above results. */}
+        {!searchTerm && (
+          <div className="shop-search-suggestions">
+            <span className="shop-search-suggestions__label">Try searching</span>
+            {SHOP_SEARCH_SUGGESTIONS.map((suggestion) => (
+              <button
+                key={suggestion}
+                type="button"
+                className="shop-search-suggestion"
+                onClick={() => {
+                  navigate(`/shop?q=${encodeURIComponent(suggestion)}`);
+                  window.requestAnimationFrame(() => window.requestAnimationFrame(scrollProductsToTop));
+                }}
+              >
+                {suggestion}
+              </button>
+            ))}
           </div>
         )}
         <div className="product-grid" ref={productGridRef}>

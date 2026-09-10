@@ -9,7 +9,7 @@ function readShopSearchTerm(searchString = '') {
 export default function SearchEyebrow({
   label,
   className = '',
-  placeholder = 'Search by SKU or piece name',
+  placeholder = 'Search by name, color, size or keyword',
 }) {
   const { searchOpen, closeSearch } = useSiteSearch();
   const location = useLocation();
