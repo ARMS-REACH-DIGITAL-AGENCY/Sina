@@ -528,6 +528,27 @@ export default function LivingMosaic() {
     return () => window.clearTimeout(timer);
   }, [zoomState]);
 
+  const zoomByStep = React.useCallback((factor) => {
+    const viewport = viewportRef.current;
+    if (!viewport) return;
+    const current = zoomRef.current;
+    const nextScale = clamp(current.scale * factor, 1, MAX_ZOOM);
+    if (nextScale <= 1) {
+      setZoomState({ scale: 1, x: 0, y: 0 });
+      return;
+    }
+    // Keep whatever is currently centred centred as the scale changes.
+    const ratio = nextScale / current.scale;
+    const rect = viewport.getBoundingClientRect();
+    const maxX = (rect.width * (nextScale - 1)) / 2;
+    const maxY = (rect.height * (nextScale - 1)) / 2;
+    setZoomState({
+      scale: nextScale,
+      x: clamp(current.x * ratio, -maxX, maxX),
+      y: clamp(current.y * ratio, -maxY, maxY),
+    });
+  }, []);
+
   function handleTap(cell) {
     setModalProduct(cellProduct(cell));
   }
@@ -628,6 +649,27 @@ export default function LivingMosaic() {
             decoding="async"
           />
         </div>
+      </div>
+
+      <div className="living-mosaic__zoom-controls">
+        <button
+          type="button"
+          className="living-mosaic__zoom-button"
+          onClick={() => zoomByStep(1 / 1.6)}
+          disabled={zoomState.scale <= 1}
+          aria-label="Zoom out of the mosaic"
+        >
+          &minus;
+        </button>
+        <button
+          type="button"
+          className="living-mosaic__zoom-button"
+          onClick={() => zoomByStep(1.6)}
+          disabled={zoomState.scale >= MAX_ZOOM}
+          aria-label="Zoom in to the mosaic"
+        >
+          +
+        </button>
       </div>
 
       <div className="living-mosaic__sr-status" role="status" aria-live="polite">

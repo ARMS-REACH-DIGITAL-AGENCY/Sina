@@ -410,3 +410,43 @@
     padding: 30px 24px 34px;
   }
 }
+
+/* Explicit zoom controls. Pinch cannot be relied on everywhere: a phone set to
+   "Desktop site" lays the page out wide and treats pinch as browser page zoom,
+   which a page is not allowed to override, so pinching scaled the page instead
+   of the mosaic. These also surface zoom on real desktops, where scrolling was
+   the only way in and nothing said so. */
+.living-mosaic__zoom-controls {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  margin-top: 12px;
+}
+
+.living-mosaic__zoom-button {
+  width: 46px;
+  height: 46px;
+  border-radius: 999px;
+  border: 1.5px solid rgba(41, 42, 40, .22);
+  background: var(--off-white);
+  color: var(--charcoal);
+  font-family: var(--font-body);
+  font-size: 24px;
+  font-weight: 700;
+  line-height: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: border-color .2s ease, color .2s ease, background .2s ease;
+}
+
+.living-mosaic__zoom-button:hover:not(:disabled) {
+  border-color: var(--burnt-orange);
+  color: var(--burnt-orange);
+}
+
+.living-mosaic__zoom-button:disabled {
+  opacity: .38;
+  cursor: default;
+}

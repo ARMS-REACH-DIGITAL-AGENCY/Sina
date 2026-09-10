@@ -14,7 +14,7 @@
   grid-template-columns: 1.35fr minmax(240px, 1fr);
   column-gap: clamp(28px, 3.4vw, 56px);
   row-gap: 24px;
-  align-items: start;
+  align-items: stretch;
   margin-top: 28px;
 }
 
@@ -123,8 +123,8 @@
    timer in LivingMosaic.jsx) -- not the moment the grid itself is ready,
    which is still while the view is zoomed in tight. */
 .living-mosaic__frame.is-portrait-revealed .living-mosaic__portrait-reveal {
-  opacity: .58;
-  filter: saturate(.8) contrast(1.08) brightness(1.04);
+  opacity: .34;
+  filter: saturate(.78) contrast(1.06) brightness(1.05);
 }
 
 /* If the tile grid can't be assembled at all, fall back to showing the
@@ -159,9 +159,17 @@
 }
 
 .living-mosaic__story {
-  display: grid;
+  display: flex;
+  flex-direction: column;
   gap: 14px;
   min-width: 0;
+}
+
+/* Pushes the closing card and its button to the foot of the column so the two
+   columns finish level, instead of the card floating mid-height with dead
+   space under it and the mosaic running on past. */
+.living-mosaic__story .living-mosaic__card {
+  margin-top: auto;
 }
 
 .living-mosaic__lead {
