@@ -106,6 +106,9 @@ export default function LivingMosaic() {
   const [portraitRevealed, setPortraitRevealed] = useState(false);
   const [revealRequested, setRevealRequested] = useState(false);
   const [gridConfig, setGridConfig] = useState(getGridConfig);
+  // True only while a zoom/pan gesture is actually in flight. Drives whether
+  // the zoom stage stays promoted to its own GPU layer -- see the effect below.
+  const [isInteracting, setIsInteracting] = useState(false);
 
   const sectionRef = useRef(null);
   const viewportRef = useRef(null);
@@ -509,6 +512,22 @@ export default function LivingMosaic() {
     };
   }, [mosaicReady, revealRequested]);
 
+  // Why tiles looked sharp on the opening grid and mushy once you pinched in:
+  // will-change: transform promotes the zoom stage to a GPU layer, and the
+  // browser rasterizes that layer ONCE at the scale it was promoted at --
+  // roughly 8 CSS px per tile. Zooming then magnifies that cached bitmap
+  // instead of redrawing, so a 10x zoom was showing an 8px thumbnail blown up
+  // 10x. The tile's <img> is the full product photo, so the detail was always
+  // there; it just never got re-rasterized.
+  //
+  // Keeping the promotion only while a gesture is in flight gives smooth
+  // pinching AND a crisp re-raster the moment the user settles on a piece.
+  React.useEffect(() => {
+    setIsInteracting(true);
+    const timer = window.setTimeout(() => setIsInteracting(false), 200);
+    return () => window.clearTimeout(timer);
+  }, [zoomState]);
+
   function handleTap(cell) {
     setModalProduct(cellProduct(cell));
   }
@@ -559,7 +578,7 @@ export default function LivingMosaic() {
         )}
 
         <div
-          className={`living-mosaic__zoom-stage${autoRevealing ? ' is-auto-revealing' : ''}`}
+          className={`living-mosaic__zoom-stage${autoRevealing ? ' is-auto-revealing' : ''}${isInteracting ? ' is-interacting' : ''}`}
           style={{
             transform: `translate3d(${zoomState.x}px, ${zoomState.y}px, 0) scale(${zoomState.scale})`,
           }}

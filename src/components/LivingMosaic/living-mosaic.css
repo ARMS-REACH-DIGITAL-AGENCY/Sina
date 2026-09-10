@@ -69,6 +69,16 @@
   inset: 0;
   z-index: 2;
   transform-origin: center center;
+}
+
+/* will-change is applied ONLY while the stage is actually moving. Left on
+   permanently it pinned the stage to a GPU texture rasterized at the scale it
+   was promoted at (~8 CSS px per tile), so zooming in magnified that bitmap
+   rather than redrawing the tiles -- the reason pieces went soft the moment a
+   visitor pinched in to look at one. Dropping it once the gesture settles
+   makes the browser re-rasterize at the scale being viewed. */
+.living-mosaic__zoom-stage.is-interacting,
+.living-mosaic__zoom-stage.is-auto-revealing {
   will-change: transform;
 }
 

@@ -414,8 +414,8 @@ export function Home() {
           <div className="living-mosaic__visual">
             <LivingMosaic />
             <p className="living-mosaic__hint">
-              Pinch and grab inside the portrait to explore the creations up close.
-              <span className="living-mosaic__hint-desktop"> On a computer: scroll to zoom in and out, then click and drag to look around.</span>
+              Pinch to come closer. Drag to look around. <strong>Tap any creation to meet her by name</strong> &mdash; and to adopt her.
+              <span className="living-mosaic__hint-desktop"> On a computer: scroll to zoom, drag to look around, click any creation to meet her.</span>
             </p>
           </div>
           <div className="living-mosaic__story">
