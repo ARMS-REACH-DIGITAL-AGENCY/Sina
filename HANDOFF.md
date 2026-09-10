@@ -1,16 +1,14 @@
 # Sina's Creations — Session Handoff
 
-Last updated: 2026-08-27. Everything described here is committed and pushed to `main`.
+Last updated: 2026-09-10. Everything described here is committed and pushed to `main`.
 
-## The one thing blocking progress
+## ARMS Client Bridge — connected (was the blocker, now resolved)
 
-**The `ARMS_Client_Bridge` MCP connector could not connect in the previous session (502 Bad Gateway).**
+The `ARMS_Client_Bridge` MCP connector failed with a 502 through late August. **As of 2026-09-10 it connects and works.** Bridge is on v0.3.2 with OAuth configured and `highlevel_agency_first_ready: true`.
 
-The server itself is healthy — verified directly. `https://arms-client-bridge.vercel.app/api/health` returns 200 with `bridge_auth_configured: true` and `highlevel_agency_pit_configured: true`. The 502 is a *stale session-level connection failure*: MCP connections are attempted once at session start and never retried, so once it fails it stays failed for that whole conversation regardless of server state.
+**Sina's Creations exists as a HighLevel sub-account: location id `Nk4N8VptbcAGan3tDFBx`** (website www.sinascreations.com). That is the destination for the likes→leads feature — no further setup needed to start writing leads there.
 
-**First thing to do in the new thread:** check whether `ARMS_Client_Bridge` tools are available. If they are, the blocker is gone. If it still shows 502, it needs to be reconnected from claude.ai → Settings → Connectors (toggle off/on).
-
-Once connected, there is still a second step: the bridge reports `highlevel_company_id_configured: false` and `highlevel_location_pit_fallback_count: 1` with no default location set. A HighLevel location credential for **Sina's Creations specifically** likely needs configuring before leads can land in the right sub-account.
+If the connector ever shows 502 again: it's a *stale session-level connection failure*. MCP connections are attempted once at session start and never retried, so it stays failed for that whole conversation even after the server recovers. Reconnect from claude.ai → Settings → Connectors (toggle off/on), or start a fresh session.
 
 Reference details:
 - Vercel project `arms-client-bridge` — `prj_5ZMYWJCHHdgfSpEe3hBRKsclNjoI`, team `team_ygYJ5beGMkv7U4328ZOuItuQ`
@@ -20,19 +18,19 @@ Reference details:
 
 ## The feature that was mid-design when the session ended
 
-**Likes → leads.** No code written yet. The owner's spec, in her own words and framing:
+**Likes → leads.** No code written yet. Pete's spec, in his own words and framing:
 
 1. Anyone can "like" a piece **without logging in** — no email asked upfront, ever.
-2. She wants an **aggregate popularity count across all visitors** — "a score from all of the different visitors who liked a certain piece" — not a per-browser favorites list.
-3. The **only** moment to ask for an email: when a piece someone liked **gets adopted**. Then: tell them it's no longer available, and ask if they'd like to be notified when similar pieces are added. She explicitly rejected a generic "this is on sale" framing as not making sense.
-4. Leads go **"in Sina's ARMS sub-account as a lead!!!"** — meaning HighLevel via the ARMS Client Bridge. Not a Google Sheet tab, not a new standalone database. She was emphatic about this.
+2. He wants an **aggregate popularity count across all visitors** — "a score from all of the different visitors who liked a certain piece" — not a per-browser favorites list.
+3. The **only** moment to ask for an email: when a piece someone liked **gets adopted**. Then: tell them it's no longer available, and ask if they'd like to be notified when similar pieces are added. He explicitly rejected a generic "this is on sale" framing as not making sense.
+4. Leads go **"in Sina's ARMS sub-account as a lead!!!"** — meaning HighLevel via the ARMS Client Bridge. Not a Google Sheet tab, not a new standalone database. He was emphatic about this.
 
 The agreed shape (not yet built): two separate storage layers — an anonymous counter for popularity (lightweight, lives in Vercel, no identity) and the identified lead (email + what they liked) pushed into HighLevel. The CRM sends the actual emails; don't build bespoke email infrastructure.
 
 ## How this site works (the stuff that causes bugs if you don't know it)
 
 - **The Google Sheet is the source of truth.** `api/shopify-sync.js` runs hourly (cron in `vercel.json`) and pushes the Sheet into Shopify.
-- **"Sync" means IDENTICAL.** This is the owner's explicit, repeated, emphatic definition: *"if after an automatic sync runs and the two catalogs are not identical in every respect, then the sync wasn't truly a sync."* The sync now **deletes** Shopify products with no matching Sheet row — deletes, not archives. She was very clear on this after an earlier misunderstanding.
+- **"Sync" means IDENTICAL.** This is Pete's explicit, repeated, emphatic definition: *"if after an automatic sync runs and the two catalogs are not identical in every respect, then the sync wasn't truly a sync."* The sync now **deletes** Shopify products with no matching Sheet row — deletes, not archives. He was very clear on this after an earlier misunderstanding.
 - **SKU drift breaks images.** The site resolves each product's photo by looking up Shopify media **by SKU**. If the Sheet's SKU changes and Shopify's hasn't caught up, the lookup fails and a stale/wrong image is served. This is the root cause of nearly every "wrong image" bug in this project. When a wrong image is reported, check SKU alignment first.
 - **SKU convention:** `COLLECTION-SIZE-TYPE-###` (e.g. `PND-SM-WW-013`). Consistent across the catalog.
 - **Sold pieces are frozen** — price and title never change once sold; only SKU cleanup applies.
@@ -69,19 +67,23 @@ Both of these column confusions caused real shipped bugs. Verify against the liv
 
 ## Open items, not started
 
-- **Certificate of Adoption** sent when a piece sells — trigger point (order placed vs. shipped) and design both need owner input
+- **Certificate of Adoption** sent when a piece sells — trigger point (order placed vs. shipped) and design both need Pete's input
 - **Missing descriptions** — 343 products all have names and SKUs, but some descriptions are blank. An audit was requested; the specific list has not been produced yet.
 - **Hook + offer** for a client acquisition campaign — suggestions requested, nothing approved yet
-- **GA4 + Meta Pixel wiring** — blocked on a Measurement ID (`G-XXXXXXXXXX`) and a Pixel ID. The plan is to add them as Vercel env vars (`VITE_GA_MEASUREMENT_ID`, `VITE_META_PIXEL_ID`), never hardcoded. This cannot move forward without those two IDs — creating the accounts requires the owner's own Google/Meta logins.
+- **GA4 + Meta Pixel wiring** — blocked on a Measurement ID (`G-XXXXXXXXXX`) and a Pixel ID. The plan is to add them as Vercel env vars (`VITE_GA_MEASUREMENT_ID`, `VITE_META_PIXEL_ID`), never hardcoded. This cannot move forward without those two IDs — creating the accounts requires Pete's own Google/Meta logins.
 - **Analytics rollup across all owned domains** — one dashboard covering Susie Sculpts, Sina's Creations, armsreachdigital.agency/.com, peteismyagent.com, whozthey.com, mybenefitbuddies.com, wearliftedtoday.com, yatstats.com and its 1025 subdomains. Key constraint discovered: **a GA4 property cannot be moved between accounts once created** — consolidation happens via Account Access Management plus Looker Studio for rollup, not by relocating properties.
 - **Future vision (explicitly deferred):** letting new owners upload a photo of themselves wearing their adopted piece plus a short story about why they adopted it
 
-## Working with the owner
+## Who's who
 
-She's the non-technical business partner on this project (ARMS Reach Digital Agency) and she's sharp about the business, not the code. A few things that make this go well:
+- **Pete DeLuca** — owner of ARMS Reach Digital Agency, and the person who directs this work. He acts as Thomasina's webmaster and Fractional Chief Growth Executive / Marketing Consultant. He is the one you talk to, and he operates the Vercel, Shopify, GitHub and HighLevel accounts directly. Email pcdaction@gmail.com; commits on `main` authored as "YAT?STATS" are his.
+- **Thomasina Schnepf** — the artist behind Sina's Creations. She makes the work; she is not the person giving technical direction.
 
-- **She approves things once.** Re-asking for confirmation on something already settled is frustrating. If she said yes, go.
-- **Screenshots are how she reports problems** — and they're accurate. Trust the screenshot over an assumption about what the code does.
-- **All caps means back up and re-read.** When she escalates, it's almost always because an instruction was inverted or an earlier decision got reversed. Re-read what she actually said before responding.
-- **She wants "here's specifically what you need to do" lists** when work depends on her. Do as much as possible without her, then hand her a short, concrete list.
-- Her email is pcdaction@gmail.com. Some commits on `main` show as author "YAT?STATS" — same person, other tooling.
+## Working with Pete
+
+He runs growth and marketing for this and a dozen other ARMS client accounts, so he thinks in terms of leads, campaigns and conversion, and he moves fast. A few things that make this go well:
+
+- **He approves things once.** Re-asking for confirmation on something already settled is frustrating. If he said yes, go.
+- **Screenshots are how he reports problems** — and they're accurate. Trust the screenshot over an assumption about what the code does.
+- **All caps means back up and re-read.** When he escalates, it's almost always because an instruction was inverted or an earlier decision got reversed. Re-read what he actually said before responding.
+- **He wants "here's specifically what you need to do" lists** when work depends on him. Do as much as possible without him, then hand him a short, concrete list.
