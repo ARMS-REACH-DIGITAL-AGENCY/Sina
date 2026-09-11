@@ -1308,12 +1308,28 @@ export default async function handler(req, res) {
           }
         }
 
-        for (const candidate of restockCandidates) {
-          try {
-            await setInventory(token, candidate.inventoryItemId, locationId, candidate.quantity);
-            applied.restocked.push({ title: candidate.title, sku: candidate.sku, quantity: candidate.quantity });
-          } catch (error) {
-            failed.push({ type: 'restock-inventory', title: candidate.title, error: error.message });
+        // Opt-in, and deliberately NOT something the hourly cron does.
+        //
+        // Restoring inventory from the Sheet put a sold piece back on sale. The
+        // guard was "only ACTIVE products at zero inventory, because Shopify
+        // archives anything sold" -- and Shopify does not archive. Peter sold
+        // at 07:12, stayed ACTIVE at zero, the Sheet still read 1 because
+        // nothing writes a sale back to it, and the 08:00 cron listed him again
+        // at $65 with nothing to ship.
+        //
+        // The Sheet cannot be trusted as a restock signal on its own: it is
+        // only ever edited by hand, so a stale 1 is indistinguishable from a
+        // deliberate one. Until there's a signal that means "this piece is
+        // genuinely back", a restock is a decision someone makes, not one a
+        // cron infers. Candidates are still reported every run.
+        if (req.query.restock === 'true') {
+          for (const candidate of restockCandidates) {
+            try {
+              await setInventory(token, candidate.inventoryItemId, locationId, candidate.quantity);
+              applied.restocked.push({ title: candidate.title, sku: candidate.sku, quantity: candidate.quantity });
+            } catch (error) {
+              failed.push({ type: 'restock-inventory', title: candidate.title, error: error.message });
+            }
           }
         }
 
