@@ -196,36 +196,18 @@ async function fetchShopifyImagesBySku() {
         if (!sku) continue;
         const mediaImages = edge.node.media.edges.map((m) => m.node.image).filter(Boolean);
 
-        // Alt text is this catalog's tagging convention, and three kinds of
-        // image live on a product. Taking every media item as a gallery shot --
-        // which is what this did -- publishes all three.
-        const altOf = (img) => normalizeText(img.altText).toLowerCase();
-        const isMosaic = (img) => altOf(img) === 'mosaic';
-        const isPendingOwner = (img) => altOf(img).startsWith('owner-pending:');
-        const isApprovedOwner = (img) => altOf(img).startsWith('owner:');
-
-        // Listing shots only. A mosaic crop is a background-free tile meant for
-        // the Living Mosaic, not a product photo. An owner photo is a customer's
-        // picture of themselves wearing the piece, and must not appear until
-        // Sina has approved it by editing its alt from "owner-pending:" to
-        // "owner:" -- the upload page promises exactly that.
-        const urls = mediaImages
-          .filter((img) => !isMosaic(img) && !isPendingOwner(img) && !isApprovedOwner(img))
-          .map((img) => img.url)
-          .filter(Boolean);
-
-        // Approved owner photos are shown, after the listing shots.
-        const ownerUrls = mediaImages
-          .filter(isApprovedOwner)
-          .map((img) => img.url)
-          .filter(Boolean);
-
-        const mosaicUrl = mediaImages.find(isMosaic)?.url || null;
+        // Every image on a product is a gallery shot, deliberately. That
+        // includes the mosaic crop and includes photos sent in by the people
+        // who adopted the piece -- both are wanted on the product card, and
+        // owner photos go live the moment they arrive rather than waiting on
+        // anyone to approve them. Obscenity review happens after the fact, off
+        // a daily digest; see api/upload-digest.js.
+        const urls = mediaImages.map((img) => img.url).filter(Boolean);
+        const mosaicUrl = mediaImages.find((img) => normalizeText(img.altText).toLowerCase() === 'mosaic')?.url || null;
 
         if (urls.length) {
           images.set(sku, {
             urls,
-            ownerUrls,
             mosaicUrl,
             status: edge.node.status,
             availableForSale: Boolean(variant?.availableForSale),
@@ -358,11 +340,8 @@ function normalizeProduct(row, shopifyImages) {
   let gallery;
 
   if (shopifyUrls && shopifyUrls.length) {
-    // Fallbacks stay listing-only: they exist so the card can recover when the
-    // primary shot 404s, and a photo of the owner is not a substitute for the
-    // product photo. Approved owner shots are gallery slots, shown last.
     [image, ...imageFallbacks] = shopifyUrls;
-    gallery = [...shopifyUrls, ...(shopifyEntry.ownerUrls || [])].map((url) => [url]);
+    gallery = shopifyUrls.map((url) => [url]);
   } else {
     const imageCandidates = buildImageCandidates(row);
     [image, ...imageFallbacks] = imageCandidates;

@@ -10,15 +10,16 @@
 // reject a large share of real uploads. This way the function only ever handles
 // small JSON.
 //
-// Nothing goes live unreviewed: media is attached with alt text prefixed
-// `owner-pending:`. Sina approves a photo by editing that prefix to `owner:`,
-// the same alt-text-as-tag convention the Living Mosaic already uses.
+// Photos go live the moment they arrive -- there is no approval step, by
+// design. They're tagged with alt text prefixed `owner:` plus the adopter's
+// name, the same alt-text-as-tag convention the Living Mosaic uses, which is
+// what lets the daily digest find the day's uploads for an after-the-fact
+// look. Anything genuinely objectionable gets deleted in Shopify.
 
 const { shopifyGraphql } = require('../lib/shopify.js');
 const { verifyAdoption, shortCodeForSku, SHORT_CODE_LENGTH } = require('../lib/adoption-token.js');
 
-const PENDING_PREFIX = 'owner-pending:';
-const APPROVED_PREFIX = 'owner:';
+const OWNER_PREFIX = 'owner:';
 
 // A token is long-lived and printed on a certificate, so it can't be a
 // write-as-much-as-you-like credential. Six is generous for "a photo of me
@@ -85,9 +86,7 @@ async function fetchPiece(sku) {
     id: node.id,
     title: node.title,
     imageUrl: node.featuredImage ? node.featuredImage.url : null,
-    ownerPhotoCount: alts.filter(
-      (alt) => alt.startsWith(PENDING_PREFIX) || alt.startsWith(APPROVED_PREFIX),
-    ).length,
+    ownerPhotoCount: alts.filter((alt) => alt.startsWith(OWNER_PREFIX)).length,
   };
 }
 
@@ -243,9 +242,8 @@ function uploadPage(piece, adoption, token) {
     <h1>${name}</h1>
     ${adoption.adopter ? `<div class="lede">now lives with ${esc(adoption.adopter)}</div>` : ''}
     ${photo}
-    <p class="blurb">Send us a photo of ${name} in its new home. Once Sina has
-       seen it, it joins ${name}'s page &mdash; so the next person who finds it
-       sees where it went.</p>
+    <p class="blurb">Send us a photo of ${name} in its new home and it joins
+       ${name}'s page &mdash; so the next person who finds it sees where it went.</p>
 
     <label class="picker" for="file">
       Choose or take a photo
@@ -255,8 +253,8 @@ function uploadPage(piece, adoption, token) {
     <img id="preview" alt="">
     <button id="send" disabled>Send to Sina</button>
     <div class="msg" id="msg"></div>
-    <p class="note">Your photo is reviewed before it appears. It will never be
-       published with your name, address or any order details.</p>
+    <p class="note">Your photo is shown on ${name}'s page. It's never published
+       with your name, address or any order details.</p>
 
 <script>
 (function () {
@@ -324,8 +322,8 @@ function uploadPage(piece, adoption, token) {
         '<img class="logo" src="/assets/brand/sinas-creations-black-logo.png" alt="Sina\\'s Creations">' +
         '<div class="eyebrow">Received</div><hr>' +
         '<div class="done"><h1>Thank you</h1></div>' +
-        '<p class="blurb">Sina will see your photo of ' + ${JSON.stringify(piece.title)} +
-        ' shortly. Once she has, it joins its page.</p>';
+        '<p class="blurb">Your photo of ' + ${JSON.stringify(piece.title)} +
+        ' is on its page now.</p>';
     } catch (err) {
       say(err.message || 'Something went wrong. Please try again.', 'err');
       send.disabled = false;
@@ -439,7 +437,7 @@ async function handleAttach(res, body, piece, adoption) {
     {
       product: { id: piece.id },
       media: [{
-        alt: (adoption.adopter ? `${PENDING_PREFIX} ${adoption.adopter}` : PENDING_PREFIX).slice(0, 512),
+        alt: (adoption.adopter ? `${OWNER_PREFIX} ${adoption.adopter}` : OWNER_PREFIX).slice(0, 512),
         mediaContentType: 'IMAGE',
         originalSource: resourceUrl,
       }],
