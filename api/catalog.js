@@ -1,5 +1,5 @@
 const { SHEET_CSV_URL } = require('../lib/sina-config.js');
-const SHOPIFY_API_VERSION = '2024-10';
+const { SHOPIFY_API_VERSION, shopifyDomain, getShopifyToken } = require('../lib/shopify.js');
 
 const CATEGORY_MAP = {
   Pendants: 'Pendants',
@@ -139,36 +139,6 @@ function buildExtensionCandidates(rawFilename) {
 // is designed to fail soft: any Shopify hiccup (missing creds, network
 // error, a SKU that was never synced) falls through to the repo-hosted
 // image logic below instead of breaking the storefront.
-function shopifyDomain() {
-  const raw = process.env.SHOPIFY_ADMIN_STORE_DOMAIN;
-  if (!raw) return null;
-  return raw.trim().replace(/^https?:\/\//i, '').replace(/\/+$/, '');
-}
-
-let cachedShopifyToken = null;
-
-async function getShopifyToken() {
-  const domain = shopifyDomain();
-  const clientId = process.env.SHOPIFY_CLIENT_ID;
-  const clientSecret = process.env.SHOPIFY_CLIENT_SECRET;
-  if (!domain || !clientId || !clientSecret) return null;
-
-  if (cachedShopifyToken && cachedShopifyToken.expiresAt > Date.now()) {
-    return cachedShopifyToken.token;
-  }
-
-  const response = await fetch(`https://${domain}/admin/oauth/access_token`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-    body: new URLSearchParams({ grant_type: 'client_credentials', client_id: clientId, client_secret: clientSecret }),
-  });
-  if (!response.ok) return null;
-
-  const data = await response.json();
-  cachedShopifyToken = { token: data.access_token, expiresAt: Date.now() + (data.expires_in - 120) * 1000 };
-  return cachedShopifyToken.token;
-}
-
 // Returns a Map<SKU, {urls, mosaicUrl, status, availableForSale}> -- Shopify's
 // own media order is the gallery order, first image is the featured one, so
 // no extra ordering logic is needed once the data is in hand. mosaicUrl is

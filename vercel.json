@@ -3,6 +3,9 @@
     { "source": "/sitemap.xml", "destination": "/api/sitemap" },
     { "source": "/(.*)", "destination": "/index.html" }
   ],
+  "functions": {
+    "api/certificate.js": { "memory": 2048, "maxDuration": 60 }
+  },
   "crons": [
     { "path": "/api/shopify-sync?mode=sync-catalog&apply=true&createMissing=true&createLimit=20", "schedule": "0 * * * *" },
     { "path": "/api/shopify-growth-sync?mode=recent&limit=50", "schedule": "10 * * * *" }
