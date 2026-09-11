@@ -392,12 +392,40 @@ async function handleStage(res, body) {
   });
 }
 
+// Only ever attach something Shopify itself just handed back from
+// stagedUploadsCreate, so this endpoint can't be pointed at an arbitrary URL.
+//
+// Matched on the parsed hostname, not with a regex on the whole string. The
+// first version required the host to be exactly storage.googleapis.com, and
+// Shopify actually stages images on shopify-staged-uploads.storage.googleapis.com
+// -- a subdomain -- so every real upload was rejected at the final step after
+// the bytes had already transferred.
+const UPLOAD_HOST_SUFFIXES = [
+  'storage.googleapis.com',
+  'shopifycloud.com',
+  'shopify.com',
+];
+
+function isShopifyUploadUrl(value) {
+  let parsed;
+  try {
+    parsed = new URL(value);
+  } catch (error) {
+    return false;
+  }
+  if (parsed.protocol !== 'https:') return false;
+
+  const host = parsed.hostname.toLowerCase();
+  // Suffix match must be on a dot boundary, or "evilstorage.googleapis.com"
+  // and "notshopify.com" would both pass.
+  return UPLOAD_HOST_SUFFIXES.some(
+    (suffix) => host === suffix || host.endsWith(`.${suffix}`),
+  );
+}
+
 async function handleAttach(res, body, piece, adoption) {
   const resourceUrl = String(body.resourceUrl || '');
-  // Only ever attach something Shopify itself just handed us, so this can't be
-  // pointed at an arbitrary URL.
-  if (!/^https:\/\/[\w.-]*shopify(cloud)?\.com\//i.test(resourceUrl)
-      && !/^https:\/\/storage\.googleapis\.com\//i.test(resourceUrl)) {
+  if (!isShopifyUploadUrl(resourceUrl)) {
     return sendJson(res, 400, { ok: false, error: 'That upload could not be verified.' });
   }
 
