@@ -13,7 +13,7 @@
 const { isAdminKeyValid } = require('../lib/sina-config.js');
 const { shopifyGraphql } = require('../lib/shopify.js');
 const { buildCertificateHtml } = require('../lib/certificate.js');
-const { verifyAdoption } = require('../lib/adoption-token.js');
+const { verifyAdoption, shortCodeForSku } = require('../lib/adoption-token.js');
 
 // Tags that describe the piece rather than what it's made of. Sina tags fairly
 // freely, so this is a denylist of the predictable noise; anything left over
@@ -232,11 +232,18 @@ module.exports = async (req, res) => {
       materials: params.get('materials') || describeMaterials(product.tags, product.sku),
       adopter,
       adoptedOn: formatAdoptedOn(adoption ? adoption.adoptedOn : params.get('adopted')),
-      // Deliberately the short form, not the signed token the webhook emails.
-      // This string is printed on the certificate and encoded in the QR, and a
-      // signed token runs past 120 characters -- unusable to read or retype.
-      // The upload page will resolve a short code back to a SKU instead.
-      uploadUrl: params.get('upload') || `sinascreations.com/u/${encodeURIComponent(sku)}`,
+      // The printed line gets the short code: unguessable, but short enough to
+      // read off paper and type. A bare SKU was used here originally and it did
+      // not work at all -- /u/ only ever accepted signed tokens, so the QR on
+      // the first real certificate led to "This link isn't valid".
+      uploadUrl: params.get('upload') || `sinascreations.com/u/${shortCodeForSku(product.sku)}`,
+      // The QR has room for the full token, so a scan gets the personalised
+      // page that knows who adopted the piece. Falls back to the short code
+      // when a certificate is minted by hand with the admin key.
+      uploadQrUrl: params.get('upload')
+        || (params.get('t')
+          ? `sinascreations.com/u/${encodeURIComponent(params.get('t'))}`
+          : `sinascreations.com/u/${shortCodeForSku(product.sku)}`),
       photo: await fetchPhotoDataUri(product.imageUrl),
     });
 

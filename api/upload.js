@@ -15,7 +15,7 @@
 // the same alt-text-as-tag convention the Living Mosaic already uses.
 
 const { shopifyGraphql } = require('../lib/shopify.js');
-const { verifyAdoption } = require('../lib/adoption-token.js');
+const { verifyAdoption, shortCodeForSku, SHORT_CODE_LENGTH } = require('../lib/adoption-token.js');
 
 const PENDING_PREFIX = 'owner-pending:';
 const APPROVED_PREFIX = 'owner:';
@@ -91,10 +91,53 @@ async function fetchPiece(sku) {
   };
 }
 
-function readAdoption(params) {
+// Short codes aren't reversible, so resolving one means deriving the code for
+// every SKU and looking for the match. That's two Shopify pages for a ~450
+// piece catalog, and only on the printed-code path -- a scanned QR carries the
+// full token and never gets here.
+async function resolveShortCode(code) {
+  const wanted = String(code).trim().toUpperCase();
+  let cursor = null;
+
+  for (let page = 0; page < 6; page += 1) {
+    const data = await shopifyGraphql(
+      `query($cursor: String) {
+        products(first: 250, after: $cursor, query: "tag:sheet-sync") {
+          edges { cursor node { variants(first: 1) { edges { node { sku } } } } }
+          pageInfo { hasNextPage }
+        }
+      }`,
+      { cursor },
+    );
+
+    const edges = (data && data.products && data.products.edges) || [];
+    for (const edge of edges) {
+      const sku = edge.node.variants.edges[0] && edge.node.variants.edges[0].node.sku;
+      if (sku && shortCodeForSku(sku) === wanted) return sku;
+    }
+    if (!data.products.pageInfo.hasNextPage || !edges.length) break;
+    cursor = edges[edges.length - 1].cursor;
+  }
+  return null;
+}
+
+// Two ways in, both arriving as ?t=. The full signed token comes from an
+// emailed link or a scanned QR and names the adopter as well as the piece. The
+// short code is what's printed on the certificate for someone typing it in,
+// and only names the piece.
+async function readAdoption(params) {
+  const value = params.get('t');
+  if (!value) return null;
+
   try {
-    const token = params.get('t');
-    return token ? verifyAdoption(token) : null;
+    const adoption = verifyAdoption(value);
+    if (adoption) return adoption;
+
+    if (value.length === SHORT_CODE_LENGTH && !value.includes('.')) {
+      const sku = await resolveShortCode(value);
+      if (sku) return { sku, adopter: null };
+    }
+    return null;
   } catch (error) {
     // Thrown when ADOPTION_TOKEN_SECRET isn't configured. Treat as no token
     // rather than leaking a config error onto a customer-facing page.
@@ -198,7 +241,7 @@ function uploadPage(piece, adoption, token) {
   return pageShell(`
     <div class="eyebrow">Share your creation</div><hr>
     <h1>${name}</h1>
-    <div class="lede">now lives with ${esc(adoption.adopter)}</div>
+    ${adoption.adopter ? `<div class="lede">now lives with ${esc(adoption.adopter)}</div>` : ''}
     ${photo}
     <p class="blurb">Send us a photo of ${name} in its new home. Once Sina has
        seen it, it joins ${name}'s page &mdash; so the next person who finds it
@@ -368,7 +411,7 @@ async function handleAttach(res, body, piece, adoption) {
     {
       product: { id: piece.id },
       media: [{
-        alt: `${PENDING_PREFIX} ${adoption.adopter}`.slice(0, 512),
+        alt: (adoption.adopter ? `${PENDING_PREFIX} ${adoption.adopter}` : PENDING_PREFIX).slice(0, 512),
         mediaContentType: 'IMAGE',
         originalSource: resourceUrl,
       }],
@@ -385,7 +428,7 @@ async function handleAttach(res, body, piece, adoption) {
 module.exports = async (req, res) => {
   const url = new URL(req.url, `https://${req.headers.host}`);
   const params = url.searchParams;
-  const adoption = readAdoption(params);
+  const adoption = await readAdoption(params);
   const isPost = req.method === 'POST';
 
   if (!adoption) {
