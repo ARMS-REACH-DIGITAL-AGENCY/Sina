@@ -81,19 +81,25 @@ Both of these column confusions caused real shipped bugs. Verify against the liv
 
 Still open on it: Peter's real adoption date, and a scanned signature from Sina (the template already prefers a `signature` image over the typeset name).
 
-## Webhook deliveries go to hooks.sinasglass.com, not the main domain
+## Shopify webhooks
 
-Registered: `FULFILLMENTS_CREATE` → `https://hooks.sinasglass.com/api/shopify-fulfillment` (`gid://shopify/WebhookSubscription/1656353325126`). Manage it with `/api/register-webhook?key=…` (add `&apply=true` to write, `&origin=` to aim it elsewhere). It is idempotent and matches on topic.
+Registered: `FULFILLMENTS_CREATE` → `https://www.sinascreations.com/api/shopify-fulfillment` (`gid://shopify/WebhookSubscription/1656356438086`).
 
-**That odd-looking host is the only option left after three separate constraints:**
+Manage with `/api/register-webhook?key=…` — `&apply=true` to write, `&replace=true` to re-point one aimed elsewhere, `&origin=` to override the delivery host. Idempotent, matches on topic. Adding a topic is one line in the `WANTED` list at the top of the file.
 
-1. **Shopify refuses its own shop domains.** `sinascreations.com` is registered in Shopify even though DNS points at Vercel, so it's rejected — *and so is every subdomain of it*. `hooks.sinascreations.com` was rejected too, despite Shopify's error message only naming the apex hosts.
-2. **The `.vercel.app` hosts are SSO-walled.** This project's protection is `all_except_custom_domains`, so Shopify's POST lands on a login redirect.
-3. **`sinasglass.com` itself 308s** to www.sinascreations.com, and webhook delivery doesn't follow redirects.
+**Everything is on sinascreations.com. Keep it that way** — `sinasglass.com` is retired and nothing new should be built on it.
 
-That leaves a subdomain of the old, client-owned, non-Shopify domain. **`hooks.sinasglass.com` still needs a DNS record and to be added to the Vercel `sina` project** — until then Shopify has a valid subscription pointing at a host that doesn't resolve.
+### The trap that made this hard, in case it resurfaces
 
-Keep `SITE_ORIGIN` branded regardless. It's what adopters see in certificate and upload links; only the delivery host is different, and `WEBHOOK_CALLBACK_ORIGIN` exists for that.
+Shopify refuses to register a webhook aimed at a domain it thinks it owns — *including subdomains*, even though its error message only names apex hosts. `sinascreations.com` and `www.sinascreations.com` were still sitting in Shopify's **Settings → Domains** as migration leftovers while their DNS pointed at Vercel, so Shopify believed it owned two domains it never served.
+
+**Both were deleted on 2026-09-11**, which unblocked the correct URL. Shopify's remaining domains are only `sinascreations.myshopify.com` (primary) and `czmw1a-fd.myshopify.com`. Checkout was never affected — `api/adopt.js` sends customers to `SHOPIFY_ADMIN_STORE_DOMAIN`, the myshopify host.
+
+Deleting them also closed a real footgun: with those entries present, Shopify's own assistant advising "point sinascreations.com DNS at Shopify" looked correct, and following it would have taken the live Vercel site down.
+
+If a webhook is ever rejected with *"Address cannot be any of the domains…"*, check Settings → Domains first. Reaching for a different hostname is the wrong fix — that's how this briefly ended up on a retired domain.
+
+Two dead ends not worth retrying: the `.vercel.app` hosts are SSO-walled (project protection is `all_except_custom_domains`), and `sinasglass.com` 308s to www, which webhook delivery does not follow.
 
 ## Don't architect around Google Drive
 
