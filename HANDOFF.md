@@ -8,6 +8,10 @@ The `ARMS_Client_Bridge` MCP connector failed with a 502 through late August. **
 
 **Sina's Creations exists as a HighLevel sub-account: location id `Nk4N8VptbcAGan3tDFBx`** (website www.sinascreations.com). That is the destination for the likes→leads feature — no further setup needed to start writing leads there.
 
+**Sub-account reads work as of 2026-09-11.** They were blocked for weeks: the agency token can't mint a location token without the `oauth.write` scope. Fixed by creating a Private Integration inside Sina's sub-account and putting its token in the bridge's `HIGHLEVEL_LOCATION_PITS` env var. That variable is a **JSON map**, not a bare token — `{"Nk4N8VptbcAGan3tDFBx":"pit-..."}`. It had a bare `pit-...` string in it for a month, which silently failed to parse and left the bridge with zero location tokens. `arms_status` reports `highlevel_location_pit_fallback_count` and a parse error; check it after any change. Env changes need a redeploy of `arms-client-bridge` to take effect.
+
+**What the audit found (2026-09-11):** Sina's sub-account is essentially empty. Six workflows, all `status: draft`, all created within seconds of each other on 2026-07-01 by the snapshot install (`69d369309cdfdcf268f0115a`) — the generic template set, never opened. **Zero custom fields.** Nothing is running. When a piece ships today, the only email the adopter gets is Shopify's stock notification.
+
 If the connector ever shows 502 again: it's a *stale session-level connection failure*. MCP connections are attempted once at session start and never retried, so it stays failed for that whole conversation even after the server recovers. Reconnect from claude.ai → Settings → Connectors (toggle off/on), or start a fresh session.
 
 Reference details:
@@ -64,6 +68,24 @@ Both of these column confusions caused real shipped bugs. Verify against the liv
 - Search extended to match on SKU, name, `Type` keywords, `Human Colors`, and the implicit keyword **"adopted"** for sold pieces (specifically requested)
 - Prevented a site-breaking DNS change — Shopify's own "Ask Gemini" assistant advised pointing sinascreations.com's DNS at Shopify's storefront, which would have taken down the real Vercel-hosted site. Worth knowing that assistant gives architecturally wrong advice for this setup.
 - Published an **Analytics Rollup** artifact — a checkbox task sheet for consolidating scattered GA4 accounts
+
+## Certificate of Adoption — built and deployed
+
+`/api/certificate?sku=…&adopter=…&adopted=…&key=…` renders a one-page Letter PDF. Design is approved by Pete. Add `&format=html` to see the document without invoking Chromium — that's the fast way to check a layout change.
+
+- `lib/certificate.js` is the document and nothing else: no Shopify, no browser. Preview it by writing the returned string to a file.
+- `lib/certificate-assets.js` is **generated** — run `node scripts/build-certificate-assets.mjs` after changing typefaces or the logo. Fonts are inlined as data URIs because Vercel's file tracer only bundles what it can see statically; an `fs` read of a font path deploys fine and then renders in a fallback serif.
+- **SKU is the key, deliberately.** Pieces sell at craft fairs and hand to hand as often as through checkout. Peter (`PND-SM-WW-001`) is exactly that case — inventory 0, no Shopify order. Anything keyed to an order id would skip those adoptions silently. The store has had **exactly one order ever** (#1001, Wanda, refunded).
+- Any image alt-tagged `mosaic` is skipped so the Living Mosaic's background-free tile crop can't stand in as the portrait.
+- Materials are derived: "Fused glass", plus the metal from tags, plus "wire" when the SKU contains `-WW-`.
+
+Still open on it: Peter's real adoption date, and a scanned signature from Sina (the template already prefers a `signature` image over the typeset name).
+
+## Don't architect around Google Drive
+
+Product images live in **Shopify**. During development the sandbox's egress policy blocked `cdn.shopify.com`, and a photo was pulled from Drive as a one-off to get a preview in front of Pete. He was explicit that this must not become part of the pipeline, and he's right — Drive is not the system of record and there's no reliable SKU→file mapping there. Production fetches `featuredImage.url` from the Shopify Admin API.
+
+Also worth knowing: the Drive connector returns **file bytes** (`download_file_content`, base64); the Shopify connector returns only data *about* media, never the image itself. That matters for the customer-photo upload flow, which has to move real bytes.
 
 ## Open items, not started
 
