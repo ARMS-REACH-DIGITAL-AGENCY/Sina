@@ -1,6 +1,7 @@
 {
   "rewrites": [
     { "source": "/sitemap.xml", "destination": "/api/sitemap" },
+    { "source": "/u/:token", "destination": "/api/upload?t=:token" },
     { "source": "/(.*)", "destination": "/index.html" }
   ],
   "functions": {
