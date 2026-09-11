@@ -427,7 +427,7 @@ export function Home() {
             <p className="living-mosaic__lead">Come closer and you meet them one at a time. Step back and they become her.</p>
             <div className="dark-card living-mosaic__card">
               <span>1 of 1</span>
-              <h3>To browse her work, you have to do what she does. Get close.</h3>
+              <h3>Do What Sina Does. Get Up Close to Browse Her Creations.</h3>
               <p>Each creation is made once and adopted once. When a piece finds its person, it leaves Thomasina&rsquo;s hands and begins its next story in a new home &mdash; and it never comes back to the shop.</p>
             </div>
             <div className="hero-actions">
