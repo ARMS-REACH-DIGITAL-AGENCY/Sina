@@ -23,6 +23,9 @@
 .living-mosaic__visual {
   width: 100%;
   min-width: 0;
+  /* One source of truth for the mosaic's width, shared with the hint below it
+     so the two stay the same size and the same left edge. */
+  --mosaic-width: min(100%, 560px, calc(66vh * 3 / 4));
 }
 
 .living-mosaic__hint {
@@ -32,6 +35,7 @@
   letter-spacing: .01em;
   color: var(--muted-olive);
   text-align: left;
+  max-width: var(--mosaic-width, 100%);
 }
 
 .living-mosaic__hint-desktop {
@@ -50,8 +54,11 @@
   /* Never taller than 74vh, so the whole section fits on screen with room to
      scroll past it, and the mosaic can't swallow the page's vertical drag.
      Width is derived from that cap via the 3:4 ratio. */
-  max-width: min(100%, 560px, calc(66vh * 3 / 4));
-  margin-inline: auto;
+  max-width: var(--mosaic-width, min(100%, 560px, calc(66vh * 3 / 4)));
+  /* Left-aligned, not centred. Once the height cap makes the frame narrower
+     than its column, margin-inline:auto pushed it to the middle and it drifted
+     away from the heading above it. The two have to share a left edge. */
+  margin-inline: 0;
   aspect-ratio: 3 / 4;
   padding: 0;
   border: 1px solid rgba(247, 244, 236, .14);
