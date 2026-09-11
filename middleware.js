@@ -489,8 +489,11 @@ export default async function middleware(request) {
   // searches it, so it can lead with the verb instead of the keywords -- which
   // tells a recipient the piece is available rather than just naming it.
   const soldOut = product.status === 'sold-out';
+  // An adopted piece gets shared by the person who adopted it, so the unfurled
+  // card is theirs to announce. It also stops "Adopt Peter" appearing on a
+  // piece nobody can adopt, which sends whoever taps it to a dead end.
   const socialTitle = soldOut
-    ? `${product.name} Found a Home — Sina's Creations`
+    ? `I Adopted ${product.name} — Sina's Creations`
     : `Adopt ${product.name} — 1-of-1 Fused Glass ${label}`;
   const description = truncate(product.description || `${product.name} is a 1-of-1 fused-glass ${label.toLowerCase()} handcrafted by Thomasina Schnepf.`, 160);
   const imageUrl = product.image?.startsWith('http') ? product.image : `${SITE_ORIGIN}${product.image || ''}`;

@@ -196,7 +196,13 @@ export function ProductCard({ product, eyebrowOverride, sharedSku }) {
     // Lead with the verb. A recipient seeing just "Selena" and a photo has no
     // idea it's for sale; "Adopt Selena" says so in the brand's own language.
     // A piece that's already gone obviously can't be adopted.
-    const shareLead = product.status === 'sold-out' ? product.name : `Adopt ${product.name}`;
+    // Who shares an adopted piece is almost always the person who adopted it,
+    // so it reads as theirs to announce rather than as a listing. "Adopt Peter"
+    // on a piece that's already gone is both wrong and a dead end for whoever
+    // taps it.
+    const shareLead = product.status === 'sold-out'
+      ? `I Adopted ${product.name}`
+      : `Adopt ${product.name}`;
     const shareTitle = `${shareLead} — Sina's Creations`;
     // Some share targets (notably Android's SMS/Messages) only surface the
     // `text` field, dropping `title` entirely -- so the piece's name has to
