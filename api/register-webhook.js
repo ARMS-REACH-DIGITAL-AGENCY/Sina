@@ -27,8 +27,27 @@ function sendJson(res, statusCode, body) {
   res.end(JSON.stringify(body, null, 2));
 }
 
-function siteOrigin() {
-  return (process.env.SITE_ORIGIN || 'https://www.sinascreations.com').replace(/\/+$/, '');
+// The callback host cannot be the site's own host.
+//
+// Shopify refuses to register a webhook aimed at any domain it associates with
+// the shop, and sinascreations.com is registered in Shopify even though its DNS
+// points at Vercel:
+//   "Address cannot be any of the domains: sinascreations.myshopify.com,
+//    sinascreations.com, www.sinascreations.com, ..."
+//
+// The .vercel.app hosts are no good either -- this project's SSO protection is
+// set to all_except_custom_domains, so Shopify's POST would hit a login
+// redirect. And sinasglass.com 308s to www, which webhook delivery won't follow.
+//
+// So deliveries need their own custom domain on this project. That is separate
+// from SITE_ORIGIN, which stays branded because it is what adopters see in
+// their certificate and upload links.
+function callbackOrigin(params) {
+  const value = params.get('origin')
+    || process.env.WEBHOOK_CALLBACK_ORIGIN
+    || process.env.SITE_ORIGIN
+    || 'https://www.sinascreations.com';
+  return value.replace(/\/+$/, '');
 }
 
 async function listSubscriptions() {
@@ -72,7 +91,7 @@ module.exports = async (req, res) => {
     const report = [];
 
     for (const want of WANTED) {
-      const callbackUrl = `${siteOrigin()}${want.path}`;
+      const callbackUrl = `${callbackOrigin(params)}${want.path}`;
       // Match on topic alone, not topic+url: a subscription pointing at a stale
       // URL is the thing worth reporting, and creating a second one for the
       // same topic would just deliver everything twice.
