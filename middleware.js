@@ -481,10 +481,20 @@ export default async function middleware(request) {
   let html = await indexResponse.text();
 
   const label = categoryLabel(product.category);
+  // Two audiences, two titles. <title> is what Google shows and rank-weights,
+  // so it leads with the name and the words people actually search ("fused
+  // glass pendant") and stays inside the ~60 char truncation limit.
   const title = `${product.name} — One-of-One Fused Glass ${label} | Sina's Creations`;
+  // og:title is what Facebook, X and iMessage render on a pasted link. Nobody
+  // searches it, so it can lead with the verb instead of the keywords -- which
+  // tells a recipient the piece is available rather than just naming it.
+  const soldOut = product.status === 'sold-out';
+  const socialTitle = soldOut
+    ? `${product.name} Found a Home — Sina's Creations`
+    : `Adopt ${product.name} — One-of-One Fused Glass ${label}`;
   const description = truncate(product.description || `${product.name} is a one-of-one fused-glass ${label.toLowerCase()} handcrafted by Thomasina Schnepf.`, 160);
   const imageUrl = product.image?.startsWith('http') ? product.image : `${SITE_ORIGIN}${product.image || ''}`;
-  const availability = product.status === 'sold-out' ? 'https://schema.org/SoldOut' : 'https://schema.org/InStock';
+  const availability = soldOut ? 'https://schema.org/SoldOut' : 'https://schema.org/InStock';
 
   const productJsonLd = {
     '@context': 'https://schema.org/',
@@ -521,7 +531,7 @@ export default async function middleware(request) {
   const extraTags = `
     <link rel="canonical" href="${escapeHtml(pageUrl)}" />
     <meta name="robots" content="index,follow,max-image-preview:large" />
-    <meta property="og:title" content="${escapeHtml(title)}" />
+    <meta property="og:title" content="${escapeHtml(socialTitle)}" />
     <meta property="og:description" content="${escapeHtml(description)}" />
     <meta property="og:image" content="${escapeHtml(imageUrl)}" />
     <meta property="og:image:alt" content="${escapeHtml(`${product.name}, handcrafted fused glass ${label.toLowerCase()} by Thomasina Schnepf`)}" />
@@ -529,7 +539,7 @@ export default async function middleware(request) {
     <meta property="product:price:amount" content="${escapeHtml(product.price)}" />
     <meta property="product:price:currency" content="USD" />
     <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:title" content="${escapeHtml(title)}" />
+    <meta name="twitter:title" content="${escapeHtml(socialTitle)}" />
     <meta name="twitter:description" content="${escapeHtml(description)}" />
     <meta name="twitter:image" content="${escapeHtml(imageUrl)}" />
     <meta name="twitter:image:alt" content="${escapeHtml(`${product.name}, handcrafted fused glass ${label.toLowerCase()} by Thomasina Schnepf`)}" />

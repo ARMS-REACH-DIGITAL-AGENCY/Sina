@@ -193,11 +193,15 @@ export function ProductCard({ product, eyebrowOverride, sharedSku }) {
     // /p/:sku is the permanent public product page. It is used everywhere:
     // share links, QR labels, search indexing, and internal product links.
     const shareUrl = `${window.location.origin}/p/${encodeURIComponent(product.sku)}`;
-    const shareTitle = `${product.name} — Sina's Creations`;
+    // Lead with the verb. A recipient seeing just "Selena" and a photo has no
+    // idea it's for sale; "Adopt Selena" says so in the brand's own language.
+    // A piece that's already gone obviously can't be adopted.
+    const shareLead = product.status === 'sold-out' ? product.name : `Adopt ${product.name}`;
+    const shareTitle = `${shareLead} — Sina's Creations`;
     // Some share targets (notably Android's SMS/Messages) only surface the
     // `text` field, dropping `title` entirely -- so the piece's name has to
     // be part of the text itself, not rely on title showing up.
-    const shareText = `${product.name}\n${product.line}\nOne-of-one, handcrafted by Thomasina Schnepf.`;
+    const shareText = `${shareLead}\n${product.line}\nOne-of-one, handcrafted by Thomasina Schnepf.`;
 
     // Try to attach the actual product photo so the share carries the image,
     // not just a link -- most share targets (Messages, Instagram, Mail) will
