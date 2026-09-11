@@ -13,6 +13,7 @@
 const { isAdminKeyValid } = require('../lib/sina-config.js');
 const { shopifyGraphql } = require('../lib/shopify.js');
 const { buildCertificateHtml } = require('../lib/certificate.js');
+const { verifyAdoption } = require('../lib/adoption-token.js');
 
 // Tags that describe the piece rather than what it's made of. Sina tags fairly
 // freely, so this is a denylist of the predictable noise; anything left over
@@ -189,12 +190,25 @@ module.exports = async (req, res) => {
   const url = new URL(req.url, `https://${req.headers.host}`);
   const params = url.searchParams;
 
-  if (!isAdminKeyValid(params.get('key'))) {
+  // Two ways in. The admin key is for Pete or Sina minting one by hand. The
+  // signed token is what goes out in the adopter's email -- and because the
+  // token carries its own SKU and adopter, holding one link doesn't let anyone
+  // mint a certificate for a different piece by editing the query string.
+  // verifyAdoption throws when the secret isn't configured; the admin path
+  // should still work in that case, so a failure here just means "no token".
+  let adoption = null;
+  try {
+    if (params.get('t')) adoption = verifyAdoption(params.get('t'));
+  } catch (error) {
+    adoption = null;
+  }
+
+  if (!adoption && !isAdminKeyValid(params.get('key'))) {
     return sendJson(res, 401, { error: 'Unauthorized' });
   }
 
-  const sku = (params.get('sku') || '').trim();
-  const adopter = (params.get('adopter') || '').trim();
+  const sku = ((adoption ? adoption.sku : params.get('sku')) || '').trim();
+  const adopter = ((adoption ? adoption.adopter : params.get('adopter')) || '').trim();
   if (!sku) return sendJson(res, 400, { error: 'sku is required' });
   if (!adopter) return sendJson(res, 400, { error: 'adopter is required' });
 
@@ -211,8 +225,11 @@ module.exports = async (req, res) => {
       sku: product.sku,
       materials: params.get('materials') || describeMaterials(product.tags, product.sku),
       adopter,
-      adoptedOn: formatAdoptedOn(params.get('adopted')),
-      // Placeholder until the upload flow mints real signed tokens.
+      adoptedOn: formatAdoptedOn(adoption ? adoption.adoptedOn : params.get('adopted')),
+      // Deliberately the short form, not the signed token the webhook emails.
+      // This string is printed on the certificate and encoded in the QR, and a
+      // signed token runs past 120 characters -- unusable to read or retype.
+      // The upload page will resolve a short code back to a SKU instead.
       uploadUrl: params.get('upload') || `sinascreations.com/u/${encodeURIComponent(sku)}`,
       photo: await fetchPhotoDataUri(product.imageUrl),
     });
