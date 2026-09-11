@@ -168,7 +168,24 @@ button,input,select,textarea{font:inherit}
 .product-card__adopt-cta--sold{display:flex;align-items:center;justify-content:center;text-align:center;background:var(--charcoal);border-color:var(--charcoal);opacity:.82;cursor:default}
 .product-card__panel .product-card__close-hint{font-size:9px;line-height:1.4;color:var(--muted-olive);letter-spacing:.14em;text-transform:uppercase;font-weight:700;text-align:center;margin-top:auto;padding-top:16px}
 .product-card__flip-cta-caption{display:block;font-size:10px;line-height:1.1;text-transform:uppercase;letter-spacing:.12em;color:var(--muted-olive);font-weight:700}
-@media(min-width:960px){.product-card{flex-direction:row-reverse}.product-card__visual{flex:0 0 42%}.product-card__image{flex:none;width:100%;aspect-ratio:1/1}.product-card__panel{padding:32px}.product-card h3{font-size:32px}}
+/* Photo beside the text from 600px up, not 960px. Stacked, the image is a
+   square at the full card width, so at 850px it rendered 850px tall and a
+   visitor met a full screen of photo with the name, price and button all
+   below the fold. */
+@media(min-width:600px){.product-card{flex-direction:row-reverse}.product-card__visual{flex:0 0 42%}.product-card__image{flex:none;width:100%;aspect-ratio:1/1}}
+/* Roomier padding and a larger name only where there is width to spend. */
+@media(min-width:960px){.product-card__panel{padding:32px}.product-card h3{font-size:32px}}
+/* Below 600px the photo sits on top, so cap it: the piece, its name and the
+   button should be on screen together rather than needing a scroll. The img
+   is object-fit:contain, so it letterboxes on the card's own black instead
+   of cropping the piece. */
+@media(max-width:599px){.product-card__image{aspect-ratio:auto;height:min(56vh,100vw)}
+/* Opened, the description is long and the photo is above it, so reading
+   scrolled the piece off screen entirely. Giving the photo less height
+   once the card is open keeps it and the start of the story together.
+   Sticky is not an option here: .product-card is overflow:hidden, which
+   makes it the sticky scroll container and the effect a no-op. */
+.product-card.is-back .product-card__image{height:min(34vh,62vw)}}
 .shop-search-suggestions{max-width:1200px;margin:0 auto 18px;display:flex;flex-wrap:wrap;align-items:center;gap:8px}
 .shop-search-suggestions__label{font-size:10px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--muted-olive);margin-right:2px}
 .shop-search-suggestion{padding:6px 13px;border:1.5px solid rgba(41,42,40,.18);border-radius:999px;background:rgba(247,244,236,.74);color:var(--charcoal);font-family:var(--font-body);font-size:12px;font-weight:600;line-height:1.2;cursor:pointer;transition:border-color .2s ease,background .2s ease,color .2s ease}
