@@ -417,8 +417,7 @@ export function Home() {
             </div>
             <LivingMosaic />
             <p className="living-mosaic__hint">
-              Pinch or use &minus;&nbsp;/&nbsp;+ to come closer. Drag to look around. <strong className="living-mosaic__hint-cta">Tap any creation to hear its story</strong> &mdash; and to adopt it.
-              <span className="living-mosaic__hint-desktop"> On a computer: scroll or use the buttons to zoom, drag to look around, then click any creation.</span>
+              Zoom with &minus;&nbsp;/&nbsp;+, pinch, or scroll. Drag to explore. <strong className="living-mosaic__hint-cta">Tap any creation to hear its story</strong> &mdash; and to adopt it.
             </p>
           </div>
           <div className="living-mosaic__story">

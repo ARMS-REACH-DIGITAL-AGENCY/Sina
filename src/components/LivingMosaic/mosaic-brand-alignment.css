@@ -11,11 +11,13 @@
 
 .living-mosaic__body {
   display: grid;
-  grid-template-columns: minmax(0, 1.05fr) minmax(300px, 1fr);
+  grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr);
   column-gap: clamp(28px, 3.4vw, 56px);
   row-gap: 24px;
   align-items: start;
-  margin-top: 28px;
+  /* The eyebrow directly above supplies the only gap needed; the generic 28px
+     pushed the heading away from the eyebrow it belongs to. */
+  margin-top: 10px;
 }
 
 .living-mosaic__visual {
@@ -25,11 +27,11 @@
 
 .living-mosaic__hint {
   margin: 10px 2px 0;
-  font-size: 12px;
-  line-height: 1.5;
+  font-size: 11px;
+  line-height: 1.45;
   letter-spacing: .01em;
   color: var(--muted-olive);
-  text-align: center;
+  text-align: left;
 }
 
 .living-mosaic__hint-desktop {
@@ -179,7 +181,7 @@
   margin: 0;
   color: var(--charcoal);
   font-family: var(--font-body);
-  font-size: clamp(16px, 1.08vw, 18px);
+  font-size: clamp(12.5px, 1.5vw, 18px);
   line-height: 1.45;
   font-weight: 800;
   text-wrap: pretty;
@@ -189,7 +191,7 @@
   margin: 0;
   color: var(--muted-olive);
   font-family: var(--font-body);
-  font-size: clamp(14px, .98vw, 16px);
+  font-size: clamp(11.5px, 1.32vw, 16px);
   line-height: 1.65;
   text-wrap: pretty;
 }
@@ -198,7 +200,7 @@
   margin-top: 6px;
 }
 
-@media (max-width: 959px) {
+@media (max-width: 559px) {
   .living-mosaic__body {
     grid-template-columns: minmax(0, 1fr);
     margin-top: 24px;
@@ -233,7 +235,7 @@
   letter-spacing: .22em;
   font-weight: 700;
   font-size: 10px;
-  margin-bottom: 10px;
+  margin-bottom: 0;
 }
 
 /* The call to action reads as one phrase; letting it wrap mid-sentence split
@@ -260,4 +262,32 @@
 .living-mosaic-section {
   padding-top: 56px;
   padding-bottom: 56px;
+}
+
+
+/* The closing card is the densest block in the narrow column, so its own type
+   has to come down with everything else or it dictates the minimum width. */
+.living-mosaic__card {
+  padding: clamp(18px, 2.2vw, 36px);
+}
+
+.living-mosaic__card h3 {
+  font-size: clamp(17px, 2.05vw, 30px);
+  margin: clamp(10px, 1.2vw, 18px) 0;
+}
+
+.living-mosaic__card p {
+  font-size: clamp(11.5px, 1.32vw, 16px);
+}
+
+.living-mosaic__story .hero-actions .button {
+  font-size: clamp(10px, 1.05vw, 13px);
+  padding-inline: clamp(10px, 1.4vw, 24px);
+}
+
+/* Stacked layout only below 560px, where two columns genuinely stop working. */
+@media (max-width: 559px) {
+  .living-mosaic__hint {
+    font-size: 11px;
+  }
 }
