@@ -193,7 +193,14 @@ export async function buildMosaicGrid({ portraitSrc, products, cols, rows }) {
           const overuse = Math.max(0, used - fairShare) / Math.max(1, fairShare);
           const crowding = crowdingPenalty(col, row, candidate.productIndex);
           // +1 so an exact colour match can still be outweighed by crowding.
-          const score = (candidate.d + 1) * (1 + 0.55 * crowding) * (1 + 0.35 * overuse);
+          // About a third of the catalog has a purpose-made "mosaic" crop in
+          // Shopify -- tight on the piece, no backdrop. The rest only have
+          // wide listing shots that this grid has to fake a crop on with CSS
+          // zoom, which is where the muddy tiles come from. Nudge the real
+          // crops to win more cells so the portrait is built from the images
+          // actually made for it, without excluding anything.
+          const cropBonus = isCustomCropByIndex.get(candidate.productIndex) ? 0.72 : 1;
+          const score = (candidate.d + 1) * cropBonus * (1 + 0.55 * crowding) * (1 + 0.35 * overuse);
           if (score < bestScore) {
             bestScore = score;
             chosen = candidate;
