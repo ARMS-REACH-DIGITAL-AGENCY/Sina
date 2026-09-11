@@ -220,3 +220,32 @@
   margin: 0 0 18px;
   max-width: none;
 }
+
+/* Eyebrow above the two-column grid, matching the standard section-header
+   treatment but left-aligned to the column edge. */
+.living-mosaic__section-eyebrow {
+  display: block;
+  color: var(--burnt-orange);
+  text-transform: uppercase;
+  letter-spacing: .22em;
+  font-weight: 700;
+  font-size: 10px;
+  margin-bottom: 10px;
+}
+
+/* The call to action reads as one phrase; letting it wrap mid-sentence split
+   it as "Tap any / creation to hear its story". */
+.living-mosaic__hint-cta {
+  white-space: nowrap;
+}
+
+/* Button matches the width of the card above it and sits tight against it.
+   The story column has a 14px gap, so the negative margin pulls it back in. */
+.living-mosaic__story .hero-actions {
+  margin-top: -6px;
+  width: 100%;
+}
+
+.living-mosaic__story .hero-actions .button {
+  width: 100%;
+}

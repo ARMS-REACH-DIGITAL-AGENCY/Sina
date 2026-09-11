@@ -400,14 +400,13 @@ export function Home() {
         backgroundPosition="left center"
       />
       <section className="cream-section living-mosaic-section" id="collection">
+        {/* Eyebrow sits above the grid; the headline stays inside the left
+            column. That way the story column starts level with the headline
+            rather than with the eyebrow above it. */}
+        <span className="living-mosaic__section-eyebrow">Her Story &amp; Creations. Your Choice.</span>
         <div className="living-mosaic__body">
           <div className="living-mosaic__visual">
-            {/* The heading lives inside the left column rather than spanning the
-                section, so the story column starts level with it instead of
-                level with the mosaic -- otherwise the right column began a
-                heading's height lower and left dead space above it. */}
             <div className="section-header living-mosaic__heading">
-              <span>Her Story &amp; Creations. Your Choice.</span>
               <FitHeading
                 as="h2"
                 className="living-mosaic-section__title"
@@ -418,7 +417,7 @@ export function Home() {
             </div>
             <LivingMosaic />
             <p className="living-mosaic__hint">
-              Pinch or use &minus;&nbsp;/&nbsp;+ to come closer. Drag to look around. <strong>Tap any creation to hear its story</strong> &mdash; and to adopt it.
+              Pinch or use &minus;&nbsp;/&nbsp;+ to come closer. Drag to look around. <strong className="living-mosaic__hint-cta">Tap any creation to hear its story</strong> &mdash; and to adopt it.
               <span className="living-mosaic__hint-desktop"> On a computer: scroll or use the buttons to zoom, drag to look around, then click any creation.</span>
             </p>
           </div>
