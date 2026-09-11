@@ -21,6 +21,9 @@ const { shopifyGraphql } = require('../lib/shopify.js');
 // here and redeploying is all a new webhook needs.
 const WANTED = [
   { topic: 'FULFILLMENTS_CREATE', path: '/api/shopify-fulfillment' },
+  // Same endpoint. It branches on X-Shopify-Topic; orders/paid only writes the
+  // sale back to the Sheet.
+  { topic: 'ORDERS_PAID', path: '/api/shopify-fulfillment' },
 ];
 
 function sendJson(res, statusCode, body) {

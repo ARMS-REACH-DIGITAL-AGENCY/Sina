@@ -1,9 +1,17 @@
-// Shopify fulfillment webhook -- the automatic half of adoption follow-up.
+// Shopify webhook -- the automatic half of adoption follow-up.
 //
-// Subscribe this to the `fulfillments/create` topic. When Sina marks a piece as
-// shipped, this records the adoption in HighLevel with links to the adopter's
-// certificate and their photo-upload page, and tags the contact so a workflow
-// can send the email.
+// Handles two topics, branching on X-Shopify-Topic:
+//
+//   orders/paid          -> write the sale back to the Google Sheet (qty -> 0)
+//   fulfillments/create  -> record the adoption in HighLevel with links to the
+//                           adopter's certificate and photo-upload page, tag the
+//                           contact so a workflow can send the email, and zero
+//                           the Sheet again as a backstop
+//
+// The two are split because "sold" and "shipped" are different moments. Shopify
+// takes the inventory when the order is paid, which is when the Sheet goes
+// stale -- but the adopter shouldn't hear about their certificate until the
+// piece is actually on its way.
 //
 // This is only half the trigger. Pieces sell at craft fairs and hand to hand
 // with no Shopify order behind them, and those adoptions have to be entered by
@@ -13,6 +21,7 @@
 import { createHmac, timingSafeEqual } from 'node:crypto';
 import { shopifyGraphql } from '../lib/shopify.js';
 import { signAdoption } from '../lib/adoption-token.js';
+import { markSkusInSheet } from '../lib/sheet-writeback.js';
 
 const HIGHLEVEL_UPSERT_URL = 'https://services.leadconnectorhq.com/contacts/upsert';
 const HIGHLEVEL_NOTES_URL = 'https://services.leadconnectorhq.com/contacts';
@@ -227,9 +236,21 @@ export default async function handler(req, res) {
     return sendJson(res, 200, { ok: false, reason: 'unparseable body' });
   }
 
+  const topic = String(req.headers['x-shopify-topic'] || '').toLowerCase();
+  const lineItems = Array.isArray(payload.line_items) ? payload.line_items : [];
+  const skus = lineItems.map((item) => item && item.sku).filter(Boolean);
+
+  // A piece is sold when the order is paid, not when it ships -- that's when
+  // Shopify takes the inventory, and it's the moment the Sheet goes stale. So
+  // the write-back rides on orders/paid and does nothing else; the adoption
+  // follow-up still waits for the piece to actually be on its way.
+  if (topic === 'orders/paid') {
+    const sheet = await markSkusInSheet(skus, 0);
+    return sendJson(res, 200, { ok: true, topic, markedSoldInSheet: skus, sheet });
+  }
+
   const fulfillmentId = payload.id;
   const orderId = payload.order_id;
-  const lineItems = Array.isArray(payload.line_items) ? payload.line_items : [];
 
   if (!orderId || !fulfillmentId) {
     return sendJson(res, 200, { ok: false, reason: 'not a fulfillment payload' });
@@ -268,6 +289,12 @@ export default async function handler(req, res) {
       noteStored = await addNote(contactId, buildNote(order, adoptions), token);
     }
 
+    // Also zero the Sheet here. orders/paid should already have done it, but a
+    // piece fulfilled from an order that predates that subscription -- or one
+    // paid while the write-back was misconfigured -- would otherwise stay at 1
+    // forever. Setting it to 0 twice costs nothing.
+    const sheet = await markSkusInSheet(adoptions.map((a) => a.sku), 0);
+
     // Tag last. If anything above threw, the order stays untagged and Shopify's
     // retry gets a real second attempt rather than hitting the skip path.
     await tagOrder(order.id, tag);
@@ -277,6 +304,7 @@ export default async function handler(req, res) {
       order: order.name,
       contactId,
       noteStored,
+      sheet,
       pieces: adoptions.map((a) => a.sku),
     });
   } catch (error) {
