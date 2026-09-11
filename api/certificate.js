@@ -149,13 +149,19 @@ async function fetchPhotoDataUri(url) {
 }
 
 async function renderPdf(html) {
-  // @sparticuz/chromium ships as ESM with a CJS interop wrapper, so under
-  // require() the real object sits on .default -- reading `args` off the
-  // wrapper gets undefined and launch fails with a confusing TypeError.
-  // Tolerating both shapes keeps a future packaging change from breaking this.
-  const chromiumModule = require('@sparticuz/chromium');
+  // Both of these are ES modules, and require() of an ESM throws on Vercel's
+  // Node runtime (ERR_REQUIRE_ESM). A local install can resolve a CJS interop
+  // build and hide that, so this has to be dynamic import() -- which is legal
+  // inside CommonJS and is what the runtime asks for. The literal specifiers
+  // keep Vercel's file tracer able to see and bundle them.
+  //
+  // The .default dance is the other half: under interop the real object sits on
+  // .default, and reading `args` off the wrapper gets undefined and fails at
+  // launch with a confusing TypeError. Tolerate both shapes.
+  const chromiumModule = await import('@sparticuz/chromium');
   const chromium = chromiumModule.default || chromiumModule;
-  const puppeteer = require('puppeteer-core');
+  const puppeteerModule = await import('puppeteer-core');
+  const puppeteer = puppeteerModule.default || puppeteerModule;
 
   // Set locally to point at a system Chrome; unset in production so the
   // bundled serverless build is used.
