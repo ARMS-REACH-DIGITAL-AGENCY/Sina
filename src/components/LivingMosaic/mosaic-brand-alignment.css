@@ -28,10 +28,13 @@
   --mosaic-width: min(100%, 560px, calc(66vh * 3 / 4));
 }
 
-.living-mosaic__hint {
-  margin: 10px 2px 0;
+/* .cream-section p sets 16px/1.7 at (0,0,1,1) and a bare .living-mosaic__hint
+   is (0,0,1,0), so it lost the cascade and the caption silently rendered at
+   body size. Qualifying with the section class makes this (0,0,2,0). */
+.cream-section .living-mosaic__hint {
+  margin: 8px 0 0;
   font-size: 11px;
-  line-height: 1.45;
+  line-height: 1.35;
   letter-spacing: .01em;
   color: var(--muted-olive);
   text-align: left;
@@ -210,7 +213,9 @@
 @media (max-width: 559px) {
   .living-mosaic__body {
     grid-template-columns: minmax(0, 1fr);
-    margin-top: 24px;
+    /* Same 10px as the wide layout. This used to reset to 24px, so the
+       eyebrow drifted from its heading only once the columns merged. */
+    margin-top: 10px;
   }
 
   .living-mosaic__lead {
@@ -292,9 +297,3 @@
   padding-inline: clamp(10px, 1.4vw, 24px);
 }
 
-/* Stacked layout only below 560px, where two columns genuinely stop working. */
-@media (max-width: 559px) {
-  .living-mosaic__hint {
-    font-size: 11px;
-  }
-}
