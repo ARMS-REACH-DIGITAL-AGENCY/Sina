@@ -1,7 +1,9 @@
 // One-shot webhook registration, run by opening a URL.
 //
-//   /api/register-webhook?key=ADMIN_KEY            -- list what's registered
-//   /api/register-webhook?key=ADMIN_KEY&apply=true -- register what's missing
+//   ?key=ADMIN_KEY                          -- list what's registered
+//   ?key=…&apply=true                       -- register what's missing
+//   ?key=…&apply=true&replace=true          -- re-point one that's aimed elsewhere
+//   ?key=…&origin=https://host              -- override the delivery host
 //
 // This exists because registering from a laptop isn't possible here: the
 // Shopify MCP connector blocks webhook creation outright as a data-exfiltration
@@ -60,6 +62,22 @@ async function listSubscriptions() {
     .map((edge) => edge.node);
 }
 
+async function deleteSubscription(id) {
+  const data = await shopifyGraphql(
+    `mutation($id: ID!) {
+      webhookSubscriptionDelete(id: $id) {
+        deletedWebhookSubscriptionId
+        userErrors { field message }
+      }
+    }`,
+    { id },
+  );
+  const result = data && data.webhookSubscriptionDelete;
+  const errors = (result && result.userErrors) || [];
+  if (errors.length) throw new Error(errors.map((e) => e.message).join('; '));
+  return result.deletedWebhookSubscriptionId;
+}
+
 async function createSubscription(topic, callbackUrl) {
   const data = await shopifyGraphql(
     `mutation($topic: WebhookSubscriptionTopic!, $sub: WebhookSubscriptionInput!) {
@@ -99,10 +117,24 @@ module.exports = async (req, res) => {
 
       if (match && match.uri === callbackUrl) {
         report.push({ topic: want.topic, status: 'already registered', id: match.id, uri: match.uri });
+      } else if (match && apply && params.get('replace') === 'true') {
+        // Re-point an existing subscription. Delete then create rather than
+        // create then delete: two live subscriptions on one topic would
+        // deliver every fulfillment twice, and a doubled fulfillment means a
+        // second certificate emailed to someone who already has theirs.
+        await deleteSubscription(match.id);
+        const created = await createSubscription(want.topic, callbackUrl);
+        report.push({
+          topic: want.topic,
+          status: 'replaced',
+          id: created.id,
+          previousUri: match.uri,
+          uri: created.uri,
+        });
       } else if (match) {
         report.push({
           topic: want.topic,
-          status: 'registered to a different URL — delete it in Shopify first',
+          status: 'registered to a different URL — re-run with &replace=true to re-point it',
           id: match.id,
           currentUri: match.uri,
           wantedUri: callbackUrl,
