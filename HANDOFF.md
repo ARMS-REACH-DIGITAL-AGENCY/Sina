@@ -81,6 +81,20 @@ Both of these column confusions caused real shipped bugs. Verify against the liv
 
 Still open on it: Peter's real adoption date, and a scanned signature from Sina (the template already prefers a `signature` image over the typeset name).
 
+## Webhook deliveries go to hooks.sinasglass.com, not the main domain
+
+Registered: `FULFILLMENTS_CREATE` → `https://hooks.sinasglass.com/api/shopify-fulfillment` (`gid://shopify/WebhookSubscription/1656353325126`). Manage it with `/api/register-webhook?key=…` (add `&apply=true` to write, `&origin=` to aim it elsewhere). It is idempotent and matches on topic.
+
+**That odd-looking host is the only option left after three separate constraints:**
+
+1. **Shopify refuses its own shop domains.** `sinascreations.com` is registered in Shopify even though DNS points at Vercel, so it's rejected — *and so is every subdomain of it*. `hooks.sinascreations.com` was rejected too, despite Shopify's error message only naming the apex hosts.
+2. **The `.vercel.app` hosts are SSO-walled.** This project's protection is `all_except_custom_domains`, so Shopify's POST lands on a login redirect.
+3. **`sinasglass.com` itself 308s** to www.sinascreations.com, and webhook delivery doesn't follow redirects.
+
+That leaves a subdomain of the old, client-owned, non-Shopify domain. **`hooks.sinasglass.com` still needs a DNS record and to be added to the Vercel `sina` project** — until then Shopify has a valid subscription pointing at a host that doesn't resolve.
+
+Keep `SITE_ORIGIN` branded regardless. It's what adopters see in certificate and upload links; only the delivery host is different, and `WEBHOOK_CALLBACK_ORIGIN` exists for that.
+
 ## Don't architect around Google Drive
 
 Product images live in **Shopify**. During development the sandbox's egress policy blocked `cdn.shopify.com`, and a photo was pulled from Drive as a one-off to get a preview in front of Pete. He was explicit that this must not become part of the pipeline, and he's right — Drive is not the system of record and there's no reliable SKU→file mapping there. Production fetches `featuredImage.url` from the Shopify Admin API.
