@@ -11,10 +11,10 @@
 
 .living-mosaic__body {
   display: grid;
-  grid-template-columns: 1.35fr minmax(240px, 1fr);
+  grid-template-columns: minmax(0, 1.05fr) minmax(300px, 1fr);
   column-gap: clamp(28px, 3.4vw, 56px);
   row-gap: 24px;
-  align-items: stretch;
+  align-items: start;
   margin-top: 28px;
 }
 
@@ -45,6 +45,11 @@
 .living-mosaic__frame {
   position: relative;
   width: 100%;
+  /* Never taller than 74vh, so the whole section fits on screen with room to
+     scroll past it, and the mosaic can't swallow the page's vertical drag.
+     Width is derived from that cap via the 3:4 ratio. */
+  max-width: min(100%, 560px, calc(66vh * 3 / 4));
+  margin-inline: auto;
   aspect-ratio: 3 / 4;
   padding: 0;
   border: 1px solid rgba(247, 244, 236, .14);
@@ -165,12 +170,10 @@
   min-width: 0;
 }
 
-/* Pushes the closing card and its button to the foot of the column so the two
-   columns finish level, instead of the card floating mid-height with dead
-   space under it and the mosaic running on past. */
-.living-mosaic__story .living-mosaic__card {
-  margin-top: auto;
-}
+/* Deliberately NOT margin-top:auto. Anchoring the card to the foot of the
+   column only looks right when both columns are a similar height; when the
+   mosaic is much taller it strands the card far below the copy it belongs
+   with. Keeping it in normal flow groups the story together. */
 
 .living-mosaic__lead {
   margin: 0;
@@ -195,7 +198,7 @@
   margin-top: 6px;
 }
 
-@media (max-width: 767px) {
+@media (max-width: 959px) {
   .living-mosaic__body {
     grid-template-columns: minmax(0, 1fr);
     margin-top: 24px;
@@ -248,4 +251,13 @@
 
 .living-mosaic__story .hero-actions .button {
   width: 100%;
+}
+
+
+/* The generic cream-section padding is 88px top and bottom. On this section
+   that is 176px competing with a tall mosaic for the same screen, which is
+   what forced zooming out to see the whole thing at once. */
+.living-mosaic-section {
+  padding-top: 56px;
+  padding-bottom: 56px;
 }
