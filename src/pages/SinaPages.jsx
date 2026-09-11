@@ -394,8 +394,8 @@ export function Home() {
         eyebrow="Crafted. Named. Adopted."
         title={<FitHeading lines={['More Than Jewelry.', 'A Story You Can Hold.']} maxFontSize={78} minFontSize={18} />}
         copy="Every creation begins as glass, but it becomes something more personal once Thomasina names it. Each piece is made by hand, chosen with intention, and offered to one person who feels connected to its color, texture, and story."
-        primary="A Message From The Artist"
-        primaryTo="/meet-sina#message"
+        primary="Adopt Sina's Creations"
+        primaryTo="/shop"
         backgroundImages={heroHomeSlides}
         backgroundPosition="left center"
       />
@@ -433,7 +433,7 @@ export function Home() {
               <p>Each creation is made once and adopted once. When a piece finds its person, it leaves Thomasina&rsquo;s hands and begins its next story in a new home &mdash; and it never comes back to the shop.</p>
             </div>
             <div className="hero-actions">
-              <Link className="button primary" to="/shop">Adopt Sina&apos;s Creations</Link>
+              <Link className="button primary" to="/meet-sina#message">A Message From The Artist</Link>
             </div>
           </div>
         </div>
