@@ -379,7 +379,7 @@ function normalizeProduct(row, shopifyImages) {
     imageFallbacks,
     gallery,
     mosaicImage: shopifyEntry?.mosaicUrl || null,
-    line: extractHeadline(bodyHtml) || 'One of one. Handcrafted by Thomasina Schnepf.',
+    line: extractHeadline(bodyHtml) || '1-of-1. Handcrafted by Thomasina Schnepf.',
     description,
     descriptionHtml: bodyHtml,
     height: readDimension(row, 'H', 'Height'),

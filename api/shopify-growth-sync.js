@@ -165,13 +165,13 @@ function buildTags(row) {
 }
 
 function buildSeoTitle(row) {
-  return truncate(`${row.title} — One-of-One Fused Glass ${singularCategory(row.category)} | Sina's Creations`, 70);
+  return truncate(`${row.title} — 1-of-1 Fused Glass ${singularCategory(row.category)} | Sina's Creations`, 70);
 }
 
 function buildSeoDescription(row) {
   const story = stripHtml(row.bodyHtml);
   return truncate(
-    story || `${row.title} is a one-of-one fused glass ${singularCategory(row.category).toLowerCase()} handcrafted by Thomasina Schnepf.`,
+    story || `${row.title} is a 1-of-1 fused glass ${singularCategory(row.category).toLowerCase()} handcrafted by Thomasina Schnepf.`,
     155
   );
 }

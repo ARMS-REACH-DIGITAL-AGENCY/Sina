@@ -385,7 +385,7 @@ export function Home() {
   const { products } = useCatalogProducts();
   usePageMeta(
     "Sina's Creations — Handcrafted Fused Glass Jewelry & Art",
-    'One-of-one fused-glass jewelry and art, handmade by Thomasina Schnepf. Every creation is named, photographed, and offered to one person.'
+    '1-of-1 fused-glass jewelry and art, handmade by Thomasina Schnepf. Every creation is named, photographed, and offered to one person.'
   );
 
   return (
@@ -483,7 +483,7 @@ export function Story() {
           <div className="meet-sina-note">
             <span>Working Close</span>
             <h3>Every piece begins with touch, light, patience, and intention.</h3>
-            <p>These studio photos show how close Sina works to the glass as she arranges color, shape, and texture into a one-of-one creation.</p>
+            <p>These studio photos show how close Sina works to the glass as she arranges color, shape, and texture into a 1-of-1 creation.</p>
           </div>
           <div className="meet-sina-media-grid">
             <article className="meet-sina-photo-card">
@@ -551,14 +551,14 @@ export function Collaborate() {
 export function Wholesale() {
   usePageMeta(
     "Wholesale Partners — Sell Sina's Creations | Sina's Creations",
-    'Wholesale applications for boutiques, galleries, and retailers who want one-of-one fused-glass jewelry and art with a personal story behind every piece.'
+    'Wholesale applications for boutiques, galleries, and retailers who want 1-of-1 fused-glass jewelry and art with a personal story behind every piece.'
   );
   return (
     <Layout>
       <Hero
         eyebrow="Wholesale Partners"
         title={<FitHeading lines={['Wholesale Partners:', 'Sell Sina’s Creations.']} maxFontSize={78} minFontSize={18} />}
-        copy="Sina's Creations is accepting wholesale applications from boutiques, galleries, gift shops, and community retailers who want one-of-one jewelry and glass art with a personal story behind every piece."
+        copy="Sina's Creations is accepting wholesale applications from boutiques, galleries, gift shops, and community retailers who want 1-of-1 jewelry and glass art with a personal story behind every piece."
         primary="Start the Application"
         primaryTo="/wholesale#application"
         backgroundImage={pageHeroImages.wholesale}
@@ -614,7 +614,7 @@ export function Shop() {
       : "Shop All Creations | Sina's Creations",
     sharedProduct
       ? sharedProduct.description
-      : 'Browse every available one-of-one fused-glass creation by Thomasina Schnepf -- pendants, necklaces, plaques, plates, and more.'
+      : 'Browse every available 1-of-1 fused-glass creation by Thomasina Schnepf -- pendants, necklaces, plaques, plates, and more.'
   );
   const requestedCollection = React.useMemo(
     () => new URLSearchParams(location.search).get('collection') || '',
@@ -1081,7 +1081,7 @@ function Footer() {
         <div><h4>Adopt</h4><p>Choose a piece, ask a question, or start a custom conversation.</p><Link className="button primary footer-button" to="/shop">Adopt</Link></div>
       </div>
       <div className="footer-bottom">
-        <p className="footer-disclaimer">Disclaimer: Each piece is handmade from fused glass and one-of-one; natural variation in color, texture, and shape is part of the process, not a defect. Product images are for reference only. Pricing and availability may change.</p>
+        <p className="footer-disclaimer">Disclaimer: Each piece is handmade from fused glass and 1-of-1; natural variation in color, texture, and shape is part of the process, not a defect. Product images are for reference only. Pricing and availability may change.</p>
         <div className="footer-legal">
           <div className="footer-legal__links">
             <Link to="/privacy">Privacy Policy</Link>
@@ -1141,7 +1141,7 @@ export function Terms() {
       <h2>Website information</h2>
       <p>Sina&apos;s Creations provides this website for general information, browsing available pieces, requesting commissions and wholesale applications, and client communication. Website content is provided for informational purposes and is not a guarantee of availability, appearance, or delivery timing for any specific piece.</p>
       <h2>Products and adoption</h2>
-      <p>Every piece is handmade, one-of-one fused glass art. Natural variation in color, texture, and shape is part of the handmade process, not a defect. Availability, pricing, and package terms may change. Sina&apos;s Creations may decline or postpone an adoption when appropriate.</p>
+      <p>Every piece is handmade, 1-of-1 fused glass art. Natural variation in color, texture, and shape is part of the handmade process, not a defect. Availability, pricing, and package terms may change. Sina&apos;s Creations may decline or postpone an adoption when appropriate.</p>
       <h2>Scheduling and purchases</h2>
       <p>Appointment availability, pricing, and service details may change. Any purchase-specific terms presented at checkout also apply. Contact Sina&apos;s Creations before purchase if you have questions about a piece, commission, or scheduling.</p>
       <h2>Text messaging terms</h2>

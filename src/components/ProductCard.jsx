@@ -201,7 +201,7 @@ export function ProductCard({ product, eyebrowOverride, sharedSku }) {
     // Some share targets (notably Android's SMS/Messages) only surface the
     // `text` field, dropping `title` entirely -- so the piece's name has to
     // be part of the text itself, not rely on title showing up.
-    const shareText = `${shareLead}\n${product.line}\nOne-of-one, handcrafted by Thomasina Schnepf.`;
+    const shareText = `${shareLead}\n${product.line}\n1-of-1, handcrafted by Thomasina Schnepf.`;
 
     // Try to attach the actual product photo so the share carries the image,
     // not just a link -- most share targets (Messages, Instagram, Mail) will

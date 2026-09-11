@@ -236,7 +236,7 @@ function globalFooterHtml() {
       </div>
     </div>
     <div class="footer-bottom">
-      <p class="footer-disclaimer">Disclaimer: Each piece is handmade from fused glass and one-of-one; natural variation in color, texture, and shape is part of the process, not a defect. Product images are for reference only. Pricing and availability may change.</p>
+      <p class="footer-disclaimer">Disclaimer: Each piece is handmade from fused glass and 1-of-1; natural variation in color, texture, and shape is part of the process, not a defect. Product images are for reference only. Pricing and availability may change.</p>
       <div class="footer-legal">
         <div class="footer-legal__links"><a href="/privacy">Privacy Policy</a><a href="/terms">Terms &amp; Messaging Terms</a></div>
         <p class="footer-copyright">&copy; 2026 Sina's Creations &middot; sinascreations.com &middot; Queen Creek, AZ</p>
@@ -438,7 +438,7 @@ function productPageScript(product) {
         share.addEventListener('click', async function () {
           var url = window.location.href;
           var title = ${JSON.stringify(`${product.name} — Sina's Creations`)};
-          var text = ${JSON.stringify(`${product.name}\n${product.line || ''}\nOne-of-one, handcrafted by Thomasina Schnepf.`)};
+          var text = ${JSON.stringify(`${product.name}\n${product.line || ''}\n1-of-1, handcrafted by Thomasina Schnepf.`)};
           if (navigator.share) {
             try { await navigator.share({ title: title, text: text, url: url }); return; }
             catch (error) { if (error && error.name === 'AbortError') return; }
@@ -484,15 +484,15 @@ export default async function middleware(request) {
   // Two audiences, two titles. <title> is what Google shows and rank-weights,
   // so it leads with the name and the words people actually search ("fused
   // glass pendant") and stays inside the ~60 char truncation limit.
-  const title = `${product.name} — One-of-One Fused Glass ${label} | Sina's Creations`;
+  const title = `${product.name} — 1-of-1 Fused Glass ${label} | Sina's Creations`;
   // og:title is what Facebook, X and iMessage render on a pasted link. Nobody
   // searches it, so it can lead with the verb instead of the keywords -- which
   // tells a recipient the piece is available rather than just naming it.
   const soldOut = product.status === 'sold-out';
   const socialTitle = soldOut
     ? `${product.name} Found a Home — Sina's Creations`
-    : `Adopt ${product.name} — One-of-One Fused Glass ${label}`;
-  const description = truncate(product.description || `${product.name} is a one-of-one fused-glass ${label.toLowerCase()} handcrafted by Thomasina Schnepf.`, 160);
+    : `Adopt ${product.name} — 1-of-1 Fused Glass ${label}`;
+  const description = truncate(product.description || `${product.name} is a 1-of-1 fused-glass ${label.toLowerCase()} handcrafted by Thomasina Schnepf.`, 160);
   const imageUrl = product.image?.startsWith('http') ? product.image : `${SITE_ORIGIN}${product.image || ''}`;
   const availability = soldOut ? 'https://schema.org/SoldOut' : 'https://schema.org/InStock';
 
