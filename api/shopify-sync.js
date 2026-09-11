@@ -1098,7 +1098,7 @@ export default async function handler(req, res) {
                   title
                   status
                   variants(first: 1) {
-                    edges { node { id sku price availableForSale inventoryItem { id } } }
+                    edges { node { id sku price availableForSale inventoryQuantity inventoryItem { id } } }
                   }
                 }
               }
@@ -1119,6 +1119,7 @@ export default async function handler(req, res) {
             status: edge.node.status,
             sku: (variant.sku || '').trim().toUpperCase(),
             price: variant.price,
+            inventoryQuantity: variant.inventoryQuantity,
           });
         }
         if (!data.products.pageInfo.hasNextPage || edges.length === 0) break;
@@ -1138,6 +1139,7 @@ export default async function handler(req, res) {
       const unmatchedShopifyProducts = [];
       const skippedSold = [];
       const zeroOutCandidates = [];
+      const restockCandidates = [];
       const matchedSheetSkus = new Set();
 
       for (const product of shopifyProducts) {
@@ -1202,6 +1204,26 @@ export default async function handler(req, res) {
           continue;
         }
 
+        // The mirror image of the zero-out above. A piece can come back:
+        // a gift that didn't happen, a comp that fell through, a piece found
+        // again after being written off. The owner signals that by putting the
+        // Sheet's Variant Inventory Qty back to 1, and without this the sync
+        // would never act on it -- it could take a piece off sale but never put
+        // one back, so the two catalogs would sit permanently out of step.
+        //
+        // Safe against resurrecting something genuinely sold: Shopify archives
+        // a product when its inventory hits zero through a real order, and
+        // anything not ACTIVE already returned above as skippedSold. Only
+        // pieces this sync zeroed out are still ACTIVE at zero.
+        if (product.inventoryQuantity !== null && product.inventoryQuantity <= 0) {
+          restockCandidates.push({
+            title: sheetRow.title,
+            sku: sheetRow.sku,
+            inventoryItemId: product.inventoryItemId,
+            quantity: sheetRow.qty,
+          });
+        }
+
         if (product.title !== sheetRow.title) {
           titleMismatches.push({ title: sheetRow.title, shopifyTitle: product.title, productId: product.productId });
         }
@@ -1221,7 +1243,7 @@ export default async function handler(req, res) {
         .filter((row) => !matchedSheetSkus.has(row.sku))
         .map((row) => ({ sku: row.sku, title: row.title, qty: row.qty, readyToCreate: row.qty >= 1 }));
 
-      const applied = { skuRenames: [], titleUpdates: [], priceUpdates: [], zeroedOut: [], created: [], deleted: [] };
+      const applied = { skuRenames: [], titleUpdates: [], priceUpdates: [], zeroedOut: [], restocked: [], created: [], deleted: [] };
       const failed = [];
 
       if (apply) {
@@ -1286,6 +1308,15 @@ export default async function handler(req, res) {
           }
         }
 
+        for (const candidate of restockCandidates) {
+          try {
+            await setInventory(token, candidate.inventoryItemId, locationId, candidate.quantity);
+            applied.restocked.push({ title: candidate.title, sku: candidate.sku, quantity: candidate.quantity });
+          } catch (error) {
+            failed.push({ type: 'restock-inventory', title: candidate.title, error: error.message });
+          }
+        }
+
         if (createMissing) {
           const creationBatch = pendingCreation
             .filter((candidate) => candidate.readyToCreate)
@@ -1332,6 +1363,8 @@ export default async function handler(req, res) {
             titleMismatches: apply ? undefined : titleMismatches,
             zeroOutCount: zeroOutCandidates.length,
             zeroOutCandidates: apply ? undefined : zeroOutCandidates,
+            restockCount: restockCandidates.length,
+            restockCandidates: apply ? undefined : restockCandidates,
             skippedAmbiguous,
             skippedSold,
             unmatchedShopifyProducts,
