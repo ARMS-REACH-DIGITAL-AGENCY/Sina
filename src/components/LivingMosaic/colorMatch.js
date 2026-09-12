@@ -78,16 +78,43 @@ function distanceSq(a, b) {
  * @param {number} rows
  * @returns {Promise<Array<{col:number, row:number, productIndex:number, color:[number,number,number]}>>}
  */
+
+async function mapWithConcurrency(items, limit, mapper) {
+  const results = new Array(items.length);
+  let nextIndex = 0;
+
+  async function worker() {
+    while (nextIndex < items.length) {
+      const index = nextIndex;
+      nextIndex += 1;
+      results[index] = await mapper(items[index], index);
+    }
+  }
+
+  await Promise.all(
+    Array.from({ length: Math.min(limit, items.length) }, () => worker()),
+  );
+
+  return results;
+}
+
 export async function buildMosaicGrid({ portraitSrc, products, cols, rows }) {
   if (!products.length) return [];
 
-  const [portraitImg, ...productImgs] = await Promise.all([
+  const [portraitImg, productImgs] = await Promise.all([
     loadImage(portraitSrc),
-    // A product's dedicated mosaicImage (uploaded in Shopify with alt text
-    // "mosaic" -- see fetchShopifyImagesBySku in api/catalog.js) is a
-    // tighter, purpose-cropped shot meant only for this grid, so it's tried
-    // before the regular listing photo and its fallbacks.
-    ...products.map((p) => loadImageWithFallbacks([p.mosaicImage, p.image, ...(p.imageFallbacks || [])])),
+    // Decode catalog images in a small queue. Launching every image at once
+    // can exhaust mobile Safari before the hero is painted.
+    mapWithConcurrency(
+      products,
+      3,
+      (product) =>
+        loadImageWithFallbacks([
+          product.mosaicImage,
+          product.image,
+          ...(product.imageFallbacks || []),
+        ]),
+    ),
   ]);
 
   if (!portraitImg) throw new Error(`Failed to load portrait image: ${portraitSrc}`);
