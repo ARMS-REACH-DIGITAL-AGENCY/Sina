@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import useMosaicProducts from '../../hooks/useMosaicProducts.js';
 import { buildMosaicGrid } from './colorMatch.js';
-import MosaicTile from './MosaicTile.jsx';
+import MosaicCanvas from './MosaicCanvas.jsx';
 import ProductModal from './ProductModal.jsx';
 import './living-mosaic.css';
 import './mosaic-brand-alignment.css';
@@ -18,7 +18,7 @@ const ZOOM_RESET_THRESHOLD = 1.02;
 // visitor to think to zoom out on their own (see is-auto-revealing below).
 const INITIAL_ZOOM_STATE = { scale: 9, x: 0, y: 0 };
 const AUTO_REVEAL_DELAY_MS = 5000;
-const AUTO_REVEAL_DURATION_MS = 4800;
+const AUTO_REVEAL_DURATION_MS = 7000;
 const INITIAL_PREVIEW_COLUMNS = 5;
 const INITIAL_PREVIEW_ROWS = 6;
 const INITIAL_PREVIEW_TILE_COUNT = INITIAL_PREVIEW_COLUMNS * INITIAL_PREVIEW_ROWS;
@@ -88,6 +88,7 @@ function anchorInitialPreviewToMosaic(grid, previewProducts, products, cols, row
       productIndex,
       resolvedSrc: previewProduct.image || cell.resolvedSrc,
       isCustomCrop: false,
+      isInitialPreview: true,
     };
   });
 }
@@ -99,6 +100,7 @@ export default function LivingMosaic() {
   const [gridLoading, setGridLoading] = useState(true);
   const [gridError, setGridError] = useState(false);
   const [portraitLoaded, setPortraitLoaded] = useState(false);
+  const [canvasReady, setCanvasReady] = useState(false);
   const [modalProduct, setModalProduct] = useState(null);
   const [active, setActive] = useState(false);
   const [zoomState, setZoomState] = useState(INITIAL_ZOOM_STATE);
@@ -182,6 +184,7 @@ export default function LivingMosaic() {
     let cancelled = false;
     setGridLoading(true);
     setGridError(false);
+    setCanvasReady(false);
     buildMosaicGrid({ portraitSrc: PORTRAIT_SRC, products, cols: gridCols, rows: gridRows })
       .then((result) => {
         if (!cancelled) {
@@ -451,7 +454,13 @@ export default function LivingMosaic() {
     return (cell) => (cell ? products[cell.productIndex] : null);
   }, [products]);
 
-  const mosaicReady = portraitLoaded && !productsLoading && !gridLoading && !gridError && grid.length > 0;
+  const mosaicReady =
+    portraitLoaded &&
+    !productsLoading &&
+    !gridLoading &&
+    !gridError &&
+    grid.length > 0 &&
+    canvasReady;
   
   useEffect(() => {
     // Start the timer right away, but leave the 5 x 6 product preview on
@@ -607,20 +616,15 @@ export default function LivingMosaic() {
           <div className="living-mosaic__grid-reveal" aria-hidden={!mosaicReady}>
             {!gridError && grid.length > 0 && (
               <div className="living-mosaic__grid" style={{ '--mosaic-cols': gridCols, '--mosaic-rows': gridRows }}>
-                {grid.map((cell) => {
-                  const key = `${cell.col}-${cell.row}`;
-                  return (
-                    <MosaicTile
-                      key={key}
-                      cell={cell}
-                      product={cellProduct(cell)}
-                      active={active}
-                      onTap={handleTap}
-                      showNames={false}
-                    />
-                  );
-                })}
-                {initialPreviewProducts.length > 0 ? (
+                <MosaicCanvas
+              cells={grid}
+              products={products}
+              cols={gridCols}
+              rows={gridRows}
+              onReady={() => setCanvasReady(true)}
+              onTap={handleTap}
+            />
+            {initialPreviewProducts.length > 0 ? (
                   <div
                     className={`living-mosaic__initial-preview living-mosaic__initial-preview--anchored${autoRevealing ? ' is-pulling-back' : ''}${(portraitRevealed || gridError) ? ' is-hidden' : ''}`}
                     style={initialPreviewPlacement}
