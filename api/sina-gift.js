@@ -5,6 +5,9 @@
 const { isSinaGiftKeyValid } = require('../lib/sina-config.js');
 const { shopifyGraphql, shopifyDomain } = require('../lib/shopify.js');
 
+const HIGHLEVEL_UPSERT_URL = 'https://services.leadconnectorhq.com/contacts/upsert';
+const HIGHLEVEL_VERSION = '2021-07-28';
+
 function sendJson(res, statusCode, body) {
   res.statusCode = statusCode;
   res.setHeader('Content-Type', 'application/json');
@@ -38,6 +41,54 @@ function numericId(gid) {
   return String(gid || '').split('/').pop();
 }
 
+function splitName(name) {
+  const parts = cleanText(name).split(' ').filter(Boolean);
+  return { firstName: parts.shift() || '', lastName: parts.join(' ') };
+}
+
+function highLevelToken() {
+  const value = process.env.HIGHLEVEL_PRIVATE_INTEGRATION_TOKEN
+    || process.env.HIGHLEVEL_SUBACCOUNT_TOKEN;
+  const locationId = process.env.HIGHLEVEL_LOCATION_ID
+    || process.env.HIGHLEVEL_DEFAULT_LOCATION_ID;
+  return value && locationId ? { value, locationId } : null;
+}
+
+async function createArmsGiftContact({ recipientName, recipientEmail, title, sku }) {
+  const token = highLevelToken();
+  if (!token) throw new Error('ARMS contact credentials are not configured. The gift was not completed.');
+  const { firstName, lastName } = splitName(recipientName);
+  const response = await fetch(HIGHLEVEL_UPSERT_URL, {
+    method: 'POST',
+    headers: {
+      Accept: 'application/json',
+      Authorization: `Bearer ${token.value}`,
+      'Content-Type': 'application/json',
+      Version: HIGHLEVEL_VERSION,
+    },
+    body: JSON.stringify({
+      locationId: token.locationId,
+      firstName,
+      lastName: lastName || undefined,
+      name: recipientName,
+      email: recipientEmail,
+      source: "Sina's Creations — Sina Gift",
+      // Kept separate from the fulfillment tag: this creates the recipient
+      // now, while the normal adoption follow-up remains tied to fulfillment.
+      tags: ['Sina Gift'],
+      // HighLevel's upsert endpoint does not support a first-class note in
+      // the same request, so the essential piece details travel in the source
+      // and tags until the fulfillment webhook adds the certificate links.
+    }),
+  });
+  const result = await response.json().catch(() => ({}));
+  if (!response.ok) {
+    const detail = Array.isArray(result.message) ? result.message.join(' ') : result.message;
+    throw new Error(detail || `ARMS rejected the new recipient contact (${response.status}).`);
+  }
+  return (result.contact && result.contact.id) || result.id || null;
+}
+
 async function findAvailableVariant(sku) {
   const data = await shopifyGraphql(
     `query($query: String!) {
@@ -68,6 +119,7 @@ async function createGiftDraft({ variant, recipientName, notificationEmail, reci
     { key: 'Gift source', value: 'Sina Gift' },
   ];
   if (recipientEmail) recipientAttributes.push({ key: 'Gift recipient email', value: recipientEmail });
+  if (notificationEmail) recipientAttributes.push({ key: 'Internal notification email', value: notificationEmail });
 
   const data = await shopifyGraphql(
     `mutation($input: DraftOrderInput!) {
@@ -81,7 +133,10 @@ async function createGiftDraft({ variant, recipientName, notificationEmail, reci
     }`,
     {
       input: {
-        email: notificationEmail,
+        // Shopify needs an order email for its own receipt/record. When Sina
+        // wants a staff copy, it stays with staff; otherwise the recipient is
+        // used. ARMS always uses the recipient email below.
+        email: notificationEmail || recipientEmail,
         taxExempt: true,
         tags: ['Sina Gift', 'Adopted a Creation'],
         note: `Sina Gift — certificate recipient: ${recipientName}`,
@@ -151,13 +206,13 @@ export default async function handler(req, res) {
   const body = req.body && typeof req.body === 'object' ? req.body : {};
   const sku = cleanSku(body.sku);
   const recipientName = cleanText(body.recipientName);
-  const notificationEmail = cleanEmail(body.notificationEmail);
-  const recipientEmail = body.recipientEmail ? cleanEmail(body.recipientEmail) : '';
+  const notificationEmail = body.notificationEmail ? cleanEmail(body.notificationEmail) : '';
+  const recipientEmail = cleanEmail(body.recipientEmail);
 
   if (!sku) return sendJson(res, 400, { error: 'Choose a valid SKU.' });
   if (!recipientName) return sendJson(res, 400, { error: 'Enter the certificate recipient name.' });
-  if (!notificationEmail) return sendJson(res, 400, { error: 'Enter a valid internal notification email.' });
-  if (body.recipientEmail && !recipientEmail) return sendJson(res, 400, { error: 'Enter a valid recipient email or leave it blank.' });
+  if (body.notificationEmail && !notificationEmail) return sendJson(res, 400, { error: 'Enter a valid internal notification email or leave it blank.' });
+  if (!recipientEmail) return sendJson(res, 400, { error: 'Enter the recipient email so ARMS can create their contact.' });
 
   try {
     const variant = await findAvailableVariant(sku);
@@ -165,7 +220,15 @@ export default async function handler(req, res) {
       return sendJson(res, 409, { error: 'That piece is no longer available to gift.' });
     }
 
+    // The order remains an unpaid draft at this point. If ARMS rejects the
+    // contact, no gift is completed and no one-of-one inventory is consumed.
     const draft = await createGiftDraft({ variant, recipientName, notificationEmail, recipientEmail });
+    const armsContactId = await createArmsGiftContact({
+      recipientName,
+      recipientEmail,
+      title: variant.product && variant.product.title ? variant.product.title : sku,
+      sku,
+    });
     const order = await completeGiftDraft(draft.id);
     const domain = shopifyDomain();
     const adminUrl = domain && order.id ? `https://${domain}/admin/orders/${numericId(order.id)}` : null;
@@ -175,6 +238,7 @@ export default async function handler(req, res) {
       orderName: order.name,
       pieceTitle: variant.product && variant.product.title ? variant.product.title : sku,
       recipientName,
+      armsContactId,
       adminUrl,
     });
   } catch (error) {
