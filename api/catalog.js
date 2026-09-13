@@ -139,7 +139,7 @@ function buildExtensionCandidates(rawFilename) {
 // is designed to fail soft: any Shopify hiccup (missing creds, network
 // error, a SKU that was never synced) falls through to the repo-hosted
 // image logic below instead of breaking the storefront.
-// Returns a Map<SKU, {urls, mosaicUrl, status, availableForSale}> -- Shopify's
+// Returns a Map<SKU, {urls, mosaicUrl, ownerImage, status, availableForSale}> -- Shopify's
 // own media order is the gallery order, first image is the featured one, so
 // no extra ordering logic is needed once the data is in hand. mosaicUrl is
 // whichever image (if any) on that product has its alt text set to
@@ -204,11 +204,17 @@ async function fetchShopifyImagesBySku() {
         // a daily digest; see api/upload-digest.js.
         const urls = mediaImages.map((img) => img.url).filter(Boolean);
         const mosaicUrl = mediaImages.find((img) => normalizeText(img.altText).toLowerCase() === 'mosaic')?.url || null;
+        // Adopter photos are deliberately labeled "owner: Name" in Shopify.
+        // That makes the intent explicit and avoids guessing based on gallery
+        // position: a new product shot may be added at any time, but an owner
+        // photo should become the lead image only after the piece finds a home.
+        const ownerImage = mediaImages.find((img) => /^owner\s*:/i.test(normalizeText(img.altText)))?.url || null;
 
         if (urls.length) {
           images.set(sku, {
             urls,
             mosaicUrl,
+            ownerImage,
             status: edge.node.status,
             availableForSale: Boolean(variant?.availableForSale),
           });
@@ -335,13 +341,17 @@ function normalizeProduct(row, shopifyImages) {
   // Shopify images yet (never synced, or Shopify was unreachable).
   const shopifyEntry = shopifyImages.get(sku);
   const shopifyUrls = shopifyEntry?.urls;
+  const status = normalizeStatus(row, shopifyEntry);
   let image;
   let imageFallbacks;
   let gallery;
 
   if (shopifyUrls && shopifyUrls.length) {
-    [image, ...imageFallbacks] = shopifyUrls;
-    gallery = shopifyUrls.map((url) => [url]);
+    const orderedUrls = status === 'sold-out' && shopifyEntry.ownerImage
+      ? [shopifyEntry.ownerImage, ...shopifyUrls.filter((url) => url !== shopifyEntry.ownerImage)]
+      : shopifyUrls;
+    [image, ...imageFallbacks] = orderedUrls;
+    gallery = orderedUrls.map((url) => [url]);
   } else {
     const imageCandidates = buildImageCandidates(row);
     [image, ...imageFallbacks] = imageCandidates;
@@ -374,7 +384,7 @@ function normalizeProduct(row, shopifyImages) {
     // "Hot Pink") that's actually searchable by a person typing a color.
     colorNames: normalizeText(row['Human Colors']),
     shopifyUrl: normalizeText(row['Shopify Product URL']),
-    status: normalizeStatus(row, shopifyEntry),
+    status,
     // A "Featured" column in the sheet lets Featured Pieces on the home page
     // be managed by marking a cell, not by editing FEATURED_SKUS in code
     // every time a featured piece sells and drops out of the published rows.
