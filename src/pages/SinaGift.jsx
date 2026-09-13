@@ -25,7 +25,7 @@ export default function SinaGift() {
 
   const giftablePieces = useMemo(() => products
     .filter(available)
-    .sort((left, right) => String(left.title || '').localeCompare(String(right.title || ''))), [products]);
+    .sort((left, right) => String(left.name || left.sku || '').localeCompare(String(right.name || right.sku || ''))), [products]);
 
   const selectedPiece = giftablePieces.find((piece) => piece.sku === form.sku);
 
@@ -90,29 +90,29 @@ export default function SinaGift() {
               <select value={form.sku} onChange={(event) => update('sku', event.target.value)} disabled={loading} required>
                 <option value="">{loading ? 'Loading available pieces…' : 'Choose an available piece'}</option>
                 {giftablePieces.map((piece) => (
-                  <option key={piece.sku} value={piece.sku}>{piece.title} — {piece.sku}</option>
+                  <option key={piece.sku} value={piece.sku}>{piece.name || piece.sku}</option>
                 ))}
               </select>
             </label>
-            {selectedPiece && <p className="sina-gift-form__selection">Selected: <strong>{selectedPiece.title}</strong> ({selectedPiece.sku})</p>}
+            {selectedPiece && <p className="sina-gift-form__selection">Selected: <strong>{selectedPiece.name || selectedPiece.sku}</strong> ({selectedPiece.sku})</p>}
             <label>
               Certificate recipient name
               <input value={form.recipientName} onChange={(event) => update('recipientName', event.target.value)} placeholder="Jayme Arnold" required />
             </label>
             <label>
-              Internal notification email
-              <input type="email" value={form.notificationEmail} onChange={(event) => update('notificationEmail', event.target.value)} placeholder="sina@example.com" required />
+              Internal notification email <em>(optional)</em>
+              <input type="email" value={form.notificationEmail} onChange={(event) => update('notificationEmail', event.target.value)} placeholder="Use only when staff should receive the Shopify order email" />
             </label>
             <label className="full">
-              Recipient email <em>(optional)</em>
-              <input type="email" value={form.recipientEmail} onChange={(event) => update('recipientEmail', event.target.value)} placeholder="Only if the recipient should receive future adoption follow-up" />
+              Recipient email
+              <input type="email" value={form.recipientEmail} onChange={(event) => update('recipientEmail', event.target.value)} placeholder="Creates or updates their ARMS contact" required />
             </label>
-            <p className="sina-gift-form__note full">The internal notification email is for the order record and adoption follow-up. It does not control the certificate name.</p>
+            <p className="sina-gift-form__note full">The recipient email creates or updates their ARMS contact. Internal notification email is only for Sina&apos;s copy of the Shopify order; it never controls the certificate name or recipient contact.</p>
             {error && <p className="sina-gift-form__message sina-gift-form__message--error full" role="alert">{error}</p>}
             {result && (
               <div className="sina-gift-form__message sina-gift-form__message--success full" role="status">
                 <strong>{result.orderName} is now a complimentary Sina Gift.</strong>
-                <span>{result.pieceTitle} is reserved for {result.recipientName}. It is marked paid and ready to fulfill.</span>
+                <span>{result.pieceTitle} is reserved for {result.recipientName}. Their ARMS contact is created, and the order is marked paid and ready to fulfill.</span>
                 {result.adminUrl && <a href={result.adminUrl} target="_blank" rel="noreferrer">Open order in Shopify</a>}
               </div>
             )}
