@@ -93,7 +93,7 @@ function ProductCardCta({ product, isOpen, onOpen }) {
     return (
       <button
         type="button"
-        className="button primary product-card__adopt-cta product-card__adopt-cta--meet"
+        className={`button primary product-card__adopt-cta${product.status === 'sold-out' ? ' product-card__adopt-cta--sold' : ' product-card__adopt-cta--meet'}`}
         // The <article> toggles on click as well, so without stopPropagation
         // the card would open here and immediately close again on the bubble.
         onClick={(event) => {
@@ -101,7 +101,7 @@ function ProductCardCta({ product, isOpen, onOpen }) {
           onOpen();
         }}
       >
-        Meet {product.name} &middot; {priceLabel}
+        {product.status === 'sold-out' ? `${product.name} Found a Home!` : `Meet ${product.name} · ${priceLabel}`}
       </button>
     );
   }
@@ -126,8 +126,7 @@ function ProductCardCta({ product, isOpen, onOpen }) {
 }
 
 export function ProductCard({ product, eyebrowOverride, sharedSku }) {
-  const isAdopted = product.status === 'sold-out';
-  const [showBack, setShowBack] = React.useState(isAdopted);
+  const [showBack, setShowBack] = React.useState(false);
   // Sheet data entry mistakes happen -- a row's "Final Image Filename" can
   // name a file that was never actually uploaded under that name (or was
   // typed with a different case/extension than what's really on disk,
@@ -151,8 +150,7 @@ export function ProductCard({ product, eyebrowOverride, sharedSku }) {
   React.useEffect(() => {
     setActiveSlot(0);
     setFailedSrcs(new Set());
-    setShowBack(product.status === 'sold-out');
-  }, [product.sku, product.status]);
+  }, [product.sku]);
 
   const resolveSlotSrc = (candidates) => candidates.find((src) => !failedSrcs.has(src)) || candidates[candidates.length - 1];
   const displayImage = resolveSlotSrc(gallerySlots[activeSlot] || []);
@@ -161,9 +159,7 @@ export function ProductCard({ product, eyebrowOverride, sharedSku }) {
     setFailedSrcs((prev) => (prev.has(src) ? prev : new Set(prev).add(src)));
   };
 
-  const toggleCard = () => {
-    if (!isAdopted) setShowBack((current) => !current);
-  };
+  const toggleCard = () => setShowBack((current) => !current);
   const handleKeyDown = (event) => {
     if (event.key === 'Enter' || event.key === ' ') {
       event.preventDefault();
@@ -251,11 +247,11 @@ export function ProductCard({ product, eyebrowOverride, sharedSku }) {
   return (
     <article
       ref={articleRef}
-      className={`product-card${showBack ? ' is-back' : ''}${isAdopted ? ' is-sold' : ''}`}
-      role={isAdopted ? undefined : 'button'}
-      tabIndex={isAdopted ? undefined : 0}
-      aria-pressed={isAdopted ? undefined : showBack}
-      aria-label={isAdopted ? `${product.name} found a home.` : `${product.name} product card. ${showBack ? 'Showing full details. Activate to close.' : 'Activate to see full details.'}`}
+      className={`product-card${showBack ? ' is-back' : ''}${product.status === 'sold-out' ? ' is-sold' : ''}`}
+      role="button"
+      tabIndex={0}
+      aria-pressed={showBack}
+      aria-label={`${product.name} product card. ${showBack ? 'Showing full details. Activate to close.' : 'Activate to see full details.'}`}
       onClick={toggleCard}
       onKeyDown={handleKeyDown}
     >
@@ -324,7 +320,7 @@ export function ProductCard({ product, eyebrowOverride, sharedSku }) {
               </div>
             </div>
             <ProductCardCta product={product} isOpen onOpen={toggleCard} />
-            {!isAdopted && <p className="product-card__close-hint">Close</p>}
+            <p className="product-card__close-hint">Close</p>
           </>
         )}
       </div>
