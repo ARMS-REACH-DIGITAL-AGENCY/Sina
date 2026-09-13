@@ -600,7 +600,7 @@ export default function LivingMosaic() {
           className="living-mosaic__portrait-base"
           src={PORTRAIT_SRC}
           alt="Thomasina Schnepf holding one of her fused-glass creations"
-          loading="lazy"
+          loading="eager"
           fetchPriority="high"
           decoding="async"
           onLoad={() => setPortraitLoaded(true)}
