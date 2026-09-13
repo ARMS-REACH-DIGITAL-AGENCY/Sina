@@ -134,11 +134,16 @@ function contactDetails(order) {
   const name = certificateRecipientName(order);
   const parts = name.split(/\s+/).filter(Boolean);
   const recipientEmail = attributeValue(order, 'Gift recipient email');
+  const isSinaGift = attributeValue(order, 'Gift source').toLowerCase() === 'sina gift';
   return {
     firstName: parts.shift() || '',
     lastName: parts.join(' '),
     fullName: name,
-    email: recipientEmail || (order.customer && order.customer.email) || order.email || '',
+    // A staff-only Shopify receipt address must never become the recipient's
+    // ARMS identity. Name-only Sina Gifts already receive their certificate
+    // links in the provisional contact note at gift creation, so fulfillment
+    // deliberately skips ARMS when the actual recipient email is still unknown.
+    email: isSinaGift ? recipientEmail : recipientEmail || (order.customer && order.customer.email) || order.email || '',
   };
 }
 
