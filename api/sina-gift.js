@@ -4,8 +4,10 @@
 
 const { isSinaGiftKeyValid } = require('../lib/sina-config.js');
 const { shopifyGraphql, shopifyDomain } = require('../lib/shopify.js');
+const { signAdoption } = require('../lib/adoption-token.js');
 
 const HIGHLEVEL_UPSERT_URL = 'https://services.leadconnectorhq.com/contacts/upsert';
+const HIGHLEVEL_NOTES_URL = 'https://services.leadconnectorhq.com/contacts';
 const HIGHLEVEL_VERSION = '2021-07-28';
 
 function sendJson(res, statusCode, body) {
@@ -31,6 +33,15 @@ function cleanEmail(value) {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) ? email : '';
 }
 
+function cleanPhone(value) {
+  const phone = cleanText(value, 40);
+  return /^[0-9+().\-\s]{7,40}$/.test(phone) ? phone : '';
+}
+
+function siteOrigin() {
+  return (process.env.SITE_ORIGIN || 'https://www.sinascreations.com').replace(/\/+$/, '');
+}
+
 function mutationErrors(result, mutationName) {
   const errors = result && result[mutationName] && result[mutationName].userErrors;
   if (!errors || !errors.length) return null;
@@ -54,10 +65,34 @@ function highLevelToken() {
   return value && locationId ? { value, locationId } : null;
 }
 
-async function createArmsGiftContact({ recipientName, recipientEmail, title, sku }) {
+function buildGiftLinks({ sku, recipientName }) {
+  const token = signAdoption({ sku, adopter: recipientName });
+  const origin = siteOrigin();
+  return {
+    certificateUrl: `${origin}/api/certificate?t=${encodeURIComponent(token)}`,
+    uploadUrl: `${origin}/u/${encodeURIComponent(token)}`,
+  };
+}
+
+async function addArmsNote(contactId, body, token) {
+  const response = await fetch(`${HIGHLEVEL_NOTES_URL}/${contactId}/notes`, {
+    method: 'POST',
+    headers: {
+      Accept: 'application/json',
+      Authorization: `Bearer ${token.value}`,
+      'Content-Type': 'application/json',
+      Version: HIGHLEVEL_VERSION,
+    },
+    body: JSON.stringify({ body }),
+  });
+  return response.ok;
+}
+
+async function createArmsGiftContact({ recipientName, recipientEmail, recipientPhone, title, sku, links }) {
   const token = highLevelToken();
   if (!token) throw new Error('ARMS contact credentials are not configured. The gift was not completed.');
   const { firstName, lastName } = splitName(recipientName);
+  const contactPending = !recipientEmail && !recipientPhone;
   const response = await fetch(HIGHLEVEL_UPSERT_URL, {
     method: 'POST',
     headers: {
@@ -71,14 +106,12 @@ async function createArmsGiftContact({ recipientName, recipientEmail, title, sku
       firstName,
       lastName: lastName || undefined,
       name: recipientName,
-      email: recipientEmail,
+      email: recipientEmail || undefined,
+      phone: recipientPhone || undefined,
       source: "Sina's Creations — Sina Gift",
       // Kept separate from the fulfillment tag: this creates the recipient
       // now, while the normal adoption follow-up remains tied to fulfillment.
-      tags: ['Sina Gift'],
-      // HighLevel's upsert endpoint does not support a first-class note in
-      // the same request, so the essential piece details travel in the source
-      // and tags until the fulfillment webhook adds the certificate links.
+      tags: contactPending ? ['Sina Gift', 'Contact Info Needed'] : ['Sina Gift'],
     }),
   });
   const result = await response.json().catch(() => ({}));
@@ -86,7 +119,18 @@ async function createArmsGiftContact({ recipientName, recipientEmail, title, sku
     const detail = Array.isArray(result.message) ? result.message.join(' ') : result.message;
     throw new Error(detail || `ARMS rejected the new recipient contact (${response.status}).`);
   }
-  return (result.contact && result.contact.id) || result.id || null;
+  const contactId = (result.contact && result.contact.id) || result.id || null;
+  if (!contactId) throw new Error('ARMS created the contact but did not return its ID. The gift was not completed.');
+
+  const noteStored = await addArmsNote(contactId, [
+    `Sina Gift record${contactPending ? ' — contact information needed' : ''}`,
+    '',
+    `${title} (${sku})`,
+    `Certificate: ${links.certificateUrl}`,
+    `Photo upload: ${links.uploadUrl}`,
+  ].join('\n'), token);
+  if (!noteStored) throw new Error('ARMS created the contact but could not save the certificate links. The gift was not completed.');
+  return contactId;
 }
 
 async function findAvailableVariant(sku) {
@@ -113,12 +157,13 @@ async function findAvailableVariant(sku) {
   return variants.find((variant) => String(variant.sku || '').trim().toUpperCase() === sku) || null;
 }
 
-async function createGiftDraft({ variant, recipientName, notificationEmail, recipientEmail }) {
+async function createGiftDraft({ variant, recipientName, notificationEmail, recipientEmail, recipientPhone }) {
   const recipientAttributes = [
     { key: 'Certificate recipient name', value: recipientName },
     { key: 'Gift source', value: 'Sina Gift' },
   ];
   if (recipientEmail) recipientAttributes.push({ key: 'Gift recipient email', value: recipientEmail });
+  if (recipientPhone) recipientAttributes.push({ key: 'Gift recipient phone', value: recipientPhone });
   if (notificationEmail) recipientAttributes.push({ key: 'Internal notification email', value: notificationEmail });
 
   const data = await shopifyGraphql(
@@ -136,7 +181,7 @@ async function createGiftDraft({ variant, recipientName, notificationEmail, reci
         // Shopify needs an order email for its own receipt/record. When Sina
         // wants a staff copy, it stays with staff; otherwise the recipient is
         // used. ARMS always uses the recipient email below.
-        email: notificationEmail || recipientEmail,
+        email: notificationEmail || recipientEmail || undefined,
         taxExempt: true,
         tags: ['Sina Gift', 'Adopted a Creation'],
         note: `Sina Gift — certificate recipient: ${recipientName}`,
@@ -207,12 +252,14 @@ export default async function handler(req, res) {
   const sku = cleanSku(body.sku);
   const recipientName = cleanText(body.recipientName);
   const notificationEmail = body.notificationEmail ? cleanEmail(body.notificationEmail) : '';
-  const recipientEmail = cleanEmail(body.recipientEmail);
+  const recipientEmail = body.recipientEmail ? cleanEmail(body.recipientEmail) : '';
+  const recipientPhone = body.recipientPhone ? cleanPhone(body.recipientPhone) : '';
 
   if (!sku) return sendJson(res, 400, { error: 'Choose a valid SKU.' });
   if (!recipientName) return sendJson(res, 400, { error: 'Enter the certificate recipient name.' });
   if (body.notificationEmail && !notificationEmail) return sendJson(res, 400, { error: 'Enter a valid internal notification email or leave it blank.' });
-  if (!recipientEmail) return sendJson(res, 400, { error: 'Enter the recipient email so ARMS can create their contact.' });
+  if (body.recipientEmail && !recipientEmail) return sendJson(res, 400, { error: 'Enter a valid recipient email or leave it blank.' });
+  if (body.recipientPhone && !recipientPhone) return sendJson(res, 400, { error: 'Enter a valid recipient phone number or leave it blank.' });
 
   try {
     const variant = await findAvailableVariant(sku);
@@ -220,14 +267,21 @@ export default async function handler(req, res) {
       return sendJson(res, 409, { error: 'That piece is no longer available to gift.' });
     }
 
-    // The order remains an unpaid draft at this point. If ARMS rejects the
-    // contact, no gift is completed and no one-of-one inventory is consumed.
-    const draft = await createGiftDraft({ variant, recipientName, notificationEmail, recipientEmail });
+    const pieceTitle = variant.product && variant.product.title ? variant.product.title : sku;
+    const links = buildGiftLinks({ sku, recipientName });
+    // The draft is deliberately not completed yet. If ARMS rejects the
+    // contact/note, no gift is completed and no one-of-one inventory is used.
+    const draft = await createGiftDraft({ recipientName, notificationEmail, recipientEmail, recipientPhone, variant });
+    // A name-only recipient is intentionally allowed. ARMS records it as a
+    // provisional individual contact instead of attaching every gift to a
+    // shared account or inventing an email address.
     const armsContactId = await createArmsGiftContact({
       recipientName,
       recipientEmail,
-      title: variant.product && variant.product.title ? variant.product.title : sku,
+      recipientPhone,
+      title: pieceTitle,
       sku,
+      links,
     });
     const order = await completeGiftDraft(draft.id);
     const domain = shopifyDomain();
@@ -236,10 +290,12 @@ export default async function handler(req, res) {
     return sendJson(res, 201, {
       ok: true,
       orderName: order.name,
-      pieceTitle: variant.product && variant.product.title ? variant.product.title : sku,
+      pieceTitle,
       recipientName,
       armsContactId,
       adminUrl,
+      certificateUrl: links.certificateUrl,
+      uploadUrl: links.uploadUrl,
     });
   } catch (error) {
     return sendJson(res, 500, { error: error.message || 'Unable to create the Sina Gift.' });
