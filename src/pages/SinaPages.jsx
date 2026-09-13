@@ -98,7 +98,7 @@ function readShopSearchTerm(searchString = '') {
   return new URLSearchParams(searchString).get('q')?.trim() || '';
 }
 
-function Layout({ children }) {
+export function Layout({ children }) {
   return (
     <SiteSearchProvider>
       <LayoutFrame>{children}</LayoutFrame>
