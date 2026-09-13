@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { Layout } from './SinaPages.jsx';
 import useCatalogProducts from '../hooks/useCatalogProducts.js';
 import usePageMeta from '../hooks/usePageMeta.js';
@@ -119,12 +119,12 @@ export default function SinaGift() {
               Recipient phone <em>(optional)</em>
               <input type="tel" value={form.recipientPhone} onChange={(event) => update('recipientPhone', event.target.value)} placeholder="For contact matching" />
             </label>
-            <p className="sina-gift-form__note full">ARMS creates a contact from the name. Email or phone helps match it later.</p>
+            <p className="sina-gift-form__note full">ARMS adds the recipient when an email or phone is supplied. Without one, use the certificate link and add their contact details later.</p>
             {error && <p className="sina-gift-form__message sina-gift-form__message--error full" role="alert">{error}</p>}
             {result && (
               <div className="sina-gift-form__message sina-gift-form__message--success full" role="status">
                 <strong>{result.orderName} is now a complimentary Sina Gift.</strong>
-                <span>{result.pieceTitle} is reserved for {result.recipientName}. Their ARMS contact is created, and the order is marked paid and ready to fulfill.</span>
+                <span>{result.pieceTitle} is reserved for {result.recipientName}. {result.armsContactPending ? 'No ARMS contact was added because no recipient email or phone was provided.' : 'Their ARMS contact is created.'} The order is marked paid and ready to fulfill.</span>
                 {result.certificateUrl && <a href={result.certificateUrl} target="_blank" rel="noreferrer">Open certificate</a>}
                 {result.adminUrl && <a href={result.adminUrl} target="_blank" rel="noreferrer">Open order in Shopify</a>}
               </div>
