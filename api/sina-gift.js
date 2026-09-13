@@ -2,7 +2,7 @@
 // Shopify credential; it supplies the existing Sina admin key only to this
 // endpoint, which validates it before it can create an order.
 
-const { isAdminKeyValid } = require('../lib/sina-config.js');
+const { isSinaGiftKeyValid } = require('../lib/sina-config.js');
 const { shopifyGraphql, shopifyDomain } = require('../lib/shopify.js');
 
 function sendJson(res, statusCode, body) {
@@ -146,7 +146,7 @@ export default async function handler(req, res) {
   }
 
   const suppliedKey = req.headers['x-admin-key'];
-  if (!isAdminKeyValid(suppliedKey)) return sendJson(res, 401, { error: 'The access key is not valid.' });
+  if (!isSinaGiftKeyValid(suppliedKey)) return sendJson(res, 401, { error: 'The Sina Gift passcode is not valid.' });
 
   const body = req.body && typeof req.body === 'object' ? req.body : {};
   const sku = cleanSku(body.sku);
