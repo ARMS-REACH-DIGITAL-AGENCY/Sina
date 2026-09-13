@@ -124,6 +124,24 @@ function certificateRecipientName(order) {
   return String(recipient && recipient.value || '').trim() || splitName(order).fullName || 'A new owner';
 }
 
+function attributeValue(order, key) {
+  const attributes = Array.isArray(order.customAttributes) ? order.customAttributes : [];
+  const attribute = attributes.find((item) => String(item.key || '').trim().toLowerCase() === key.toLowerCase());
+  return String(attribute && attribute.value || '').trim();
+}
+
+function contactDetails(order) {
+  const name = certificateRecipientName(order);
+  const parts = name.split(/\s+/).filter(Boolean);
+  const recipientEmail = attributeValue(order, 'Gift recipient email');
+  return {
+    firstName: parts.shift() || '',
+    lastName: parts.join(' '),
+    fullName: name,
+    email: recipientEmail || (order.customer && order.customer.email) || order.email || '',
+  };
+}
+
 // Mirrors api/highlevel/contact.js: a custom field is only sent when its id has
 // been configured. HighLevel custom fields do not exist in Sina's sub-account
 // yet, so today every one of these is skipped and the note below carries the
@@ -163,8 +181,8 @@ function buildNote(order, adoptions) {
   return lines.join('\n').trim();
 }
 
-async function upsertContact({ order, adoptions, email, token }) {
-  const { firstName, lastName, fullName } = splitName(order);
+async function upsertContact({ order, adoptions, contact, token }) {
+  const { firstName, lastName, fullName, email } = contact;
   const primary = adoptions[0];
 
   const customFields = [];
@@ -278,7 +296,8 @@ export default async function handler(req, res) {
       return sendJson(res, 200, { ok: true, skipped: 'already processed' });
     }
 
-    const email = (order.customer && order.customer.email) || order.email || '';
+    const contact = contactDetails(order);
+    const { email } = contact;
     if (!email) {
       // Nothing to send to. Tagging would hide the problem, so leave the order
       // untagged and report it -- it can be handled by hand.
@@ -293,7 +312,7 @@ export default async function handler(req, res) {
     const token = highLevelToken();
     if (!token) throw new Error('HighLevel credentials are not configured');
 
-    const contactId = await upsertContact({ order, adoptions, email, token });
+    const contactId = await upsertContact({ order, adoptions, contact, token });
     let noteStored = false;
     if (contactId) {
       noteStored = await addNote(contactId, buildNote(order, adoptions), token);
@@ -324,4 +343,4 @@ export default async function handler(req, res) {
   }
 }
 
-export { buildAdoptions, buildNote, fulfillmentTag, hmacMatches, certificateRecipientName };
+export { buildAdoptions, buildNote, fulfillmentTag, hmacMatches, certificateRecipientName, contactDetails };
