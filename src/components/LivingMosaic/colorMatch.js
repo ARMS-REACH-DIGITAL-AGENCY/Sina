@@ -29,7 +29,7 @@ function loadImage(src) {
 // doesn't just lose one tile, it loses that product from the whole
 // mosaic, and a systemic sheet mistake (every row's extension changed at
 // once) can empty the grid entirely.
-async // Mosaic cells need compact derivatives, not original camera files. Shopify's
+// Mosaic cells need compact derivatives, not original camera files. Shopify's
 // CDN can resize its hosted images before the browser decodes them.
 function mosaicImageSource(src) {
   try {
@@ -48,7 +48,7 @@ function mosaicImageSource(src) {
   return src;
 }
 
-function loadImageWithFallbacks(candidates) {
+async function loadImageWithFallbacks(candidates) {
   for (const src of candidates) {
     if (!src) continue;
     const img = await loadImage(src);
