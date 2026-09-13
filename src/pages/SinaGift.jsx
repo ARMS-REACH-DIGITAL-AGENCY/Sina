@@ -82,7 +82,7 @@ export default function SinaGift() {
         <section className="sina-gift-card" aria-label="Create a complimentary gift adoption">
           <form className="sina-gift-form" onSubmit={submit}>
             <label className="full">
-              Access key
+              Sina Gift passcode
               <input type="password" value={form.accessKey} onChange={(event) => update('accessKey', event.target.value)} autoComplete="current-password" required />
             </label>
             <label className="full">
