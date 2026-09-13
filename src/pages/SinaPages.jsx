@@ -230,6 +230,7 @@ function FitHeading({ as: Tag = 'span', lines, maxFontSize, minFontSize = 16, cl
     };
 
     fit();
+    if (typeof ResizeObserver === 'undefined') return undefined;
     const observer = new ResizeObserver(fit);
     observer.observe(container);
     return () => observer.disconnect();
