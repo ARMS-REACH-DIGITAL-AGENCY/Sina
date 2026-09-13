@@ -9,6 +9,7 @@ const initialForm = {
   recipientName: '',
   notificationEmail: '',
   recipientEmail: '',
+  recipientPhone: '',
 };
 
 function available(product) {
@@ -57,6 +58,7 @@ export default function SinaGift() {
           recipientName: form.recipientName,
           notificationEmail: form.notificationEmail,
           recipientEmail: form.recipientEmail,
+          recipientPhone: form.recipientPhone,
         }),
       });
       const payload = await response.json().catch(() => ({}));
@@ -103,16 +105,21 @@ export default function SinaGift() {
               Internal notification email <em>(optional)</em>
               <input type="email" value={form.notificationEmail} onChange={(event) => update('notificationEmail', event.target.value)} placeholder="Use only when staff should receive the Shopify order email" />
             </label>
-            <label className="full">
-              Recipient email
-              <input type="email" value={form.recipientEmail} onChange={(event) => update('recipientEmail', event.target.value)} placeholder="Creates or updates their ARMS contact" required />
+            <label>
+              Recipient email <em>(optional)</em>
+              <input type="email" value={form.recipientEmail} onChange={(event) => update('recipientEmail', event.target.value)} placeholder="Best for future certificate email" />
             </label>
-            <p className="sina-gift-form__note full">The recipient email creates or updates their ARMS contact. Internal notification email is only for Sina&apos;s copy of the Shopify order; it never controls the certificate name or recipient contact.</p>
+            <label>
+              Recipient phone <em>(optional)</em>
+              <input type="tel" value={form.recipientPhone} onChange={(event) => update('recipientPhone', event.target.value)} placeholder="Helps find the contact later" />
+            </label>
+            <p className="sina-gift-form__note full">A contact is created in ARMS from the recipient&apos;s name. Email and phone help match an existing contact later. If neither is known, ARMS marks it as a Sina Gift contact needing details.</p>
             {error && <p className="sina-gift-form__message sina-gift-form__message--error full" role="alert">{error}</p>}
             {result && (
               <div className="sina-gift-form__message sina-gift-form__message--success full" role="status">
                 <strong>{result.orderName} is now a complimentary Sina Gift.</strong>
                 <span>{result.pieceTitle} is reserved for {result.recipientName}. Their ARMS contact is created, and the order is marked paid and ready to fulfill.</span>
+                {result.certificateUrl && <a href={result.certificateUrl} target="_blank" rel="noreferrer">Open certificate</a>}
                 {result.adminUrl && <a href={result.adminUrl} target="_blank" rel="noreferrer">Open order in Shopify</a>}
               </div>
             )}
