@@ -85,6 +85,7 @@ async function fetchOrder(orderId) {
         name
         tags
         email
+        customAttributes { key value }
         customer { firstName lastName email }
         shippingAddress { firstName lastName }
       }
@@ -111,6 +112,16 @@ function splitName(order) {
   const firstName = customer.firstName || shipping.firstName || '';
   const lastName = customer.lastName || shipping.lastName || '';
   return { firstName, lastName, fullName: [firstName, lastName].filter(Boolean).join(' ') };
+}
+
+// Sina Gift orders use the staff member's notification email as the Shopify
+// order email, so the customer record cannot be trusted for the certificate
+// name. A named gift recipient takes precedence; ordinary customer orders
+// continue to use their billing/shipping name unchanged.
+function certificateRecipientName(order) {
+  const attributes = Array.isArray(order.customAttributes) ? order.customAttributes : [];
+  const recipient = attributes.find((attribute) => String(attribute.key || '').trim().toLowerCase() === 'certificate recipient name');
+  return String(recipient && recipient.value || '').trim() || splitName(order).fullName || 'A new owner';
 }
 
 // Mirrors api/highlevel/contact.js: a custom field is only sent when its id has
@@ -274,8 +285,7 @@ export default async function handler(req, res) {
       return sendJson(res, 200, { ok: false, reason: 'order has no email address' });
     }
 
-    const { fullName } = splitName(order);
-    const adoptions = buildAdoptions(lineItems, fullName || 'A new owner');
+    const adoptions = buildAdoptions(lineItems, certificateRecipientName(order));
     if (!adoptions.length) {
       return sendJson(res, 200, { ok: false, reason: 'no line items with a SKU' });
     }
@@ -314,4 +324,4 @@ export default async function handler(req, res) {
   }
 }
 
-export { buildAdoptions, buildNote, fulfillmentTag, hmacMatches };
+export { buildAdoptions, buildNote, fulfillmentTag, hmacMatches, certificateRecipientName };
