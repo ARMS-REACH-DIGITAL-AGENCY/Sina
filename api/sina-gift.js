@@ -157,6 +157,40 @@ async function findAvailableVariant(sku) {
   return variants.find((variant) => String(variant.sku || '').trim().toUpperCase() === sku) || null;
 }
 
+// A deliberate staff action for a real gift-flow test. The normal catalog
+// cron never restores sold inventory from the Sheet automatically: a stale
+// "1" could otherwise re-list a piece that has already found a home. This
+// route is protected by the Sina Gift passcode and only changes the selected
+// variant's on-hand quantity; it does not touch product text, price, or any
+// other catalog row.
+async function restockForGiftTest(sku) {
+  const data = await shopifyGraphql(
+    `query($query: String!) {
+      productVariants(first: 5, query: $query) {
+        edges { node { sku inventoryItem { id } product { title } } }
+      }
+      locations(first: 1) { edges { node { id } } }
+    }`,
+    { query: `sku:${sku}` },
+  );
+  const variant = (data.productVariants && data.productVariants.edges || [])
+    .map((edge) => edge.node)
+    .find((node) => String(node && node.sku || '').trim().toUpperCase() === sku);
+  const locationId = data.locations && data.locations.edges && data.locations.edges[0]
+    && data.locations.edges[0].node && data.locations.edges[0].node.id;
+  if (!variant || !variant.inventoryItem || !locationId) throw new Error('Shopify could not find the piece or inventory location.');
+
+  const result = await shopifyGraphql(
+    `mutation($input: InventorySetOnHandQuantitiesInput!) {
+      inventorySetOnHandQuantities(input: $input) { userErrors { field message } }
+    }`,
+    { input: { reason: 'correction', setQuantities: [{ inventoryItemId: variant.inventoryItem.id, locationId, quantity: 1 }] } },
+  );
+  const errors = result.inventorySetOnHandQuantities && result.inventorySetOnHandQuantities.userErrors;
+  if (errors && errors.length) throw new Error(errors.map((error) => error.message).join('; '));
+  return { sku, title: variant.product && variant.product.title ? variant.product.title : sku };
+}
+
 async function createGiftDraft({ variant, recipientName, notificationEmail, recipientEmail, recipientPhone }) {
   const recipientAttributes = [
     { key: 'Certificate recipient name', value: recipientName },
@@ -250,6 +284,17 @@ export default async function handler(req, res) {
 
   const body = req.body && typeof req.body === 'object' ? req.body : {};
   const sku = cleanSku(body.sku);
+
+  if (body.action === 'restock-test') {
+    if (!sku) return sendJson(res, 400, { error: 'Choose a valid SKU.' });
+    try {
+      const restocked = await restockForGiftTest(sku);
+      return sendJson(res, 200, { ok: true, restocked });
+    } catch (error) {
+      return sendJson(res, 500, { error: error.message || 'Unable to restock this test piece.' });
+    }
+  }
+
   const recipientName = cleanText(body.recipientName);
   const notificationEmail = body.notificationEmail ? cleanEmail(body.notificationEmail) : '';
   const recipientEmail = body.recipientEmail ? cleanEmail(body.recipientEmail) : '';
