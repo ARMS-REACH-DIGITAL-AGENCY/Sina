@@ -12,6 +12,7 @@ import {
   ProductShortLink,
   NotFound,
 } from './pages/SinaPages.jsx';
+import SinaGift from './pages/SinaGift.jsx';
 import './styles/meet-sina.css';
 
 function ScrollToTop() {
@@ -48,6 +49,7 @@ export default function App() {
         <Route path="/shop" element={<Shop />} />
         <Route path="/p/:sku" element={<ProductShortLink />} />
         <Route path="/schedule" element={<Schedule />} />
+        <Route path="/sina-gift" element={<SinaGift />} />
         <Route path="/contact" element={<Navigate to="/schedule" replace />} />
         <Route path="/privacy" element={<Privacy />} />
         <Route path="/terms" element={<Terms />} />
