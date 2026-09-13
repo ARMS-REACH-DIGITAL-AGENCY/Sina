@@ -18,6 +18,14 @@ function available(product) {
 
 export default function SinaGift() {
   usePageMeta('Sina Gift | Sina\'s Creations', 'Create a complimentary Sina Gift adoption.');
+  useEffect(() => {
+    const manifest = document.querySelector('link[rel="manifest"]');
+    const originalHref = manifest && manifest.getAttribute('href');
+    if (manifest) manifest.setAttribute('href', '/sina-gift.webmanifest');
+    return () => {
+      if (manifest) manifest.setAttribute('href', originalHref || '/site.webmanifest');
+    };
+  }, []);
   const { products, loading } = useCatalogProducts();
   const [form, setForm] = useState(initialForm);
   const [submitting, setSubmitting] = useState(false);
