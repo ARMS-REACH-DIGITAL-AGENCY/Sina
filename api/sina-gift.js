@@ -92,7 +92,6 @@ async function createArmsGiftContact({ recipientName, recipientEmail, recipientP
   const token = highLevelToken();
   if (!token) throw new Error('ARMS contact credentials are not configured. The gift was not completed.');
   const { firstName, lastName } = splitName(recipientName);
-  const contactPending = !recipientEmail && !recipientPhone;
   const response = await fetch(HIGHLEVEL_UPSERT_URL, {
     method: 'POST',
     headers: {
@@ -111,7 +110,7 @@ async function createArmsGiftContact({ recipientName, recipientEmail, recipientP
       source: "Sina's Creations — Sina Gift",
       // Kept separate from the fulfillment tag: this creates the recipient
       // now, while the normal adoption follow-up remains tied to fulfillment.
-      tags: contactPending ? ['Sina Gift', 'Contact Info Needed'] : ['Sina Gift'],
+      tags: ['Sina Gift'],
     }),
   });
   const result = await response.json().catch(() => ({}));
@@ -123,7 +122,7 @@ async function createArmsGiftContact({ recipientName, recipientEmail, recipientP
   if (!contactId) throw new Error('ARMS created the contact but did not return its ID. The gift was not completed.');
 
   const noteStored = await addArmsNote(contactId, [
-    `Sina Gift record${contactPending ? ' — contact information needed' : ''}`,
+    'Sina Gift record',
     '',
     `${title} (${sku})`,
     `Certificate: ${links.certificateUrl}`,
@@ -314,20 +313,21 @@ export default async function handler(req, res) {
 
     const pieceTitle = variant.product && variant.product.title ? variant.product.title : sku;
     const links = buildGiftLinks({ sku, recipientName });
-    // The draft is deliberately not completed yet. If ARMS rejects the
-    // contact/note, no gift is completed and no one-of-one inventory is used.
+    // The draft is deliberately not completed yet. If an ARMS contact method
+    // was supplied, ARMS must accept the contact and note before the gift is
+    // completed. ARMS cannot create a name-only contact through its API.
     const draft = await createGiftDraft({ recipientName, notificationEmail, recipientEmail, recipientPhone, variant });
-    // A name-only recipient is intentionally allowed. ARMS records it as a
-    // provisional individual contact instead of attaching every gift to a
-    // shared account or inventing an email address.
-    const armsContactId = await createArmsGiftContact({
-      recipientName,
-      recipientEmail,
-      recipientPhone,
-      title: pieceTitle,
-      sku,
-      links,
-    });
+    const hasRecipientContactMethod = Boolean(recipientEmail || recipientPhone);
+    const armsContactId = hasRecipientContactMethod
+      ? await createArmsGiftContact({
+        recipientName,
+        recipientEmail,
+        recipientPhone,
+        title: pieceTitle,
+        sku,
+        links,
+      })
+      : null;
     const order = await completeGiftDraft(draft.id);
     const domain = shopifyDomain();
     const adminUrl = domain && order.id ? `https://${domain}/admin/orders/${numericId(order.id)}` : null;
@@ -338,6 +338,7 @@ export default async function handler(req, res) {
       pieceTitle,
       recipientName,
       armsContactId,
+      armsContactPending: !hasRecipientContactMethod,
       adminUrl,
       certificateUrl: links.certificateUrl,
       uploadUrl: links.uploadUrl,
