@@ -29,7 +29,26 @@ function loadImage(src) {
 // doesn't just lose one tile, it loses that product from the whole
 // mosaic, and a systemic sheet mistake (every row's extension changed at
 // once) can empty the grid entirely.
-async function loadImageWithFallbacks(candidates) {
+async // Mosaic cells need compact derivatives, not original camera files. Shopify's
+// CDN can resize its hosted images before the browser decodes them.
+function mosaicImageSource(src) {
+  try {
+    const url = new URL(src, window.location.href);
+    if (
+      url.hostname.endsWith('myshopify.com')
+      || url.hostname === 'cdn.shopify.com'
+      || url.hostname.endsWith('.shopifycdn.com')
+    ) {
+      url.searchParams.set('width', '256');
+      return url.toString();
+    }
+  } catch (error) {
+    // Keep an unrecognised source unchanged.
+  }
+  return src;
+}
+
+function loadImageWithFallbacks(candidates) {
   for (const src of candidates) {
     if (!src) continue;
     const img = await loadImage(src);
@@ -113,7 +132,7 @@ export async function buildMosaicGrid({ portraitSrc, products, cols, rows }) {
           product.mosaicImage,
           product.image,
           ...(product.imageFallbacks || []),
-        ]),
+        ].map(mosaicImageSource)),
     ),
   ]);
 
