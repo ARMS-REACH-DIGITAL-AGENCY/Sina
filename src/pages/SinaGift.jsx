@@ -23,6 +23,7 @@ export default function SinaGift() {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
   const [result, setResult] = useState(null);
+  const [passcodeVisible, setPasscodeVisible] = useState(false);
 
   const giftablePieces = useMemo(() => products
     .filter(available)
@@ -85,7 +86,12 @@ export default function SinaGift() {
           <form className="sina-gift-form" onSubmit={submit}>
             <label className="full">
               Sina Gift passcode
-              <input type="password" value={form.accessKey} onChange={(event) => update('accessKey', event.target.value)} autoComplete="current-password" required />
+              <span className="sina-gift-passcode-field">
+                <input type={passcodeVisible ? 'text' : 'password'} value={form.accessKey} onChange={(event) => update('accessKey', event.target.value)} autoComplete="current-password" required />
+                <button type="button" onClick={() => setPasscodeVisible((visible) => !visible)} aria-pressed={passcodeVisible}>
+                  {passcodeVisible ? 'Hide' : 'Show'}
+                </button>
+              </span>
             </label>
             <label className="full">
               Piece to gift
