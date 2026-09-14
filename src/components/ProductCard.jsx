@@ -86,7 +86,7 @@ function ShareButton({ sku, onShare, shareStatus }) {
 // the first click and sends you to a payment screen on the second is a trust
 // trap, and this is a first-time visitor spending $75+ on a piece they just met.
 // "Meet" -> "Adopt" also matches the adoption story the whole brand runs on.
-function ProductCardCta({ product, isOpen, onOpen }) {
+function ProductCardCta({ product, isOpen, onOpen, onAdopt }) {
   const priceLabel = `$${product.price}`;
 
   if (!isOpen) {
@@ -115,18 +115,51 @@ function ProductCardCta({ product, isOpen, onOpen }) {
   }
 
   return (
-    <a
-      href={`/api/adopt?sku=${encodeURIComponent(product.sku)}`}
+    <button
+      type="button"
       className="button primary product-card__adopt-cta"
-      onClick={(event) => event.stopPropagation()}
+      onClick={(event) => {
+        event.stopPropagation();
+        onAdopt();
+      }}
     >
       Adopt {product.name} &middot; {priceLabel}
-    </a>
+    </button>
+  );
+}
+
+function CertificateNameDialog({ product, onClose }) {
+  const [certificateName, setCertificateName] = React.useState('');
+
+  function continueToCheckout(event) {
+    event.preventDefault();
+    const params = new URLSearchParams({ sku: product.sku });
+    if (certificateName.trim()) params.set('certificateName', certificateName.trim());
+    window.location.assign(`/api/adopt?${params.toString()}`);
+  }
+
+  return (
+    <div className="certificate-name-dialog__backdrop" role="presentation" onMouseDown={onClose}>
+      <section className="certificate-name-dialog" role="dialog" aria-modal="true" aria-labelledby="certificate-name-dialog-title" onMouseDown={(event) => event.stopPropagation()}>
+        <button type="button" className="certificate-name-dialog__close" onClick={onClose} aria-label="Close">×</button>
+        <p className="certificate-name-dialog__eyebrow">{product.name}</p>
+        <h2 id="certificate-name-dialog-title">Name for the adoption certificate</h2>
+        <p>Enter the name that should appear on the adoption certificate. Leave it blank to use the purchaser&rsquo;s name entered at checkout.</p>
+        <form onSubmit={continueToCheckout}>
+          <label>
+            Certificate name <span>(optional)</span>
+            <input value={certificateName} onChange={(event) => setCertificateName(event.target.value)} maxLength="160" autoFocus placeholder="Name for the adoption papers" />
+          </label>
+          <button type="submit" className="button primary">Continue to checkout</button>
+        </form>
+      </section>
+    </div>
   );
 }
 
 export function ProductCard({ product, eyebrowOverride, sharedSku }) {
   const [showBack, setShowBack] = React.useState(false);
+  const [showCertificateNameDialog, setShowCertificateNameDialog] = React.useState(false);
   // Sheet data entry mistakes happen -- a row's "Final Image Filename" can
   // name a file that was never actually uploaded under that name (or was
   // typed with a different case/extension than what's really on disk,
@@ -245,6 +278,7 @@ export function ProductCard({ product, eyebrowOverride, sharedSku }) {
   };
 
   return (
+    <>
     <article
       ref={articleRef}
       className={`product-card${showBack ? ' is-back' : ''}${product.status === 'sold-out' ? ' is-sold' : ''}`}
@@ -293,7 +327,7 @@ export function ProductCard({ product, eyebrowOverride, sharedSku }) {
             <h3><ProductNameLink product={product} /></h3>
             <p className="product-card__line">{product.line}</p>
             <div className="product-card__cta-row">
-              <ProductCardCta product={product} isOpen={false} onOpen={toggleCard} />
+              <ProductCardCta product={product} isOpen={false} onOpen={toggleCard} onAdopt={() => setShowCertificateNameDialog(true)} />
               <ShareButton sku={product.sku} onShare={handleShare} shareStatus={shareStatus} />
             </div>
           </>
@@ -319,12 +353,14 @@ export function ProductCard({ product, eyebrowOverride, sharedSku }) {
                 <ShareButton sku={product.sku} onShare={handleShare} shareStatus={shareStatus} />
               </div>
             </div>
-            <ProductCardCta product={product} isOpen onOpen={toggleCard} />
+            <ProductCardCta product={product} isOpen onOpen={toggleCard} onAdopt={() => setShowCertificateNameDialog(true)} />
             <p className="product-card__close-hint">Close</p>
           </>
         )}
       </div>
     </article>
+    {showCertificateNameDialog && <CertificateNameDialog product={product} onClose={() => setShowCertificateNameDialog(false)} />}
+    </>
   );
 }
 
