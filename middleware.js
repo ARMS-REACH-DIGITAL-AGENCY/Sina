@@ -287,7 +287,7 @@ function productOpenCardHtml(product, imageUrl) {
         </div>
         ${isSold
           ? `<span class="button primary product-card__adopt-cta seo-card-adopt is-sold" aria-disabled="true">${escapeHtml(product.name)} Found a Home!</span>`
-          : `<a class="button primary product-card__adopt-cta seo-card-adopt" href="/api/adopt?sku=${encodeURIComponent(product.sku)}">Adopt ${escapeHtml(product.name)} &middot; $${escapeHtml(String(product.price))}</a>`}
+          : `<button type="button" class="button primary product-card__adopt-cta seo-card-adopt" id="seo-adopt-button">Adopt ${escapeHtml(product.name)} &middot; $${escapeHtml(String(product.price))}</button>`}
       </section>
 
       <section class="product-card__visual seo-card-visual" aria-label="Photos of ${escapeHtml(product.name)}">
@@ -301,8 +301,26 @@ function productOpenCardHtml(product, imageUrl) {
   </main>`;
 }
 
+function certificateNameDialogHtml(product) {
+  if (product.status === 'sold-out') return '';
+  return `<div class="seo-certificate-dialog" id="seo-certificate-dialog" hidden>
+    <div class="seo-certificate-dialog__backdrop" data-certificate-close></div>
+    <section class="seo-certificate-dialog__panel" role="dialog" aria-modal="true" aria-labelledby="seo-certificate-dialog-title">
+      <button type="button" class="seo-certificate-dialog__close" data-certificate-close aria-label="Close">&times;</button>
+      <p class="seo-certificate-dialog__eyebrow">One-of-one adoption</p>
+      <h2 id="seo-certificate-dialog-title">Name for the adoption certificate</h2>
+      <p>Whose name should appear on the adoption papers? Leave this blank to use the purchaser name entered at checkout.</p>
+      <form id="seo-certificate-form">
+        <label for="seo-certificate-name">Adopter name <span>(optional)</span></label>
+        <input id="seo-certificate-name" type="text" maxlength="160" autocomplete="name" />
+        <button type="submit" class="button primary">Continue to checkout</button>
+      </form>
+    </section>
+  </div>`;
+}
+
 function productFallbackHtml(product, imageUrl) {
-  return `<div id="root"><div class="site-shell">${globalHeaderHtml()}${collectionBrowseHtml(product)}${productOpenCardHtml(product, imageUrl)}${globalFooterHtml()}</div></div>`;
+  return `<div id="root"><div class="site-shell">${globalHeaderHtml()}${collectionBrowseHtml(product)}${productOpenCardHtml(product, imageUrl)}${globalFooterHtml()}${certificateNameDialogHtml(product)}</div></div>`;
 }
 
 function productPageStyles() {
@@ -335,6 +353,17 @@ function productPageStyles() {
     .seo-card-thumb{flex:0 0 62px;width:62px;height:62px;padding:0;border:2px solid transparent;background:#292a28;border-radius:2px;overflow:hidden;cursor:pointer}
     .seo-card-thumb.active{border-color:var(--sand)}
     .seo-card-thumb img{width:100%;height:100%;object-fit:cover}
+    .seo-certificate-dialog[hidden]{display:none}
+    .seo-certificate-dialog{position:fixed;z-index:1000;inset:0;display:flex;align-items:center;justify-content:center;padding:20px}
+    .seo-certificate-dialog__backdrop{position:absolute;inset:0;background:rgba(20,20,18,.62)}
+    .seo-certificate-dialog__panel{position:relative;width:min(100%,490px);padding:34px;background:var(--off-white);border:2px solid var(--charcoal);box-shadow:5px 5px 0 rgba(41,42,40,.3)}
+    .seo-certificate-dialog__close{position:absolute;top:9px;right:12px;border:0;background:transparent;color:var(--charcoal);font-size:34px;line-height:1;cursor:pointer}
+    .seo-certificate-dialog__eyebrow{margin:0 0 8px;color:var(--burnt-orange);font-size:10px;font-weight:700;letter-spacing:.14em;text-transform:uppercase}
+    .seo-certificate-dialog__panel h2{margin:0;color:var(--charcoal);font-size:30px;line-height:1.08}
+    .seo-certificate-dialog__panel>p:not(.seo-certificate-dialog__eyebrow){margin:14px 0 22px;color:var(--muted-olive);line-height:1.5}
+    .seo-certificate-dialog form{display:grid;gap:10px}.seo-certificate-dialog label{color:var(--charcoal);font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase}.seo-certificate-dialog label span{color:var(--muted-olive);font-weight:400}
+    .seo-certificate-dialog input{width:100%;min-height:46px;padding:10px 12px;border:1px solid var(--charcoal);border-radius:0;background:var(--off-white);color:var(--charcoal);font:inherit}
+    .seo-certificate-dialog form .button{width:100%;margin-top:6px;min-height:50px}
     @media(max-width:760px){
       .seo-product-page{padding:16px 16px 56px}
       .seo-open-card{grid-template-columns:1fr}
@@ -354,6 +383,7 @@ function productPageStyles() {
       .seo-card-cost-share .product-card__flip-cta-caption{max-width:140px}
       .seo-card-thumbs{min-height:82px;padding:10px 12px}
       .seo-card-thumb{flex-basis:56px;width:56px;height:56px}
+      .seo-certificate-dialog{align-items:flex-end;padding:12px}.seo-certificate-dialog__panel{padding:30px 24px 26px}.seo-certificate-dialog__panel h2{font-size:27px}
     }
   </style>`;
 }
@@ -450,6 +480,37 @@ function productPageScript(product) {
               window.setTimeout(function () { share.setAttribute('aria-label', 'Share ${escapeHtml(product.name)}'); }, 1800);
             } catch (error) {}
           }
+        });
+      }
+
+      var adoptButton = document.getElementById('seo-adopt-button');
+      var certificateDialog = document.getElementById('seo-certificate-dialog');
+      var certificateForm = document.getElementById('seo-certificate-form');
+      var certificateName = document.getElementById('seo-certificate-name');
+      var closeCertificateDialog = function () {
+        if (!certificateDialog) return;
+        certificateDialog.hidden = true;
+        document.body.style.overflow = '';
+        if (adoptButton) adoptButton.focus();
+      };
+      if (adoptButton && certificateDialog && certificateForm && certificateName) {
+        adoptButton.addEventListener('click', function () {
+          certificateDialog.hidden = false;
+          document.body.style.overflow = 'hidden';
+          window.setTimeout(function () { certificateName.focus(); }, 0);
+        });
+        Array.prototype.slice.call(certificateDialog.querySelectorAll('[data-certificate-close]')).forEach(function (close) {
+          close.addEventListener('click', closeCertificateDialog);
+        });
+        document.addEventListener('keydown', function (event) {
+          if (event.key === 'Escape' && !certificateDialog.hidden) closeCertificateDialog();
+        });
+        certificateForm.addEventListener('submit', function (event) {
+          event.preventDefault();
+          var name = certificateName.value.trim();
+          var target = '/api/adopt?sku=' + encodeURIComponent(${JSON.stringify(product.sku)});
+          if (name) target += '&certificateName=' + encodeURIComponent(name);
+          window.location.assign(target);
         });
       }
     }());
