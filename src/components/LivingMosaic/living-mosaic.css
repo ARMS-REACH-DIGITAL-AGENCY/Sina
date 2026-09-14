@@ -430,19 +430,6 @@
   justify-content: center;
   gap: 10px;
   margin-top: 12px;
-  flex-wrap: wrap;
-}
-
-.living-mosaic__start-button {
-  min-height: 46px;
-  padding: 0 18px;
-  border: 1px solid var(--sand);
-  border-radius: 999px;
-  background: var(--sand);
-  color: var(--charcoal);
-  font: inherit;
-  font-weight: 700;
-  cursor: pointer;
 }
 
 .living-mosaic__zoom-button {
