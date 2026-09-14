@@ -131,18 +131,20 @@ function attributeValue(order, key) {
 }
 
 function contactDetails(order) {
-  const name = certificateRecipientName(order);
-  const parts = name.split(/\s+/).filter(Boolean);
+  const certificateName = certificateRecipientName(order);
+  const purchaserName = splitName(order).fullName;
   const recipientEmail = attributeValue(order, 'Gift recipient email');
   const isSinaGift = attributeValue(order, 'Gift source').toLowerCase() === 'sina gift';
+  // A certificate-name override without a recipient email is often a surprise
+  // gift. Keep the purchaser's ARMS contact intact while the certificate itself
+  // uses the supplied name. A supplied recipient email intentionally creates
+  // the recipient's contact instead.
+  const name = recipientEmail || isSinaGift ? certificateName : purchaserName || certificateName;
+  const parts = name.split(/\s+/).filter(Boolean);
   return {
     firstName: parts.shift() || '',
     lastName: parts.join(' '),
     fullName: name,
-    // A staff-only Shopify receipt address must never become the recipient's
-    // ARMS identity. Name-only Sina Gifts already receive their certificate
-    // links in the provisional contact note at gift creation, so fulfillment
-    // deliberately skips ARMS when the actual recipient email is still unknown.
     email: isSinaGift ? recipientEmail : recipientEmail || (order.customer && order.customer.email) || order.email || '',
   };
 }
@@ -173,6 +175,7 @@ function buildAdoptions(lineItems, adopterName) {
 function buildNote(order, adoptions) {
   const lines = [
     `Adoption confirmed — Shopify order ${order.name}`,
+    `Certificate name: ${certificateRecipientName(order)}`,
     '',
   ];
   for (const adoption of adoptions) {
