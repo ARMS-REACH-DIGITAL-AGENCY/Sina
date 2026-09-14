@@ -58,6 +58,7 @@ export default function LivingMosaic() {
   const [canvasReady, setCanvasReady] = useState(false);
   const [modalProduct, setModalProduct] = useState(null);
   const [active, setActive] = useState(false);
+  const [inViewport, setInViewport] = useState(false);
   const [zoomState, setZoomState] = useState(INITIAL_ZOOM_STATE);
   const [autoRevealing, setAutoRevealing] = useState(false);
   const [portraitRevealed, setPortraitRevealed] = useState(false);
@@ -116,6 +117,28 @@ export default function LivingMosaic() {
         }
       },
       { rootMargin: '400px 0px' }
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
+
+  useEffect(() => {
+    const el = sectionRef.current;
+    if (!el) return undefined;
+    if (typeof IntersectionObserver === 'undefined') {
+      setInViewport(true);
+      return undefined;
+    }
+    // Preload before the section is reached, but do not spend the opening
+    // five seconds until a visitor can actually see the close-up tiles.
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setInViewport(true);
+          observer.disconnect();
+        }
+      },
+      { threshold: 0.15 }
     );
     observer.observe(el);
     return () => observer.disconnect();
@@ -402,7 +425,7 @@ export default function LivingMosaic() {
     // Hold the real, color-matched center tiles for the full opening beat.
     // Starting this clock earlier made a slow device reveal the full portrait
     // immediately after the grid arrived, skipping the intended close-up.
-    if (!active || !mosaicReady || hasAutoRevealedRef.current) return undefined;
+    if (!inViewport || !mosaicReady || hasAutoRevealedRef.current) return undefined;
 
     const startScrollY = window.scrollY;
 
@@ -427,7 +450,7 @@ export default function LivingMosaic() {
       window.clearTimeout(startTimer);
       window.removeEventListener('scroll', handleScroll);
     };
-  }, [active, mosaicReady]);
+  }, [inViewport, mosaicReady]);
 
   useEffect(() => {
     // Commit the transition class before changing the transform. Two frames
