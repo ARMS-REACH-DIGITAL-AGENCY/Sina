@@ -8,7 +8,9 @@ const { signAdoption } = require('../lib/adoption-token.js');
 
 const HIGHLEVEL_UPSERT_URL = 'https://services.leadconnectorhq.com/contacts/upsert';
 const HIGHLEVEL_NOTES_URL = 'https://services.leadconnectorhq.com/contacts';
+const HIGHLEVEL_MESSAGES_URL = 'https://services.leadconnectorhq.com/conversations/messages';
 const HIGHLEVEL_VERSION = '2021-07-28';
+const DEFAULT_NOTIFICATION_EMAIL = 'thomasinascreations@gmail.com';
 
 function sendJson(res, statusCode, body) {
   res.statusCode = statusCode;
@@ -130,6 +132,73 @@ async function createArmsGiftContact({ recipientName, recipientEmail, recipientP
   ].join('\n'), token);
   if (!noteStored) throw new Error('ARMS created the contact but could not save the certificate links. The gift was not completed.');
   return contactId;
+}
+
+function escapeHtml(value) {
+  return String(value || '').replace(/[&<>"']/g, (character) => ({
+    '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;',
+  }[character]));
+}
+
+async function sendGiftRecoveryEmail({ notificationEmail, recipientName, title, sku, orderName, links }) {
+  const token = highLevelToken();
+  if (!token) throw new Error('ARMS email credentials are not configured.');
+
+  // Upserting by email only preserves an existing contact's name and details.
+  const contactResponse = await fetch(HIGHLEVEL_UPSERT_URL, {
+    method: 'POST',
+    headers: {
+      Accept: 'application/json', Authorization: `Bearer ${token.value}`,
+      'Content-Type': 'application/json', Version: HIGHLEVEL_VERSION,
+    },
+    body: JSON.stringify({
+      locationId: token.locationId,
+      email: notificationEmail,
+      source: "Sina's Creations — Sina Gift recovery copy",
+      tags: ['Sina Gift Audit'],
+    }),
+  });
+  const contactResult = await contactResponse.json().catch(() => ({}));
+  const contactId = (contactResult.contact && contactResult.contact.id) || contactResult.id || null;
+  if (!contactResponse.ok || !contactId) {
+    const detail = Array.isArray(contactResult.message) ? contactResult.message.join(' ') : contactResult.message;
+    throw new Error(detail || 'ARMS could not prepare the recovery-email contact.');
+  }
+
+  const subject = `Sina Gift confirmation — ${title} for ${recipientName}`;
+  const text = [
+    'Sina Gift confirmation', '', `Order: ${orderName}`,
+    `Piece: ${title} (${sku})`, `Certificate recipient: ${recipientName}`, '',
+    `Certificate: ${links.certificateUrl}`, `Photo upload: ${links.uploadUrl}`,
+  ].join('\n');
+  const html = [
+    '<p>Your Sina Gift was created successfully.</p>',
+    `<p><strong>Order:</strong> ${escapeHtml(orderName)}<br><strong>Piece:</strong> ${escapeHtml(title)} (${escapeHtml(sku)})<br><strong>Certificate recipient:</strong> ${escapeHtml(recipientName)}</p>`,
+    `<p><a href="${escapeHtml(links.certificateUrl)}">Open adoption certificate</a><br><a href="${escapeHtml(links.uploadUrl)}">Open photo-upload page</a></p>`,
+  ].join('');
+  const messageResponse = await fetch(HIGHLEVEL_MESSAGES_URL, {
+    method: 'POST',
+    headers: {
+      Accept: 'application/json', Authorization: `Bearer ${token.value}`,
+      'Content-Type': 'application/json', Version: HIGHLEVEL_VERSION,
+    },
+    body: JSON.stringify({
+      type: 'Email', contactId, emailTo: notificationEmail,
+      subject, html, message: text, status: 'pending',
+    }),
+  });
+  const messageResult = await messageResponse.json().catch(() => ({}));
+  if (!messageResponse.ok || !(messageResult.messageId || messageResult.emailMessageId)) {
+    const detail = Array.isArray(messageResult.message) ? messageResult.message.join(' ') : messageResult.message;
+    throw new Error(detail || 'ARMS could not queue the recovery email.');
+  }
+
+  await addArmsNote(contactId, [
+    'Sina Gift recovery email', `Order: ${orderName}`,
+    `Piece: ${title} (${sku})`, `Certificate recipient: ${recipientName}`,
+    `Certificate: ${links.certificateUrl}`, `Photo upload: ${links.uploadUrl}`,
+  ].join('\n'), token);
+  return { contactId, emailMessageId: messageResult.emailMessageId || messageResult.messageId };
 }
 
 async function findAvailableVariant(sku) {
@@ -295,7 +364,7 @@ export default async function handler(req, res) {
   }
 
   const recipientName = cleanText(body.recipientName);
-  const notificationEmail = body.notificationEmail ? cleanEmail(body.notificationEmail) : '';
+  const notificationEmail = body.notificationEmail ? cleanEmail(body.notificationEmail) : DEFAULT_NOTIFICATION_EMAIL;
   const recipientEmail = body.recipientEmail ? cleanEmail(body.recipientEmail) : '';
   const recipientPhone = body.recipientPhone ? cleanPhone(body.recipientPhone) : '';
 
@@ -329,6 +398,22 @@ export default async function handler(req, res) {
       })
       : null;
     const order = await completeGiftDraft(draft.id);
+    let recoveryEmail = null;
+    let recoveryEmailError = '';
+    try {
+      recoveryEmail = await sendGiftRecoveryEmail({
+        notificationEmail,
+        recipientName,
+        title: pieceTitle,
+        sku,
+        orderName: order.name,
+        links,
+      });
+    } catch (recoveryError) {
+      // The gift itself is already completed. Report a recovery-email failure
+      // without suggesting staff submit the gift a second time.
+      recoveryEmailError = recoveryError.message || 'The recovery email could not be queued.';
+    }
     const domain = shopifyDomain();
     const adminUrl = domain && order.id ? `https://${domain}/admin/orders/${numericId(order.id)}` : null;
 
@@ -339,6 +424,9 @@ export default async function handler(req, res) {
       recipientName,
       armsContactId,
       armsContactPending: !hasRecipientContactMethod,
+      notificationEmail,
+      recoveryEmailSent: Boolean(recoveryEmail),
+      recoveryEmailError,
       adminUrl,
       certificateUrl: links.certificateUrl,
       uploadUrl: links.uploadUrl,
