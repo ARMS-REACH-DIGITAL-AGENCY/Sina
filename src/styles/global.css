@@ -165,6 +165,12 @@ button,input,select,textarea{font:inherit}
 .product-card__cta-row .product-card__adopt-cta{margin-top:0;width:auto;flex:1 1 auto;min-width:0}
 .product-card__adopt-cta--meet{cursor:pointer;font-family:var(--font-body)}
 .button.primary.product-card__adopt-cta--sold{display:flex;align-items:center;justify-content:center;text-align:center;background:var(--earth-brown);border-color:var(--earth-brown);color:var(--sand);opacity:1}
+.certificate-name-dialog__backdrop{position:fixed;inset:0;z-index:1300;display:grid;place-items:center;padding:20px;background:rgba(12,13,12,.7)}
+.certificate-name-dialog{position:relative;width:min(100%,460px);padding:30px;background:var(--off-white);border:2px solid var(--charcoal);box-shadow:5px 5px 0 var(--charcoal);color:var(--charcoal)}
+.certificate-name-dialog__close{position:absolute;top:9px;right:11px;border:0;background:transparent;font-size:30px;line-height:1;color:var(--charcoal);cursor:pointer}
+.certificate-name-dialog__eyebrow{margin:0 34px 8px 0;color:var(--burnt-orange);font-size:11px;font-weight:700;letter-spacing:.14em;text-transform:uppercase}
+.certificate-name-dialog h2{margin:0 30px 10px 0;font-size:28px;line-height:1.05}.certificate-name-dialog p{margin:0 0 18px;line-height:1.55;color:var(--muted-olive)}
+.certificate-name-dialog label{display:block;font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase}.certificate-name-dialog label span{font-weight:400}.certificate-name-dialog input{box-sizing:border-box;display:block;width:100%;margin:8px 0 16px;padding:12px;border:1px solid var(--charcoal);background:var(--off-white);font:inherit;text-transform:none;letter-spacing:normal}.certificate-name-dialog form .button{width:100%}
 .product-card__panel .product-card__close-hint{font-size:9px;line-height:1.4;color:var(--muted-olive);letter-spacing:.14em;text-transform:uppercase;font-weight:700;text-align:center;margin-top:auto;padding-top:16px}
 .product-card__flip-cta-caption{display:block;font-size:10px;line-height:1.1;text-transform:uppercase;letter-spacing:.12em;color:var(--muted-olive);font-weight:700}
 /* Photo beside the text from 600px up, not 960px. Stacked, the image is a
