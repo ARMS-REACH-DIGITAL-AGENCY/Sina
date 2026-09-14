@@ -21,7 +21,6 @@ const AUTO_REVEAL_DELAY_MS = 5000;
 const AUTO_REVEAL_DURATION_MS = 7000;
 const INITIAL_PREVIEW_COLUMNS = 5;
 const INITIAL_PREVIEW_ROWS = 6;
-const INITIAL_PREVIEW_TILE_COUNT = INITIAL_PREVIEW_COLUMNS * INITIAL_PREVIEW_ROWS;
 
 function clamp(value, min, max) {
   return Math.min(Math.max(value, min), max);
@@ -34,65 +33,19 @@ function getGridConfig() {
   return DESKTOP_GRID;
 }
 
-function getInitialPreviewPlacement(cols, rows) {
+function prioritizeActualCenterCells(grid, cols, rows) {
   const startCol = Math.floor((cols - INITIAL_PREVIEW_COLUMNS) / 2);
   const startRow = Math.floor((rows - INITIAL_PREVIEW_ROWS) / 2);
-
-  return {
-    left: `${(startCol / cols) * 100}%`,
-    top: `${(startRow / rows) * 100}%`,
-    width: `${(INITIAL_PREVIEW_COLUMNS / cols) * 100}%`,
-    height: `${(INITIAL_PREVIEW_ROWS / rows) * 100}%`,
-    "--initial-preview-scale-y":
-      (rows / INITIAL_PREVIEW_ROWS) / (cols / INITIAL_PREVIEW_COLUMNS),
-  };
-}
-
-function anchorInitialPreviewToMosaic(grid, previewProducts, products, cols, rows) {
-  if (!grid.length || !previewProducts.length) return grid;
-
-  const productIndexes = new Map(
-    products.map((product, index) => [
-      product.sku || product.id || product.name,
-      index,
-    ])
-  );
-  const startCol = Math.floor((cols - INITIAL_PREVIEW_COLUMNS) / 2);
-  const startRow = Math.floor((rows - INITIAL_PREVIEW_ROWS) / 2);
-
-  // The instant 5 x 6 preview is the center of the completed mosaic, so the
-  // reveal behaves like a pull-back instead of swapping to another image set.
+  // Prioritize the actual color-matched center cells. No arbitrary product is
+  // substituted, so the zoom-out cannot leave a visible rectangle.
   return grid.map((cell) => {
-    const previewCol = cell.col - startCol;
-    const previewRow = cell.row - startRow;
-
-    if (
-      previewCol < 0 ||
-      previewCol >= INITIAL_PREVIEW_COLUMNS ||
-      previewRow < 0 ||
-      previewRow >= INITIAL_PREVIEW_ROWS
-    ) {
-      return cell;
-    }
-
-    const previewProduct =
-      previewProducts[previewRow * INITIAL_PREVIEW_COLUMNS + previewCol];
-    const productIndex = productIndexes.get(
-      previewProduct.sku || previewProduct.id || previewProduct.name
-    );
-
-    if (productIndex === undefined) return cell;
-
-    return {
-      ...cell,
-      productIndex,
-      resolvedSrc: previewProduct.image || cell.resolvedSrc,
-      isCustomCrop: false,
-      isInitialPreview: true,
-    };
+    const inCenter = cell.col >= startCol
+      && cell.col < startCol + INITIAL_PREVIEW_COLUMNS
+      && cell.row >= startRow
+      && cell.row < startRow + INITIAL_PREVIEW_ROWS;
+    return inCenter ? { ...cell, isInitialPreview: true } : cell;
   });
 }
-
 export default function LivingMosaic() {
   const { products, loading: productsLoading } = useMosaicProducts();
 
@@ -122,23 +75,6 @@ export default function LivingMosaic() {
   const revealAnimationStartedRef = useRef(false);
 
   const { cols: gridCols, rows: gridRows } = gridConfig;
-
-  // Start with a deliberate 5 x 6 grid of real creations, not a crop of
-  // the portrait. The complete interactive mosaic can then zoom out behind it.
-  const initialPreviewProducts = useMemo(() => {
-    const productsWithImages = products.filter((product) => product.image);
-    if (!productsWithImages.length) return [];
-
-    return Array.from(
-      { length: INITIAL_PREVIEW_TILE_COUNT },
-      (_, index) => productsWithImages[index % productsWithImages.length]
-    );
-  }, [products]);
-
-  const initialPreviewPlacement = useMemo(
-    () => getInitialPreviewPlacement(gridCols, gridRows),
-    [gridCols, gridRows]
-  );
 
   useEffect(() => {
     zoomRef.current = zoomState;
@@ -194,15 +130,7 @@ export default function LivingMosaic() {
     buildMosaicGrid({ portraitSrc: PORTRAIT_SRC, products, cols: gridCols, rows: gridRows })
       .then((result) => {
         if (!cancelled) {
-          setGrid(
-          anchorInitialPreviewToMosaic(
-            result,
-            initialPreviewProducts,
-            products,
-            gridCols,
-            gridRows
-          )
-        );
+          setGrid(prioritizeActualCenterCells(result, gridCols, gridRows));
           setGridLoading(false);
         }
       })
@@ -218,7 +146,6 @@ export default function LivingMosaic() {
   }, [
     gridCols,
     gridRows,
-    initialPreviewProducts,
     products,
     productsLoading,
     active,
@@ -597,23 +524,6 @@ export default function LivingMosaic() {
           onLoad={() => setPortraitLoaded(true)}
         />
 
-        {active && initialPreviewProducts.length > 0 && (
-          <div
-            className={`living-mosaic__initial-preview living-mosaic__initial-preview--fallback${(mosaicReady || gridError) ? ' is-hidden' : ''}`}
-            aria-hidden="true"
-          >
-            {initialPreviewProducts.map((product, index) => (
-              <img
-                key={`${product.sku || product.id || product.name || 'creation'}-${index}`}
-                src={product.image}
-                alt=""
-                loading="lazy"
-                decoding="async"
-              />
-            ))}
-          </div>
-        )}
-
         <div
           className={`living-mosaic__zoom-stage${autoRevealing ? ' is-auto-revealing' : ''}${isInteracting ? ' is-interacting' : ''}`}
           style={{
@@ -631,23 +541,7 @@ export default function LivingMosaic() {
               onReady={() => setCanvasReady(true)}
               onTap={handleTap}
             />
-            {initialPreviewProducts.length > 0 ? (
-                  <div
-                    className={`living-mosaic__initial-preview living-mosaic__initial-preview--anchored${autoRevealing ? ' is-pulling-back' : ''}${(portraitRevealed || gridError) ? ' is-hidden' : ''}`}
-                    style={initialPreviewPlacement}
-                    aria-hidden="true"
-                  >
-                    {initialPreviewProducts.map((product, index) => (
-                      <img
-                        key={`anchored-preview-${product.sku || product.id || product.name || 'creation'}-${index}`}
-                        src={product.image}
-                        alt=""
-                        loading="lazy"
-                        decoding="async"
-                      />
-                    ))}
-                  </div>
-                ) : null}
+
               </div>
             )}
           </div>
