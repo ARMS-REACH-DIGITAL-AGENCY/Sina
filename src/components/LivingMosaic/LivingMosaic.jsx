@@ -21,6 +21,7 @@ const AUTO_REVEAL_DELAY_MS = 5000;
 const AUTO_REVEAL_DURATION_MS = 7000;
 const INITIAL_PREVIEW_COLUMNS = 5;
 const INITIAL_PREVIEW_ROWS = 6;
+const INITIAL_PREVIEW_TILE_COUNT = INITIAL_PREVIEW_COLUMNS * INITIAL_PREVIEW_ROWS;
 
 function clamp(value, min, max) {
   return Math.min(Math.max(value, min), max);
@@ -61,7 +62,6 @@ export default function LivingMosaic() {
   const [inViewport, setInViewport] = useState(false);
   const [zoomState, setZoomState] = useState(INITIAL_ZOOM_STATE);
   const [autoRevealing, setAutoRevealing] = useState(false);
-  const [portraitRevealed, setPortraitRevealed] = useState(false);
   const [revealRequested, setRevealRequested] = useState(false);
   const [gridConfig, setGridConfig] = useState(getGridConfig);
   // True only while a zoom/pan gesture is actually in flight. Drives whether
@@ -78,6 +78,17 @@ export default function LivingMosaic() {
   const revealAnimationStartedRef = useRef(false);
 
   const { cols: gridCols, rows: gridRows } = gridConfig;
+
+  // This is an opening-only layer. It is never inserted into the completed
+  // grid, so it cannot leave a differently-coloured rectangle after zoom-out.
+  const initialPreviewProducts = useMemo(() => {
+    const withImages = products.filter((product) => product.image);
+    if (!withImages.length) return [];
+    return Array.from(
+      { length: INITIAL_PREVIEW_TILE_COUNT },
+      (_, index) => withImages[index % withImages.length],
+    );
+  }, [products]);
 
   useEffect(() => {
     zoomRef.current = zoomState;
@@ -156,6 +167,7 @@ export default function LivingMosaic() {
       .then((result) => {
         if (!cancelled) {
           setGrid(prioritizeActualCenterCells(result, gridCols, gridRows));
+          setPortraitLoaded(true);
           setGridLoading(false);
         }
       })
@@ -469,10 +481,7 @@ export default function LivingMosaic() {
       });
     });
 
-    const endTimer = window.setTimeout(() => {
-      setAutoRevealing(false);
-      setPortraitRevealed(true);
-    }, AUTO_REVEAL_DURATION_MS);
+    const endTimer = window.setTimeout(() => setAutoRevealing(false), AUTO_REVEAL_DURATION_MS);
 
     return () => {
       window.cancelAnimationFrame(firstFrame);
@@ -531,7 +540,7 @@ export default function LivingMosaic() {
 
   return (
     <div
-      className={`living-mosaic__frame${mosaicReady ? ' is-mosaic-ready' : ''}${gridError ? ' has-grid-error' : ''}${portraitRevealed ? ' is-portrait-revealed' : ''}`}
+      className={`living-mosaic__frame${mosaicReady ? ' is-mosaic-ready' : ''}${gridError ? ' has-grid-error' : ''}`}
       ref={sectionRef}
     >
       <div
@@ -540,16 +549,6 @@ export default function LivingMosaic() {
         onClickCapture={handleViewportClickCapture}
         aria-label="Interactive mosaic portrait"
       >
-        <img
-          className="living-mosaic__portrait-base"
-          src={PORTRAIT_SRC}
-          alt="Thomasina Schnepf holding one of her fused-glass creations"
-          loading="eager"
-          fetchPriority="high"
-          decoding="async"
-          onLoad={() => setPortraitLoaded(true)}
-        />
-
         <div
           className={`living-mosaic__zoom-stage${autoRevealing ? ' is-auto-revealing' : ''}${isInteracting ? ' is-interacting' : ''}`}
           style={{
@@ -571,14 +570,24 @@ export default function LivingMosaic() {
             )}
           </div>
 
-          <img
-            className="living-mosaic__portrait-reveal"
-            src={PORTRAIT_SRC}
-            alt=""
-            aria-hidden="true"
-            decoding="async"
-          />
         </div>
+
+        {initialPreviewProducts.length > 0 && (
+          <div
+            className={`living-mosaic__initial-preview living-mosaic__initial-preview--fallback${mosaicReady ? ' is-hidden' : ''}`}
+            aria-hidden="true"
+          >
+            {initialPreviewProducts.map((product, index) => (
+              <img
+                key={`${product.sku || product.id || product.name || 'creation'}-${index}`}
+                src={product.image}
+                alt=""
+                loading="eager"
+                decoding="async"
+              />
+            ))}
+          </div>
+        )}
       </div>
 
       <div className="living-mosaic__zoom-controls">
