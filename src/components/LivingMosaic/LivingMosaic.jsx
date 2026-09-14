@@ -23,13 +23,6 @@ const INITIAL_PREVIEW_COLUMNS = 5;
 const INITIAL_PREVIEW_ROWS = 6;
 const INITIAL_PREVIEW_TILE_COUNT = INITIAL_PREVIEW_COLUMNS * INITIAL_PREVIEW_ROWS;
 
-function canAutoBuildMosaic() {
-  if (typeof window === 'undefined') return false;
-  // Tablets receive the lightweight portrait first and can explicitly opt into
-  // the interactive version, avoiding a large catalog decode during page load.
-  return window.matchMedia('(pointer: fine)').matches;
-}
-
 function clamp(value, min, max) {
   return Math.min(Math.max(value, min), max);
 }
@@ -115,7 +108,6 @@ export default function LivingMosaic() {
   const [portraitRevealed, setPortraitRevealed] = useState(false);
   const [revealRequested, setRevealRequested] = useState(false);
   const [gridConfig, setGridConfig] = useState(getGridConfig);
-  const [mosaicRequested, setMosaicRequested] = useState(canAutoBuildMosaic);
   // True only while a zoom/pan gesture is actually in flight. Drives whether
   // the zoom stage stays promoted to its own GPU layer -- see the effect below.
   const [isInteracting, setIsInteracting] = useState(false);
@@ -192,9 +184,9 @@ export default function LivingMosaic() {
   }, []);
 
   useEffect(() => {
-    // Never decode the whole catalog at the top of the homepage. Tablets wait
-    // for an explicit request; desktop starts only when this section is near.
-    if (!active || !mosaicRequested || productsLoading || !products.length) return;
+    // Never decode the whole catalog at the top of the homepage. Start only
+    // once the mosaic section is near the viewport.
+    if (!active || productsLoading || !products.length) return;
     let cancelled = false;
     setGridLoading(true);
     setGridError(false);
@@ -230,7 +222,6 @@ export default function LivingMosaic() {
     products,
     productsLoading,
     active,
-    mosaicRequested,
   ]);
 
   useEffect(() => {
@@ -672,8 +663,7 @@ export default function LivingMosaic() {
       </div>
 
       <div className="living-mosaic__zoom-controls">
-        {!mosaicRequested && (
-          <button
+        <button
             type="button"
             className="living-mosaic__start-button"
             onClick={() => setMosaicRequested(true)}
@@ -685,7 +675,7 @@ export default function LivingMosaic() {
           type="button"
           className="living-mosaic__zoom-button"
           onClick={() => zoomByStep(1 / 1.6)}
-          disabled={!mosaicReady || zoomState.scale <= 1}
+          disabled={zoomState.scale <= 1}
           aria-label="Zoom out of the mosaic"
         >
           &minus;
@@ -694,7 +684,7 @@ export default function LivingMosaic() {
           type="button"
           className="living-mosaic__zoom-button"
           onClick={() => zoomByStep(1.6)}
-          disabled={!mosaicReady || zoomState.scale >= MAX_ZOOM}
+          disabled={zoomState.scale >= MAX_ZOOM}
           aria-label="Zoom in to the mosaic"
         >
           +
@@ -702,9 +692,7 @@ export default function LivingMosaic() {
       </div>
 
       <div className="living-mosaic__sr-status" role="status" aria-live="polite">
-        {!mosaicRequested
-          ? 'The portrait is ready. Select Explore the Living Mosaic to load the interactive view.'
-          : gridError
+        {gridError
           ? 'The portrait is visible. The mosaic could not be assembled right now.'
           : mosaicReady
             ? 'The mosaic is ready. Pinch and drag, or scroll to zoom and click and drag to pan, to explore -- or tap or click a creation to view its details.'
