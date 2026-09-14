@@ -95,6 +95,12 @@
   pointer-events: none;
 }
 
+/* Show the portrait while the real center tiles are being matched and loaded.
+   Once the canvas is ready it fully covers this layer. */
+.living-mosaic__frame:not(.is-mosaic-ready) .living-mosaic__portrait-base {
+  opacity: .72;
+}
+
 .living-mosaic__portrait-reveal {
   z-index: 3;
   object-fit: cover;
