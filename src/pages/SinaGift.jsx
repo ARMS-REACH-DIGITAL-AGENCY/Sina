@@ -7,7 +7,7 @@ const initialForm = {
   accessKey: '',
   sku: '',
   recipientName: '',
-  notificationEmail: '',
+  notificationEmail: 'thomasinascreations@gmail.com',
   recipientEmail: '',
   recipientPhone: '',
 };
@@ -116,7 +116,7 @@ export default function SinaGift() {
               <input value={form.recipientName} onChange={(event) => update('recipientName', event.target.value)} required />
             </label>
             <label>
-              Shopify email <em>(optional)</em>
+              Shopify / audit email
               <input type="email" value={form.notificationEmail} onChange={(event) => update('notificationEmail', event.target.value)} placeholder="Sina's order receipt" />
             </label>
             <label>
@@ -132,7 +132,8 @@ export default function SinaGift() {
             {result && (
               <div className="sina-gift-form__message sina-gift-form__message--success full" role="status">
                 <strong>{result.orderName} is now a complimentary Sina Gift.</strong>
-                <span>{result.pieceTitle} is reserved for {result.recipientName}. {result.armsContactPending ? 'No ARMS contact was added because no recipient email or phone was provided.' : 'Their ARMS contact is created.'} The order is marked paid and ready to fulfill.</span>
+                <span>{result.pieceTitle} is reserved for {result.recipientName}. {result.armsContactPending ? 'No ARMS contact was added because no recipient email or phone was provided.' : 'Their ARMS contact is created.'} {result.recoveryEmailSent ? `A recovery copy with both links was emailed to ${result.notificationEmail}.` : 'The order is marked paid and ready to fulfill.'}</span>
+                {result.recoveryEmailError && <span className="sina-gift-form__delivery-warning">Gift completed, but the recovery email was not sent: {result.recoveryEmailError}</span>}
                 {result.certificateUrl && <a href={result.certificateUrl} target="_blank" rel="noreferrer">Open certificate</a>}
                 {result.adminUrl && <a href={result.adminUrl} target="_blank" rel="noreferrer">Open order in Shopify</a>}
               </div>
