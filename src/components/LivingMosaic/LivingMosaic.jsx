@@ -36,8 +36,9 @@ function getGridConfig() {
 function prioritizeActualCenterCells(grid, cols, rows) {
   const startCol = Math.floor((cols - INITIAL_PREVIEW_COLUMNS) / 2);
   const startRow = Math.floor((rows - INITIAL_PREVIEW_ROWS) / 2);
-  // Prioritize the actual color-matched center cells. No arbitrary product is
-  // substituted, so the zoom-out cannot leave a visible rectangle.
+  // The canvas prioritizes these already-matched center cells. Unlike the old
+  // product-list preview, this never substitutes arbitrary images into the
+  // portrait and therefore cannot leave a visible rectangle on zoom-out.
   return grid.map((cell) => {
     const inCenter = cell.col >= startCol
       && cell.col < startCol + INITIAL_PREVIEW_COLUMNS
@@ -46,6 +47,7 @@ function prioritizeActualCenterCells(grid, cols, rows) {
     return inCenter ? { ...cell, isInitialPreview: true } : cell;
   });
 }
+
 export default function LivingMosaic() {
   const { products, loading: productsLoading } = useMosaicProducts();
 
@@ -120,8 +122,8 @@ export default function LivingMosaic() {
   }, []);
 
   useEffect(() => {
-    // Never decode the whole catalog at the top of the homepage. Start only
-    // once the mosaic section is near the viewport.
+    // Do not decode the whole catalog while a visitor is at the top of the
+    // homepage. Start only once the mosaic section is near the viewport.
     if (!active || productsLoading || !products.length) return;
     let cancelled = false;
     setGridLoading(true);
@@ -397,9 +399,10 @@ export default function LivingMosaic() {
     canvasReady;
   
   useEffect(() => {
-    // Start the timer right away, but leave the 5 x 6 product preview on
-    // screen until the complete interactive tile map is ready to animate.
-    if (!active || !portraitLoaded || hasAutoRevealedRef.current) return undefined;
+    // Hold the real, color-matched center tiles for the full opening beat.
+    // Starting this clock earlier made a slow device reveal the full portrait
+    // immediately after the grid arrived, skipping the intended close-up.
+    if (!active || !mosaicReady || hasAutoRevealedRef.current) return undefined;
 
     const startScrollY = window.scrollY;
 
@@ -424,7 +427,7 @@ export default function LivingMosaic() {
       window.clearTimeout(startTimer);
       window.removeEventListener('scroll', handleScroll);
     };
-  }, [active, portraitLoaded]);
+  }, [active, mosaicReady]);
 
   useEffect(() => {
     // Commit the transition class before changing the transform. Two frames
@@ -541,7 +544,6 @@ export default function LivingMosaic() {
               onReady={() => setCanvasReady(true)}
               onTap={handleTap}
             />
-
               </div>
             )}
           </div>
@@ -558,18 +560,10 @@ export default function LivingMosaic() {
 
       <div className="living-mosaic__zoom-controls">
         <button
-            type="button"
-            className="living-mosaic__start-button"
-            onClick={() => setMosaicRequested(true)}
-          >
-            Explore the Living Mosaic
-          </button>
-        )}
-        <button
           type="button"
           className="living-mosaic__zoom-button"
           onClick={() => zoomByStep(1 / 1.6)}
-          disabled={zoomState.scale <= 1}
+          disabled={!mosaicReady || zoomState.scale <= 1}
           aria-label="Zoom out of the mosaic"
         >
           &minus;
@@ -578,7 +572,7 @@ export default function LivingMosaic() {
           type="button"
           className="living-mosaic__zoom-button"
           onClick={() => zoomByStep(1.6)}
-          disabled={zoomState.scale >= MAX_ZOOM}
+          disabled={!mosaicReady || zoomState.scale >= MAX_ZOOM}
           aria-label="Zoom in to the mosaic"
         >
           +
