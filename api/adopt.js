@@ -105,6 +105,10 @@ function numericIdFromGid(gid) {
   return gid.split('/').pop();
 }
 
+function cleanCertificateName(value) {
+  return typeof value === 'string' ? value.trim().replace(/\s+/g, ' ').slice(0, 160) : '';
+}
+
 function redirect(res, location) {
   res.statusCode = 302;
   res.setHeader('Location', location);
@@ -113,6 +117,7 @@ function redirect(res, location) {
 
 export default async function handler(req, res) {
   const sku = typeof req.query.sku === 'string' ? req.query.sku.trim().toUpperCase() : '';
+  const certificateName = cleanCertificateName(req.query.certificateName);
 
   if (!sku) {
     res.statusCode = 400;
@@ -131,7 +136,10 @@ export default async function handler(req, res) {
     }
 
     const variantId = numericIdFromGid(variant.id);
-    redirect(res, `https://${shopDomain()}/cart/${variantId}:1`);
+    const attributes = new URLSearchParams();
+    if (certificateName) attributes.set('attributes[Certificate recipient name]', certificateName);
+    const suffix = attributes.toString() ? `?${attributes.toString()}` : '';
+    redirect(res, `https://${shopDomain()}/cart/${variantId}:1${suffix}`);
   } catch (error) {
     res.statusCode = 500;
     // Include which domain we attempted (never the token) -- a bare
